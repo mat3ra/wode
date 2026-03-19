@@ -46,7 +46,7 @@
         "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse#66ac7dcfd993cc492644e158b0b422b2ddbdacec",
         "@mat3ra/made": "git+https://github.com/Exabyte-io/made.git#47b3e12a859c45fa72079ed4ddd1675a6a32b4fe",
         "@mat3ra/mode": "git+https://github.com/Exabyte-io/mode.git#9d6ff1c11342945badf3c112b9680998c7da8f53",
-        "@mat3ra/standata": "2026.1.12-0",
+        "@mat3ra/standata": "git+https://github.com/Exabyte-io/standata.git#7f2a794f8b6a7b1a0c7f334ca8be72b7004f4b5f",
         "@mat3ra/tsconfig": "^2024.6.3-0",
         "@mat3ra/utils": "2025.9.20-0",
         "chai": "^4.3.4",
