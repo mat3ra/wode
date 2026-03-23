@@ -7,22 +7,10 @@ import type {
 } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 
-import jobContextMixin, {
-    type JobContextMixin,
-    type JobExternalContext,
-} from "../../../mixins/JobContextMixin";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
 } from "../../../mixins/MaterialContextMixin";
-import methodDataContextMixin, {
-    type MethodDataContextMixin,
-    type MethodDataExternalContext,
-} from "../../../mixins/MethodDataContextMixin";
-import workflowContextMixin, {
-    type WorkflowContextMixin,
-    type WorkflowExternalContext,
-} from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
@@ -30,16 +18,9 @@ import JSONSchemaDataProvider, {
 
 type Data = NWChemTotalEnergyContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
-type ExternalContext = JinjaExternalContext &
-    WorkflowExternalContext &
-    JobExternalContext &
-    MethodDataExternalContext &
-    MaterialExternalContext;
+type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<JobContextMixin> &
-    Constructor<MaterialContextMixin> &
-    Constructor<MethodDataContextMixin> &
-    Constructor<WorkflowContextMixin>;
+    Constructor<MaterialContextMixin>;
 
 const jsonSchemaId =
     "context-providers-directory/by-application/nwchem-total-energy-context-provider";
@@ -50,6 +31,8 @@ export default class NWChemInputDataManager extends (JSONSchemaDataProvider as B
     readonly domain = "executable" as const;
 
     readonly entityName = "unit" as const;
+
+    isEdited = false;
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
@@ -63,9 +46,6 @@ export default class NWChemInputDataManager extends (JSONSchemaDataProvider as B
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
 
         this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
@@ -103,6 +83,3 @@ export default class NWChemInputDataManager extends (JSONSchemaDataProvider as B
 }
 
 materialContextMixin(NWChemInputDataManager.prototype);
-methodDataContextMixin(NWChemInputDataManager.prototype);
-workflowContextMixin(NWChemInputDataManager.prototype);
-jobContextMixin(NWChemInputDataManager.prototype);

@@ -3,7 +3,6 @@ import type { JobSchema } from "@mat3ra/esse/dist/js/types";
 import type ContextProvider from "../providers/base/ContextProvider";
 
 export type JobContextMixin = {
-    isEdited: boolean;
     job?: Pick<JobSchema, "parent">;
     initJobContextMixin(externalContext: JobExternalContext): void;
 };
@@ -15,11 +14,8 @@ export type JobExternalContext = {
 export default function jobContextMixin(item: ContextProvider) {
     // @ts-expect-error
     const properties: ContextProvider & JobContextMixin = {
-        isEdited: false,
-
         initJobContextMixin(externalContext: JobExternalContext) {
             this.job = externalContext.job;
-            this.isEdited = false; // we always get the `defaultData` (recalculated from scratch, not persistent)
         },
     };
 

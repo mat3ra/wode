@@ -59,6 +59,8 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
 
     readonly entityName = "unit" as const;
 
+    isEdited = false;
+
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
 

@@ -10,12 +10,10 @@ type MethodData = BaseMethod["data"] & {
 };
 export type MethodDataContextMixin = {
     methodData: MethodData;
-    isEdited: boolean;
     initMethodDataContextMixin(externalContext: MethodDataExternalContext): void;
 };
 export type MethodDataExternalContext = {
     methodData?: MethodData;
-    isEdited?: boolean;
 };
 export default function methodDataContextMixin(item: ContextProvider): void;
 export {};

@@ -5,10 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const periodic_table_js_1 = require("@exabyte-io/periodic-table.js");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-const JobContextMixin_1 = __importDefault(require("../../../mixins/JobContextMixin"));
 const MaterialContextMixin_1 = __importDefault(require("../../../mixins/MaterialContextMixin"));
-const MethodDataContextMixin_1 = __importDefault(require("../../../mixins/MethodDataContextMixin"));
-const WorkflowContextMixin_1 = __importDefault(require("../../../mixins/WorkflowContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("../../base/JSONSchemaDataProvider"));
 const jsonSchemaId = "context-providers-directory/by-application/nwchem-total-energy-context-provider";
 class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
@@ -21,10 +18,8 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
         this.name = "input";
         this.domain = "executable";
         this.entityName = "unit";
+        this.isEdited = false;
         this.contextProviderName = "nwchem-total-energy";
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
         this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
     }
@@ -57,6 +52,3 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
 }
 exports.default = NWChemInputDataManager;
 (0, MaterialContextMixin_1.default)(NWChemInputDataManager.prototype);
-(0, MethodDataContextMixin_1.default)(NWChemInputDataManager.prototype);
-(0, WorkflowContextMixin_1.default)(NWChemInputDataManager.prototype);
-(0, JobContextMixin_1.default)(NWChemInputDataManager.prototype);

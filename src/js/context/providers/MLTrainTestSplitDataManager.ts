@@ -1,19 +1,13 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { MlTrainTestSplitContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 
-import applicationContextMixin, {
-    type ApplicationContextMixin,
-    type ApplicationExternalContext,
-} from "../mixins/ApplicationContextMixin";
 import { type UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
 
 type Schema = MlTrainTestSplitContextItemSchema;
-type ExternalContext = JinjaExternalContext & ApplicationExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<ApplicationContextMixin>;
+type ExternalContext = JinjaExternalContext;
+type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext>;
 
 const jsonSchemaId = "context-providers-directory/ml-train-test-split-context-provider";
 
@@ -45,7 +39,6 @@ export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
-        this.initApplicationContextMixin(externalContext);
 
         this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             fraction_held_as_test_set: { default: defaultData.fraction_held_as_test_set },
@@ -57,5 +50,3 @@ export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider
         return defaultData;
     }
 }
-
-applicationContextMixin(MLTrainTestSplitDataManager.prototype);

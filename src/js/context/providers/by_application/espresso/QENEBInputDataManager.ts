@@ -6,10 +6,6 @@ import type {
 } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 
-import jobContextMixin, {
-    type JobContextMixin,
-    type JobExternalContext,
-} from "../../../mixins/JobContextMixin";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
@@ -22,14 +18,8 @@ import materialsSetContextMixin, {
     type MaterialsSetContextMixin,
     type MaterialsSetExternalContext,
 } from "../../../mixins/MaterialsSetContextMixin";
-import methodDataContextMixin, {
-    type MethodDataContextMixin,
-    type MethodDataExternalContext,
-} from "../../../mixins/MethodDataContextMixin";
-import workflowContextMixin, {
-    type WorkflowContextMixin,
-    type WorkflowExternalContext,
-} from "../../../mixins/WorkflowContextMixin";
+import type { MethodDataExternalContext } from "../../../mixins/MethodDataContextMixin";
+import type { WorkflowExternalContext } from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
@@ -42,18 +32,14 @@ type Data = QENEBContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
 type ExternalContext = JinjaExternalContext &
     WorkflowExternalContext &
-    JobExternalContext &
     MaterialsExternalContext &
     MethodDataExternalContext &
     MaterialsSetExternalContext &
     MaterialExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<JobContextMixin> &
     Constructor<MaterialContextMixin> &
     Constructor<MaterialsContextMixin> &
-    Constructor<MaterialsSetContextMixin> &
-    Constructor<WorkflowContextMixin> &
-    Constructor<MethodDataContextMixin>;
+    Constructor<MaterialsSetContextMixin>;
 
 export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Base) {
     readonly name = "input" as const;
@@ -61,6 +47,8 @@ export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Ba
     readonly domain = "executable" as const;
 
     readonly entityName = "unit" as const;
+
+    isEdited = false;
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
@@ -72,10 +60,7 @@ export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Ba
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialsContextMixin(externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
         this.initMaterialsSetContextMixin(externalContext);
 
@@ -108,7 +93,4 @@ export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Ba
 
 materialContextMixin(QENEBInputDataManager.prototype);
 materialsContextMixin(QENEBInputDataManager.prototype);
-methodDataContextMixin(QENEBInputDataManager.prototype);
-workflowContextMixin(QENEBInputDataManager.prototype);
-jobContextMixin(QENEBInputDataManager.prototype);
 materialsSetContextMixin(QENEBInputDataManager.prototype);

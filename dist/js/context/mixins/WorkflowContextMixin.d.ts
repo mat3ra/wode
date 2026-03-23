@@ -1,7 +1,6 @@
 import type { Workflow } from "../../Workflow";
 import type ContextProvider from "../providers/base/ContextProvider";
 export type WorkflowContextMixin = {
-    isEdited: boolean;
     workflow: Workflow;
     initWorkflowContextMixin(externalContext: WorkflowExternalContext): void;
 };

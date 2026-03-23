@@ -4,10 +4,6 @@ import type { InputContextItemSchema, VASPContextProviderSchema } from "@mat3ra/
 import type { Material } from "@mat3ra/made";
 import type { JSONSchema7 } from "json-schema";
 
-import jobContextMixin, {
-    type JobContextMixin,
-    type JobExternalContext,
-} from "../../../mixins/JobContextMixin";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
@@ -16,14 +12,6 @@ import materialsContextMixin, {
     type MaterialsContextMixin,
     type MaterialsExternalContext,
 } from "../../../mixins/MaterialsContextMixin";
-import methodDataContextMixin, {
-    type MethodDataContextMixin,
-    type MethodDataExternalContext,
-} from "../../../mixins/MethodDataContextMixin";
-import workflowContextMixin, {
-    type WorkflowContextMixin,
-    type WorkflowExternalContext,
-} from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
@@ -31,18 +19,10 @@ import JSONSchemaDataProvider, {
 
 type Data = VASPContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
-type ExternalContext = JinjaExternalContext &
-    WorkflowExternalContext &
-    JobExternalContext &
-    MaterialExternalContext &
-    MethodDataExternalContext &
-    MaterialsExternalContext;
+type ExternalContext = JinjaExternalContext & MaterialExternalContext & MaterialsExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<JobContextMixin> &
     Constructor<MaterialContextMixin> &
-    Constructor<MethodDataContextMixin> &
-    Constructor<MaterialsContextMixin> &
-    Constructor<WorkflowContextMixin>;
+    Constructor<MaterialsContextMixin>;
 
 const jsonSchemaId = "context-providers-directory/by-application/vasp-context-provider";
 
@@ -52,6 +32,8 @@ export default class VASPInputDataManager extends (JSONSchemaDataProvider as Bas
     readonly domain = "executable" as const;
 
     readonly entityName = "unit" as const;
+
+    isEdited = false;
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
@@ -63,10 +45,7 @@ export default class VASPInputDataManager extends (JSONSchemaDataProvider as Bas
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialsContextMixin(externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
 
         this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
@@ -102,6 +81,3 @@ export default class VASPInputDataManager extends (JSONSchemaDataProvider as Bas
 
 materialContextMixin(VASPInputDataManager.prototype);
 materialsContextMixin(VASPInputDataManager.prototype);
-methodDataContextMixin(VASPInputDataManager.prototype);
-workflowContextMixin(VASPInputDataManager.prototype);
-jobContextMixin(VASPInputDataManager.prototype);

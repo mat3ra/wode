@@ -1,23 +1,21 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { InputContextItemSchema, NWChemTotalEnergyContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
-import { type JobContextMixin, type JobExternalContext } from "../../../mixins/JobContextMixin";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
-import { type MethodDataContextMixin, type MethodDataExternalContext } from "../../../mixins/MethodDataContextMixin";
-import { type WorkflowContextMixin, type WorkflowExternalContext } from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../../base/JSONSchemaDataProvider";
 type Data = NWChemTotalEnergyContextProviderSchema;
 type Schema = InputContextItemSchema & {
     data: Data;
 };
-type ExternalContext = JinjaExternalContext & WorkflowExternalContext & JobExternalContext & MethodDataExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<JobContextMixin> & Constructor<MaterialContextMixin> & Constructor<MethodDataContextMixin> & Constructor<WorkflowContextMixin>;
+type ExternalContext = JinjaExternalContext & MaterialExternalContext;
+type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
 declare const NWChemInputDataManager_base: Base;
 export default class NWChemInputDataManager extends NWChemInputDataManager_base {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
+    isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): NWChemInputDataManager;
     readonly contextProviderName: "nwchem-total-energy";
     readonly jsonSchema: JSONSchema7 | undefined;

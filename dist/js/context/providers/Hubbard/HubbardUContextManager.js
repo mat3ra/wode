@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const HubbardContextProvider_1 = __importDefault(require("./HubbardContextProvider"));
 const defaultHubbardConfig = {
     atomicSpecies: "",
@@ -52,4 +51,3 @@ class HubbardUContextManager extends HubbardContextProvider_1.default {
     }
 }
 exports.default = HubbardUContextManager;
-(0, MaterialContextMixin_1.default)(HubbardUContextManager.prototype);

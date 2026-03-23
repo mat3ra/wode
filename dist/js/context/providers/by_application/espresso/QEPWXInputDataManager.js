@@ -23,6 +23,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         this.name = "input";
         this.domain = "executable";
         this.entityName = "unit";
+        this.isEdited = false;
         this.initMaterialsContextMixin(externalContext);
         this.initMethodDataContextMixin(externalContext);
         this.initWorkflowContextMixin(externalContext);

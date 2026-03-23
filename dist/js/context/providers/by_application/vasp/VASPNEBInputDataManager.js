@@ -4,12 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-const JobContextMixin_1 = __importDefault(require("../../../mixins/JobContextMixin"));
 const MaterialContextMixin_1 = __importDefault(require("../../../mixins/MaterialContextMixin"));
 const MaterialsContextMixin_1 = __importDefault(require("../../../mixins/MaterialsContextMixin"));
 const MaterialsSetContextMixin_1 = __importDefault(require("../../../mixins/MaterialsSetContextMixin"));
-const MethodDataContextMixin_1 = __importDefault(require("../../../mixins/MethodDataContextMixin"));
-const WorkflowContextMixin_1 = __importDefault(require("../../../mixins/WorkflowContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("../../base/JSONSchemaDataProvider"));
 const VASPInputDataManager_1 = __importDefault(require("./VASPInputDataManager"));
 const jsonSchemaId = "context-providers-directory/by-application/vasp-neb-context-provider";
@@ -23,12 +20,10 @@ class VASPNEBInputDataManager extends JSONSchemaDataProvider_1.default {
         this.name = "input";
         this.domain = "executable";
         this.entityName = "unit";
+        this.isEdited = false;
         this.initMaterialContextMixin(externalContext);
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialsSetContextMixin(externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
-        this.initJobContextMixin(externalContext);
         this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
     }
     getDefaultData() {
@@ -49,6 +44,3 @@ exports.default = VASPNEBInputDataManager;
 (0, MaterialContextMixin_1.default)(VASPNEBInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(VASPNEBInputDataManager.prototype);
 (0, MaterialsSetContextMixin_1.default)(VASPNEBInputDataManager.prototype);
-(0, MethodDataContextMixin_1.default)(VASPNEBInputDataManager.prototype);
-(0, WorkflowContextMixin_1.default)(VASPNEBInputDataManager.prototype);
-(0, JobContextMixin_1.default)(VASPNEBInputDataManager.prototype);

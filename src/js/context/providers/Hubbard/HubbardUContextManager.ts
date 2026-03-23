@@ -5,7 +5,6 @@ import type {
 } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 
-import materialContextMixin from "../../mixins/MaterialContextMixin";
 import type { UnitContext } from "../base/ContextProvider";
 import HubbardContextProvider, { type HubbardExternalContext } from "./HubbardContextProvider";
 
@@ -71,5 +70,3 @@ export default class HubbardUContextManager extends HubbardContextProvider<Schem
         ];
     }
 }
-
-materialContextMixin(HubbardUContextManager.prototype);
