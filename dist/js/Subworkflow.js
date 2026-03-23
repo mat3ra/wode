@@ -122,7 +122,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         }, {});
         return {
             ...context,
-            application: this.applicationInstance,
+            application: this.applicationInstance.toJSON(),
             methodData: this.model.method.data,
             subworkflowContext,
         };

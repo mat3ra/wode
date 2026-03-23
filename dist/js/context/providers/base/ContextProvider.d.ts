@@ -24,7 +24,7 @@ declare abstract class ContextProvider<S extends ContextItemSchema = ContextItem
     constructor(contextItem: Partial<S>, externalContext: EC);
     setIsEdited(isEdited: boolean): void;
     getData(): S["data"];
-    setData(data?: S["data"]): void;
+    setData(data: S["data"]): void;
     getContextItemData(): S;
     /**
      * Helper method to find a context item from a unit context array by name.

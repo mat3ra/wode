@@ -5,7 +5,9 @@ class ContextProvider {
     constructor(contextItem, externalContext) {
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
-        this.setData(contextItem.data);
+        if (contextItem.data) {
+            this.setData(contextItem.data);
+        }
     }
     setIsEdited(isEdited) {
         this.isEdited = isEdited;
@@ -14,7 +16,7 @@ class ContextProvider {
         return this.isEdited && this.data ? this.data : this.getDefaultData();
     }
     setData(data) {
-        this.data = data ? utils_1.Utils.clone.deepClone(data) : undefined;
+        this.data = utils_1.Utils.clone.deepClone(data);
     }
     getContextItemData() {
         return {

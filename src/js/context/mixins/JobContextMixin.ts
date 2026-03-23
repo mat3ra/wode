@@ -4,12 +4,12 @@ import type ContextProvider from "../providers/base/ContextProvider";
 
 export type JobContextMixin = {
     isEdited: boolean;
-    job: JobSchema;
+    job?: Pick<JobSchema, "parent">;
     initJobContextMixin(externalContext: JobExternalContext): void;
 };
 
 export type JobExternalContext = {
-    job: JobSchema;
+    job?: Pick<JobSchema, "parent">;
 };
 
 export default function jobContextMixin(item: ContextProvider) {

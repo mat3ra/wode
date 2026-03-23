@@ -25,7 +25,7 @@ import type { MaterialExternalContext } from "./context/mixins/MaterialContextMi
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
 import type { WorkflowExternalContext } from "./context/mixins/WorkflowContextMixin";
-import type { ExternalContext } from "./context/providers";
+import type { AssignmentContext, ExternalContext } from "./context/providers";
 import { createConvergenceParameter } from "./convergence/factory";
 import { UnitTag, UnitType } from "./enums";
 import {
@@ -67,7 +67,7 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
 
     private applicationInstance: Application;
 
-    private unitsInstances!: AnySubworkflowUnit[];
+    unitsInstances!: AnySubworkflowUnit[];
 
     modelInstance: Model;
 
@@ -213,11 +213,11 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
                     ...acc,
                     [u.operand]: u.value,
                 };
-            }, {} as Record<string, string | number | boolean>);
+            }, {} as AssignmentContext);
 
         return {
             ...context,
-            application: this.applicationInstance,
+            application: this.applicationInstance.toJSON(),
             methodData: this.model.method.data,
             subworkflowContext,
         };

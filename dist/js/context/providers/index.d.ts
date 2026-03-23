@@ -1,3 +1,4 @@
+import type { AssignmentUnitSchema } from "@mat3ra/esse/dist/js/types";
 import type { ApplicationExternalContext } from "../mixins/ApplicationContextMixin";
 import type { JobExternalContext } from "../mixins/JobContextMixin";
 import type { MaterialExternalContext } from "../mixins/MaterialContextMixin";
@@ -63,8 +64,9 @@ export declare const PROVIDER_REGISTRY: {
     readonly VASPNEBInputDataManager: typeof VASPNEBInputDataManager;
     readonly NWChemInputDataManager: typeof NWChemInputDataManager;
 };
+export type AssignmentContext = Record<AssignmentUnitSchema["operand"], AssignmentUnitSchema["value"]>;
 export type SubworkflowContext = {
-    subworkflowContext: Record<string, string | number | boolean>;
+    subworkflowContext: AssignmentContext;
 };
 /**
  * External context type used by ExecutionUnitInput when creating providers.

@@ -1,12 +1,14 @@
-import { Application, ApplicationRegistry as AdeRegistry, Executable, Flavor } from "@mat3ra/ade";
+import { Application, Executable, Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
+    ApplicationSchema,
     ContextItemSchema,
     ExecutableSchema,
     ExecutionUnitSchema,
     FlavorSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { ApplicationStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
 import { type ExternalContext, createProvider } from "../context/providers";
@@ -22,15 +24,14 @@ type Schema = ExecutionUnitSchema;
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
 interface SetApplicationProps {
-    application: Application;
+    application: Application | ApplicationSchema;
     executable?: Executable | ExecutableSchema;
     flavor?: Flavor | FlavorSchema;
 }
 
-interface SetExecutableProps {
-    executable?: Executable | ExecutableSchema;
-    flavor?: Flavor | FlavorSchema;
-}
+type SetExecutableProps = Pick<SetApplicationProps, "executable" | "flavor">;
+
+const standata = new ApplicationStandata();
 
 class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     applicationInstance!: Application;
@@ -41,7 +42,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
     inputInstances: ExecutionUnitInput[] = [];
 
-    renderingContext: Record<string, unknown> = {};
+    renderingContext: Partial<ExternalContext> = {};
 
     declare toJSON: () => Schema & AnyObject;
 
@@ -51,65 +52,50 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         super(config);
 
         const { application, executable, flavor } = config;
-        const applicationInstance = AdeRegistry.createApplication(application);
-        const executableInstance = AdeRegistry.getExecutableByConfig(application.name, executable);
-        const flavorInstance = AdeRegistry.getFlavorByConfig(executableInstance, flavor);
 
-        if (!flavorInstance) {
-            throw new Error("Flavor is not set");
-        }
-
-        this.setApplication({
-            application: applicationInstance,
-            executable: executableInstance,
-            flavor: flavorInstance,
-        });
+        this.setApplication({ application, executable, flavor });
 
         this.name = this.name || this.flavor?.name || "";
     }
 
     setApplication({ application, executable, flavor }: SetApplicationProps) {
-        this.applicationInstance = application;
-        this.setProp("application", application.toJSON());
+        this.applicationInstance = new Application(standata.getApplication(application));
+        this.setProp("application", this.applicationInstance.toJSON());
         this.setExecutable({ executable, flavor });
     }
 
     setExecutable({ executable, flavor }: SetExecutableProps) {
-        const defaultExecutable = AdeRegistry.getExecutableByName(this.application.name);
-        const instance =
-            executable instanceof Executable
-                ? executable
-                : new Executable(executable ?? defaultExecutable.toJSON());
+        const { executable: executablePlain } = standata.getExecutableAndFlavorByName(
+            this.application.name,
+        );
 
-        this.allowedResults = instance.results;
-        this.allowedMonitors = instance.monitors;
-        this.allowedPostProcessors = instance.postProcessors;
+        this.executableInstance = new Executable(executable || executablePlain);
+        this.allowedResults = this.executableInstance.results;
+        this.allowedMonitors = this.executableInstance.monitors;
+        this.allowedPostProcessors = this.executableInstance.postProcessors;
 
-        this.setProp("executable", instance.toJSON());
+        this.setProp("executable", this.executableInstance.toJSON());
         this.setFlavor(flavor);
     }
 
     setFlavor(flavor?: Flavor | FlavorSchema) {
-        const defaultFlavor = AdeRegistry.getFlavorByConfig(this.executableInstance);
-        const instance =
-            flavor instanceof Flavor ? flavor : new Flavor(flavor ?? defaultFlavor?.toJSON());
+        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName(
+            this.application.name,
+            this.executable.name,
+        );
 
-        if (!instance) {
-            throw new Error("Flavor is not found for executable");
-        }
+        this.flavorInstance = new Flavor(flavor || defaultFlavor);
+        this.defaultMonitors = this.flavorInstance.monitors;
+        this.defaultResults = this.flavorInstance.results;
+        this.defaultPostProcessors = this.flavorInstance.postProcessors;
 
-        this.flavorInstance = instance;
-        this.defaultMonitors = instance.monitors;
-        this.defaultResults = instance.results;
-        this.defaultPostProcessors = instance.postProcessors;
-
-        this.setProp("flavor", instance.toJSON());
+        this.setProp("flavor", this.flavorInstance.toJSON());
         this.setRuntimeItemsToDefaultValues();
         this.setDefaultInput();
     }
 
     setDefaultInput() {
-        const inputs = AdeRegistry.getInput(this.flavorInstance);
+        const inputs = standata.getInput(this.flavorInstance);
         this.inputInstances = inputs.map(ExecutionUnitInput.createFromTemplate);
     }
 
@@ -163,13 +149,13 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         });
     }
 
-    private saveContext(fullContext: ContextItemSchema[], { subworkflowContext }: ExternalContext) {
+    private saveContext(fullContext: ContextItemSchema[], externalContext: ExternalContext) {
         // persistent context
         this.context = fullContext.filter((c) => c.isEdited);
 
         this.renderingContext = {
             ...Object.fromEntries(fullContext.map((context) => [context.name, context.data])),
-            subworkflowContext: { ...subworkflowContext },
+            ...externalContext,
         };
     }
 

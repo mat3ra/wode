@@ -1,7 +1,7 @@
 import { Application, Executable, Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ExecutableSchema, ExecutionUnitSchema, FlavorSchema } from "@mat3ra/esse/dist/js/types";
+import type { ApplicationSchema, ExecutableSchema, ExecutionUnitSchema, FlavorSchema } from "@mat3ra/esse/dist/js/types";
 import { type ExternalContext } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { type ExecutionUnitSchemaMixin } from "../generated/ExecutionUnitSchemaMixin";
@@ -10,21 +10,18 @@ import ExecutionUnitInput from "./ExecutionUnitInput";
 type Schema = ExecutionUnitSchema;
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 interface SetApplicationProps {
-    application: Application;
+    application: Application | ApplicationSchema;
     executable?: Executable | ExecutableSchema;
     flavor?: Flavor | FlavorSchema;
 }
-interface SetExecutableProps {
-    executable?: Executable | ExecutableSchema;
-    flavor?: Flavor | FlavorSchema;
-}
+type SetExecutableProps = Pick<SetApplicationProps, "executable" | "flavor">;
 declare const ExecutionUnit_base: Base;
 declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     applicationInstance: Application;
     executableInstance: Executable;
     flavorInstance: Flavor;
     inputInstances: ExecutionUnitInput[];
-    renderingContext: Record<string, unknown>;
+    renderingContext: Partial<ExternalContext>;
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
     constructor(config: Schema);

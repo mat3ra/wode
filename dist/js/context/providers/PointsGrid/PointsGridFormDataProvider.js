@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const constants_1 = require("@mat3ra/code/dist/js/constants");
 const math_1 = require("@mat3ra/code/dist/js/math");
-const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const made_1 = require("@mat3ra/made");
 const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const JSONSchemaFormDataProvider_1 = __importDefault(require("../base/JSONSchemaFormDataProvider"));
@@ -23,7 +22,6 @@ const vector = (defaultValue, isStringType = false) => {
         ...(isArray ? { default: defaultValue } : {}),
     };
 };
-const jsonSchemaId = "context-providers-directory/points-grid-data-provider";
 const defaultShift = 0;
 const defaultShifts = [defaultShift, defaultShift, defaultShift];
 class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
@@ -31,10 +29,9 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         super(contextItem, externalContext);
         this.domain = "important";
         this.entityName = "unit";
+        this.jsonSchemaId = "context-providers-directory/points-grid-data-provider";
         this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
-        const { jsonSchemaPatchConfig } = this;
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, jsonSchemaPatchConfig);
     }
     initInstanceFields() {
         var _a, _b, _c, _d, _e;
@@ -209,9 +206,6 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         }
     }
     setData(data) {
-        if (!data) {
-            return;
-        }
         const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
         if (preferGridMetric && gridMetricType && gridMetricValue) {
             return super.setData({

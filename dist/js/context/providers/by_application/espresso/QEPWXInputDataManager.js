@@ -72,7 +72,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         });
         return {
             IBRAV: 0,
-            RESTART_MODE: job.parent || workflow.hasRelaxation ? "restart" : "from_scratch",
+            RESTART_MODE: (job === null || job === void 0 ? void 0 : job.parent) || workflow.hasRelaxation ? "restart" : "from_scratch",
             ATOMIC_SPECIES,
             ATOMIC_SPECIES_WITH_LABELS,
             NAT: basis.atomicPositions.length,
@@ -84,18 +84,13 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
             contextProviderName: "qe-pwx",
         };
     }
-    getDataPerMaterial() {
-        if (!this.materials || this.materials.length <= 1)
-            return {};
-        return { perMaterial: this.materials.map((material) => this.buildQEPWXContext(material)) };
-    }
     getDefaultData() {
         // the below values are read from PlanewaveDataManager instead
         // ECUTWFC = 40;
         // ECUTRHO = 200;
         return {
             ...this.buildQEPWXContext(this.material),
-            ...this.getDataPerMaterial(),
+            perMaterial: this.materials.map((material) => this.buildQEPWXContext(material)),
         };
     }
 }

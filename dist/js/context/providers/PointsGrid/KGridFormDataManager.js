@@ -3,12 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const PointsGridFormDataProvider_1 = __importDefault(require("./PointsGridFormDataProvider"));
 class KGridFormDataManager extends PointsGridFormDataProvider_1.default {
-    constructor() {
-        super(...arguments);
+    constructor(contextItem, externalContext) {
+        super(contextItem, externalContext);
         this.name = "kgrid";
         this.divisor = 1;
+        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
     }
     static createFromUnitContext(unitContext, externalContext) {
         const contextItem = this.findContextItem(unitContext, "kgrid");

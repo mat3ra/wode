@@ -3,7 +3,7 @@ import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { TemplateSchema } from "@mat3ra/esse/dist/js/types";
-import type { ExecutionUnitInputSchemaMixin } from "../generated/ExecutionUnitInputSchemaMixin";
+import { ExecutionUnitInputSchemaMixin } from "../generated/ExecutionUnitInputSchemaMixin";
 type Schema = ExecutionUnitInputSchemaMixin;
 type JSON = Schema & AnyObject;
 type Base = typeof InMemoryEntity & Constructor<ExecutionUnitInputSchemaMixin>;

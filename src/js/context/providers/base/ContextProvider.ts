@@ -46,7 +46,9 @@ abstract class ContextProvider<
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
 
-        this.setData(contextItem.data);
+        if (contextItem.data) {
+            this.setData(contextItem.data);
+        }
     }
 
     setIsEdited(isEdited: boolean) {
@@ -57,8 +59,8 @@ abstract class ContextProvider<
         return this.isEdited && this.data ? this.data : this.getDefaultData();
     }
 
-    setData(data?: S["data"]) {
-        this.data = data ? Utils.clone.deepClone(data) : undefined;
+    setData(data: S["data"]) {
+        this.data = Utils.clone.deepClone(data);
     }
 
     getContextItemData(): S {

@@ -23,41 +23,7 @@ export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
     readonly jsonSchema: JSONSchema7 | undefined;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     private buildQEPWXContext;
-    private getDataPerMaterial;
     getDefaultData(): {
-        perMaterial?: undefined;
-        IBRAV: number;
-        RESTART_MODE: "from_scratch" | "restart";
-        ATOMIC_SPECIES: {
-            X: string;
-            Mass_X: number;
-            PseudoPot_X: string;
-        }[];
-        ATOMIC_SPECIES_WITH_LABELS: {
-            X: string;
-            Mass_X: number;
-            PseudoPot_X: string;
-        }[];
-        NAT: number;
-        NTYP: number;
-        NTYP_WITH_LABELS: number;
-        ATOMIC_POSITIONS: {
-            X?: string;
-            x: number;
-            y: number;
-            z: number;
-            "if_pos(1)"?: number;
-            "if_pos(2)"?: number;
-            "if_pos(3)"?: number;
-        }[];
-        ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS: string;
-        CELL_PARAMETERS: {
-            v1?: [number, number, number];
-            v2?: [number, number, number];
-            v3?: [number, number, number];
-        };
-        contextProviderName: "qe-pwx";
-    } | {
         perMaterial: QEPwxContextProviderSchema[];
         IBRAV: number;
         RESTART_MODE: "from_scratch" | "restart";

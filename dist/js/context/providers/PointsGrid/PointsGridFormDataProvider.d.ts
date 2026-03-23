@@ -13,6 +13,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     abstract readonly name: N;
     readonly domain: "important";
     readonly entityName: "unit";
+    readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
     dimensions: Data["dimensions"];
     shifts: Data["shifts"];
     private reciprocalLattice;
@@ -23,12 +24,70 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     private reciprocalVectorRatios;
     abstract readonly divisor: number;
     private defaultMetric;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    abstract readonly jsonSchema: JSONSchema7 | undefined;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     private initInstanceFields;
     private getDefaultGridMetricValue;
     getDefaultData(): PointsGridDataProviderSchema;
-    private get jsonSchemaPatchConfig();
+    protected get jsonSchemaPatchConfig(): {
+        dimensions: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        shifts: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        reciprocalVectorRatios: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        gridMetricType: {
+            default: "KPPRA" | "spacing";
+        };
+        description: string;
+        required: string[];
+        dependencies: {
+            gridMetricType: {
+                oneOf: {
+                    properties: {
+                        gridMetricType: {
+                            enum: string[];
+                        };
+                        gridMetricValue: {
+                            type: string;
+                            minimum: number;
+                            title: string;
+                            default: number;
+                        };
+                        preferGridMetric: {
+                            type: string;
+                            title: string;
+                            default: boolean;
+                        };
+                    };
+                }[];
+            };
+        };
+    };
     get uiSchema(): {
         dimensions: {
             readonly "ui:options": {
@@ -80,6 +139,6 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     };
     private calculateDimensions;
     private calculateGridMetric;
-    setData(data?: Data): void;
+    setData(data: Data): void;
 }
 export {};

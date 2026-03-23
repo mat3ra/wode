@@ -24,19 +24,6 @@ class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
     }
-    static generateDefaultWorkflowId() {
-        return utils_1.Utils.uuid.getUUID();
-    }
-    static generateStandataWorkflowId({ name, properties, subworkflows, applicationName, }) {
-        const propsInfo = (properties === null || properties === void 0 ? void 0 : properties.length) ? properties.sort().join(",") : "";
-        const swInfo = (subworkflows === null || subworkflows === void 0 ? void 0 : subworkflows.length)
-            ? subworkflows.map((sw) => sw.name || "unknown").join(",")
-            : "";
-        const seed = [`workflow-${name}`, applicationName, propsInfo, swInfo]
-            .filter((p) => p)
-            .join("-");
-        return utils_1.Utils.uuid.getUUIDFromNamespace(seed);
-    }
     static fromSubworkflow(subworkflow) {
         const config = {
             name: subworkflow.name,
@@ -50,18 +37,10 @@ class Workflow extends entity_1.InMemoryEntity {
     }
     constructor(config) {
         var _a;
-        if (!config._id) {
-            if (Workflow.usePredefinedIds) {
-                if (!config.applicationName) {
-                    throw new Error("applicationName is required when usePredefinedIds is true");
-                }
-                config._id = Workflow.generateStandataWorkflowId(config);
-            }
-            else {
-                config._id = Workflow.generateDefaultWorkflowId();
-            }
-        }
-        super(config);
+        super({
+            ...config,
+            _id: config._id || utils_1.Utils.uuid.getUUID(),
+        });
         this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow_1.default(x));
         this.workflowInstances = ((_a = this.workflows) === null || _a === void 0 ? void 0 : _a.map((x) => new Workflow(x))) || [];
         this.setUnits(this.units.map((unit) => factory_1.UnitFactory.createInWorkflow(unit)));
@@ -198,7 +177,7 @@ class Workflow extends entity_1.InMemoryEntity {
             case enums_1.UnitType.map: {
                 const mapWorkflowConfig = {
                     ...default_1.default,
-                    _id: Workflow.generateDefaultWorkflowId(),
+                    _id: utils_1.Utils.uuid.getUUID(),
                 };
                 const mapUnit = new units_1.MapUnit({
                     workflowId: mapWorkflowConfig._id,
@@ -217,7 +196,7 @@ class Workflow extends entity_1.InMemoryEntity {
     }
     addMapUnit(mapUnit, mapWorkflow) {
         const mapWorkflowConfig = {
-            _id: Workflow.generateDefaultWorkflowId(),
+            _id: utils_1.Utils.uuid.getUUID(),
             ...mapWorkflow.toJSON(),
         };
         mapUnit.setWorkflowId(mapWorkflowConfig._id);

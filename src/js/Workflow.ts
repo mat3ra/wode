@@ -39,15 +39,8 @@ type Base = typeof InMemoryEntity &
     NamedInMemoryEntityConstructor &
     Constructor<WorkflowSchemaMixin>;
 
-type GenerateWorkflowIdParams = {
-    name: string;
-    properties?: string[];
-    subworkflows?: SubworkflowSchema[];
-    applicationName?: string;
-};
-
 /** Context passed to Workflow.render() before workflow reference is injected for subworkflows. */
-type WorkflowRenderContext = MaterialExternalContext &
+export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsExternalContext &
     MaterialsSetExternalContext &
     JobExternalContext;
@@ -61,32 +54,11 @@ export class Workflow extends (InMemoryEntity as Base) {
         return JSONSchemasInterface.getSchemaById("workflow");
     }
 
-    private subworkflowInstances: Subworkflow[];
+    subworkflowInstances: Subworkflow[];
 
     private unitInstances!: AnyWorkflowUnit[];
 
     private workflowInstances: Workflow[];
-
-    private static generateDefaultWorkflowId() {
-        return Utils.uuid.getUUID();
-    }
-
-    private static generateStandataWorkflowId({
-        name,
-        properties,
-        subworkflows,
-        applicationName,
-    }: GenerateWorkflowIdParams) {
-        const propsInfo = properties?.length ? properties.sort().join(",") : "";
-        const swInfo = subworkflows?.length
-            ? subworkflows.map((sw) => sw.name || "unknown").join(",")
-            : "";
-        const seed = [`workflow-${name}`, applicationName, propsInfo, swInfo]
-            .filter((p) => p)
-            .join("-");
-
-        return Utils.uuid.getUUIDFromNamespace(seed);
-    }
 
     static fromSubworkflow(subworkflow: Subworkflow) {
         const config = {
@@ -101,18 +73,10 @@ export class Workflow extends (InMemoryEntity as Base) {
     }
 
     constructor(config: WorkflowSchema & { applicationName?: string }) {
-        if (!config._id) {
-            if (Workflow.usePredefinedIds) {
-                if (!config.applicationName) {
-                    throw new Error("applicationName is required when usePredefinedIds is true");
-                }
-                config._id = Workflow.generateStandataWorkflowId(config);
-            } else {
-                config._id = Workflow.generateDefaultWorkflowId();
-            }
-        }
-
-        super(config);
+        super({
+            ...config,
+            _id: config._id || Utils.uuid.getUUID(),
+        });
 
         this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow(x));
         this.workflowInstances = this.workflows?.map((x) => new Workflow(x)) || [];
@@ -277,7 +241,7 @@ export class Workflow extends (InMemoryEntity as Base) {
             case UnitType.map: {
                 const mapWorkflowConfig = {
                     ...defaultWorkflowConfig,
-                    _id: Workflow.generateDefaultWorkflowId(),
+                    _id: Utils.uuid.getUUID(),
                 };
                 const mapUnit = new MapUnit({
                     workflowId: mapWorkflowConfig._id,
@@ -300,7 +264,7 @@ export class Workflow extends (InMemoryEntity as Base) {
 
     addMapUnit(mapUnit: MapUnit, mapWorkflow: Workflow) {
         const mapWorkflowConfig = {
-            _id: Workflow.generateDefaultWorkflowId(),
+            _id: Utils.uuid.getUUID(),
             ...mapWorkflow.toJSON(),
         };
 

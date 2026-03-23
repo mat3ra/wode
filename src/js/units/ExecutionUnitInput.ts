@@ -4,14 +4,20 @@ import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { TemplateSchema } from "@mat3ra/esse/dist/js/types";
+import { setupNunjucksEnvironment } from "@mat3ra/standata";
 import nunjucks from "nunjucks";
 
-import type { ExecutionUnitInputSchemaMixin } from "../generated/ExecutionUnitInputSchemaMixin";
+import {
+    ExecutionUnitInputSchemaMixin,
+    executionUnitInputSchemaMixin,
+} from "../generated/ExecutionUnitInputSchemaMixin";
 
 type Schema = ExecutionUnitInputSchemaMixin;
 type JSON = Schema & AnyObject;
 type Base = typeof InMemoryEntity & Constructor<ExecutionUnitInputSchemaMixin>;
 type ConstructorConfig = Schema | (Omit<Schema, "template"> & { template: Template });
+
+const env = setupNunjucksEnvironment(new nunjucks.Environment());
 
 export default class ExecutionUnitInput extends (InMemoryEntity as Base) implements Schema {
     declare _json: JSON;
@@ -44,10 +50,19 @@ export default class ExecutionUnitInput extends (InMemoryEntity as Base) impleme
             return this;
         }
 
-        const rendered = nunjucks.compile(this.template.content).render(renderingContext);
+        try {
+            const rendered = nunjucks.compile(this.template.content, env).render(renderingContext);
 
-        this.rendered = rendered || this.template.content;
+            this.rendered = rendered || this.template.content;
 
-        return this;
+            return this;
+        } catch (error) {
+            console.error("Error rendering template", this.template.content);
+            console.error("Rendering context: ", JSON.stringify(renderingContext));
+            console.error("Error", error);
+            throw error;
+        }
     }
 }
+
+executionUnitInputSchemaMixin(ExecutionUnitInput.prototype);

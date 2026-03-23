@@ -1,7 +1,6 @@
 import { Units } from "@mat3ra/code/dist/js/constants";
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     GridContextItemSchema,
     PointsGridDataProviderSchema,
@@ -44,7 +43,6 @@ const vector = (
     };
 };
 
-const jsonSchemaId = "context-providers-directory/points-grid-data-provider";
 const defaultShift = 0;
 const defaultShifts: Vector3DSchema = [defaultShift, defaultShift, defaultShift];
 
@@ -56,6 +54,8 @@ export default abstract class PointsGridFormDataProvider<
     readonly domain = "important" as const;
 
     readonly entityName = "unit" as const;
+
+    readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
 
     public dimensions!: Data["dimensions"];
 
@@ -80,19 +80,12 @@ export default abstract class PointsGridFormDataProvider<
         value: number;
     };
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    abstract readonly jsonSchema: JSONSchema7 | undefined;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
-
-        const { jsonSchemaPatchConfig } = this;
-
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
-            jsonSchemaId,
-            jsonSchemaPatchConfig,
-        );
     }
 
     private initInstanceFields() {
@@ -155,7 +148,7 @@ export default abstract class PointsGridFormDataProvider<
         return defaultData;
     }
 
-    private get jsonSchemaPatchConfig() {
+    protected get jsonSchemaPatchConfig() {
         const metricDescription = {
             KPPRA: `${this.name.toUpperCase()}PPRA (${this.name}pt per reciprocal atom)`, // KPPRA or QPPRA
             spacing: "grid spacing",
@@ -301,11 +294,7 @@ export default abstract class PointsGridFormDataProvider<
         }
     }
 
-    setData(data?: Data) {
-        if (!data) {
-            return;
-        }
-
+    setData(data: Data) {
         const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
 
         if (preferGridMetric && gridMetricType && gridMetricValue) {

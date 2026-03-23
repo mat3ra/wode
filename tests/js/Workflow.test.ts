@@ -1,7 +1,31 @@
+import {
+    type InMemoryEntityInSetConstructor,
+    inMemoryEntityInSetMixin,
+} from "@mat3ra/code/dist/js/entity/set/InMemoryEntityInSetMixin";
+import {
+    type OrderedInMemoryEntityInSet,
+    type OrderedInMemoryEntityInSetConstructor,
+    orderedEntityInSetMixin,
+} from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
+import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { Material } from "@mat3ra/made";
+import { WorkflowStandata } from "@mat3ra/standata";
 import { expect } from "chai";
+import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
+
+type Base = typeof Material &
+    InMemoryEntityInSetConstructor &
+    OrderedInMemoryEntityInSetConstructor;
+
+class OrderedMaterial extends (Material as Base) implements OrderedInMemoryEntityInSet {
+    declare static createDefault: () => OrderedMaterial;
+}
+
+inMemoryEntityInSetMixin(OrderedMaterial.prototype);
+orderedEntityInSetMixin(OrderedMaterial.prototype);
 
 describe("Workflow", () => {
     describe("construction", () => {
@@ -25,22 +49,6 @@ describe("Workflow", () => {
             const w2 = new Workflow({ ...Workflow.defaultConfig });
 
             expect(w1._id).to.not.equal(w2._id);
-        });
-    });
-
-    describe("usePredefinedIds", () => {
-        afterEach(() => {
-            Workflow.usePredefinedIds = false;
-        });
-
-        it("throws when usePredefinedIds is true and config has no applicationName", () => {
-            Workflow.usePredefinedIds = true;
-            const config = { ...Workflow.defaultConfig };
-            delete (config as { applicationName?: string }).applicationName;
-
-            expect(() => new Workflow(config)).to.throw(
-                "applicationName is required when usePredefinedIds is true",
-            );
         });
     });
 
@@ -134,6 +142,46 @@ describe("Workflow", () => {
 
             expect(workflow.toJSON().subworkflows).to.have.lengthOf(initialSubworkflows + 1);
             expect(workflow.toJSON().units).to.have.lengthOf(initialUnits + 1);
+        });
+    });
+
+    describe("render", () => {
+        it("invokes each subworkflow render with spread context and parent workflow", () => {
+            const standataWorkflows = new WorkflowStandata().getAll();
+            expect(standataWorkflows.length).to.be.above(0);
+
+            const workflows = standataWorkflows.map((standataJson) => {
+                return new Workflow(standataJson as unknown as WorkflowSchema);
+            });
+
+            expect(
+                workflows.length,
+                "expected at least one standata workflow from getAll() to construct",
+            ).to.be.above(0);
+
+            const material = OrderedMaterial.createDefault();
+            const context: WorkflowRenderContext = {
+                material,
+                materials: [material, material, material],
+                job: {},
+            };
+
+            workflows.forEach((workflow) => {
+                workflow.render(context);
+
+                workflow.subworkflowInstances.forEach((subworkflow) => {
+                    subworkflow.unitsInstances
+                        .filter((unit) => unit.type === UnitType.execution)
+                        .forEach((unit) => {
+                            expect(unit.renderingContext).to.deep.include({ ...context });
+                            expect(unit.renderingContext).to.have.property("methodData");
+                            expect(unit.renderingContext).to.have.property("application");
+                            expect(unit.renderingContext).to.have.property("subworkflowContext");
+                            expect(unit.renderingContext).to.have.property("workflow");
+                            expect(unit.context).to.be.deep.equal([]);
+                        });
+                });
+            });
         });
     });
 

@@ -15,17 +15,15 @@ import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
 type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & NamedInMemoryEntityConstructor & Constructor<WorkflowSchemaMixin>;
 /** Context passed to Workflow.render() before workflow reference is injected for subworkflows. */
-type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
+export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
 declare const Workflow_base: Base;
 export declare class Workflow extends Workflow_base {
     static usePredefinedIds: boolean;
     static readonly defaultConfig: WorkflowSchema;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
-    private subworkflowInstances;
+    subworkflowInstances: Subworkflow[];
     private unitInstances;
     private workflowInstances;
-    private static generateDefaultWorkflowId;
-    private static generateStandataWorkflowId;
     static fromSubworkflow(subworkflow: Subworkflow): Workflow;
     constructor(config: WorkflowSchema & {
         applicationName?: string;

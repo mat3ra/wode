@@ -33,7 +33,7 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
     static usePredefinedIds: boolean;
     private ModelFactory;
     private applicationInstance;
-    private unitsInstances;
+    unitsInstances: AnySubworkflowUnit[];
     modelInstance: Model;
     properties: string[];
     static createDefault: () => Subworkflow;
