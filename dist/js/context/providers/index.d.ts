@@ -1,16 +1,13 @@
 import type { AssignmentUnitSchema } from "@mat3ra/esse/dist/js/types";
 import type { ApplicationExternalContext } from "../mixins/ApplicationContextMixin";
-import type { JobExternalContext } from "../mixins/JobContextMixin";
 import type { MaterialExternalContext } from "../mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "../mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "../mixins/MaterialsSetContextMixin";
-import type { MethodDataExternalContext } from "../mixins/MethodDataContextMixin";
-import type { WorkflowExternalContext } from "../mixins/WorkflowContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import type { JinjaExternalContext } from "./base/JSONSchemaDataProvider";
 import BoundaryConditionsFormDataManager from "./BoundaryConditionsFormDataManager";
 import QENEBInputDataManager from "./by_application/espresso/QENEBInputDataManager";
-import QEPWXInputDataManager from "./by_application/espresso/QEPWXInputDataManager";
+import QEPWXInputDataManager, { type JobExternalContext, type MethodDataExternalContext, type WorkflowExternalContext } from "./by_application/espresso/QEPWXInputDataManager";
 import NWChemInputDataManager from "./by_application/nwchem/NWChemInputDataManager";
 import VASPInputDataManager from "./by_application/vasp/VASPInputDataManager";
 import VASPNEBInputDataManager from "./by_application/vasp/VASPNEBInputDataManager";

@@ -18,13 +18,14 @@ import materialsSetContextMixin, {
     type MaterialsSetContextMixin,
     type MaterialsSetExternalContext,
 } from "../../../mixins/MaterialsSetContextMixin";
-import type { MethodDataExternalContext } from "../../../mixins/MethodDataContextMixin";
-import type { WorkflowExternalContext } from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
 } from "../../base/JSONSchemaDataProvider";
-import QEPWXInputDataManager from "./QEPWXInputDataManager";
+import QEPWXInputDataManager, {
+    type MethodDataExternalContext,
+    type WorkflowExternalContext,
+} from "./QEPWXInputDataManager";
 
 const jsonSchemaId = "context-providers-directory/by-application/qe-neb-context-provider";
 

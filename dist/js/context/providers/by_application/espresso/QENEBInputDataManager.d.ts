@@ -4,10 +4,9 @@ import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
 import { type MaterialsContextMixin, type MaterialsExternalContext } from "../../../mixins/MaterialsContextMixin";
 import { type MaterialsSetContextMixin, type MaterialsSetExternalContext } from "../../../mixins/MaterialsSetContextMixin";
-import type { MethodDataExternalContext } from "../../../mixins/MethodDataContextMixin";
-import type { WorkflowExternalContext } from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../../base/JSONSchemaDataProvider";
+import { type MethodDataExternalContext, type WorkflowExternalContext } from "./QEPWXInputDataManager";
 type Data = QENEBContextProviderSchema;
 type Schema = InputContextItemSchema & {
     data: Data;

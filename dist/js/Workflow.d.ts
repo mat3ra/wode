@@ -4,10 +4,10 @@ import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
-import type { JobExternalContext } from "./context/mixins/JobContextMixin";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
+import type { JobExternalContext } from "./context/providers/by_application/espresso/QEPWXInputDataManager";
 import { UnitType } from "./enums";
 import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
@@ -38,7 +38,7 @@ export declare class Workflow extends Workflow_base {
     get usedApplicationNames(): string[];
     get usedApplicationVersions(): string[];
     get usedApplicationNamesWithVersions(): string[];
-    get usedModels(): ("dft" | "ml" | "unknown")[];
+    get usedModels(): ("unknown" | "dft" | "ml")[];
     get humanReadableUsedModels(): string[];
     toJSON(): WorkflowSchema & AnyObject;
     get properties(): string[];

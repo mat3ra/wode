@@ -6,11 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const periodic_table_js_1 = require("@exabyte-io/periodic-table.js");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const path_1 = __importDefault(require("path"));
-const JobContextMixin_1 = __importDefault(require("../../../mixins/JobContextMixin"));
 const MaterialContextMixin_1 = __importDefault(require("../../../mixins/MaterialContextMixin"));
 const MaterialsContextMixin_1 = __importDefault(require("../../../mixins/MaterialsContextMixin"));
-const MethodDataContextMixin_1 = __importDefault(require("../../../mixins/MethodDataContextMixin"));
-const WorkflowContextMixin_1 = __importDefault(require("../../../mixins/WorkflowContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("../../base/JSONSchemaDataProvider"));
 const jsonSchemaId = "context-providers-directory/by-application/qe-pwx-context-provider";
 class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
@@ -25,10 +22,10 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         this.entityName = "unit";
         this.isEdited = false;
         this.initMaterialsContextMixin(externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
+        this.methodData = externalContext.methodData || {};
+        this.job = externalContext.job;
+        this.workflow = externalContext.workflow;
         this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
     }
     buildQEPWXContext(material) {
@@ -98,6 +95,6 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
 exports.default = QEPWXInputDataManager;
 (0, MaterialContextMixin_1.default)(QEPWXInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(QEPWXInputDataManager.prototype);
-(0, MethodDataContextMixin_1.default)(QEPWXInputDataManager.prototype);
-(0, WorkflowContextMixin_1.default)(QEPWXInputDataManager.prototype);
-(0, JobContextMixin_1.default)(QEPWXInputDataManager.prototype);
+// methodDataContextMixin(QEPWXInputDataManager.prototype);
+// workflowContextMixin(QEPWXInputDataManager.prototype);
+// jobContextMixin(QEPWXInputDataManager.prototype);

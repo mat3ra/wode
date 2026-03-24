@@ -1,24 +1,42 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { InputContextItemSchema, QEPwxContextProviderSchema } from "@mat3ra/esse/dist/js/types";
+import type { BaseMethod, InputContextItemSchema, JobSchema, QEPwxContextProviderSchema } from "@mat3ra/esse/dist/js/types";
+import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
-import { type JobContextMixin, type JobExternalContext } from "../../../mixins/JobContextMixin";
+import type { Workflow } from "src/js/Workflow";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
 import { type MaterialsContextMixin, type MaterialsExternalContext } from "../../../mixins/MaterialsContextMixin";
-import { type MethodDataContextMixin, type MethodDataExternalContext } from "../../../mixins/MethodDataContextMixin";
-import { type WorkflowContextMixin, type WorkflowExternalContext } from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../../base/JSONSchemaDataProvider";
+type MethodData = BaseMethod["data"] & {
+    pseudo?: {
+        element: AtomicElementValue;
+        filename?: string;
+        path?: string;
+    }[];
+};
+export type MethodDataExternalContext = {
+    methodData?: MethodData;
+};
+export type JobExternalContext = {
+    job?: Pick<JobSchema, "parent">;
+};
+export type WorkflowExternalContext = {
+    workflow: Workflow;
+};
 type Data = QEPwxContextProviderSchema;
 type Schema = InputContextItemSchema & {
     data: Data;
 };
 type ExternalContext = JinjaExternalContext & WorkflowExternalContext & MaterialExternalContext & JobExternalContext & MethodDataExternalContext & MaterialsExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<JobContextMixin> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin> & Constructor<MethodDataContextMixin> & Constructor<WorkflowContextMixin>;
+type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin>;
 declare const QEPWXInputDataManager_base: Base;
 export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
+    methodData?: MethodData;
+    job?: Pick<JobSchema, "parent">;
+    workflow: Workflow;
     isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QEPWXInputDataManager;
     readonly jsonSchema: JSONSchema7 | undefined;

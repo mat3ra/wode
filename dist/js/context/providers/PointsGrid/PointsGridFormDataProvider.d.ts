@@ -28,13 +28,20 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     private initInstanceFields;
     private getDefaultGridMetricValue;
-    getDefaultData(): PointsGridDataProviderSchema;
+    getDefaultData(): {
+        dimensions: [number, number, number] | [string, string, string];
+        shifts?: [number, number, number];
+        reciprocalVectorRatios?: [number, number, number];
+        gridMetricType: "KPPRA" | "spacing";
+        gridMetricValue: number;
+        preferGridMetric?: boolean;
+    };
     protected get jsonSchemaPatchConfig(): {
         dimensions: {
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly number[] | readonly string[] | undefined;
+                default?: string | number | readonly string[] | readonly number[] | undefined;
                 type: string;
             };
             minItems: number;
@@ -44,7 +51,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly number[] | readonly string[] | undefined;
+                default?: string | number | readonly string[] | readonly number[] | undefined;
                 type: string;
             };
             minItems: number;
@@ -54,7 +61,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly number[] | readonly string[] | undefined;
+                default?: string | number | readonly string[] | readonly number[] | undefined;
                 type: string;
             };
             minItems: number;

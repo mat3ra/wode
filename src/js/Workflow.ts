@@ -20,10 +20,10 @@ import { SubworkflowStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 import slugify from "slugify";
 
-import type { JobExternalContext } from "./context/mixins/JobContextMixin";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
+import type { JobExternalContext } from "./context/providers/by_application/espresso/QEPWXInputDataManager";
 import { UnitType } from "./enums";
 import { type WorkflowSchemaMixin, workflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";

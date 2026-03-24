@@ -20,12 +20,14 @@ import type {
 import { type Method, Model, ModelFactory } from "@mat3ra/mode";
 import { Utils } from "@mat3ra/utils";
 
-import type { JobExternalContext } from "./context/mixins/JobContextMixin";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
-import type { WorkflowExternalContext } from "./context/mixins/WorkflowContextMixin";
 import type { AssignmentContext, ExternalContext } from "./context/providers";
+import type {
+    JobExternalContext,
+    WorkflowExternalContext,
+} from "./context/providers/by_application/espresso/QEPWXInputDataManager";
 import { createConvergenceParameter } from "./convergence/factory";
 import { UnitTag, UnitType } from "./enums";
 import {

@@ -2,18 +2,17 @@ import { PERIODIC_TABLE } from "@exabyte-io/periodic-table.js";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
+    BaseMethod,
     InputContextItemSchema,
+    JobSchema,
     QEPwxContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
 import type { Material } from "@mat3ra/made";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
 import path from "path";
+import type { Workflow } from "src/js/Workflow";
 
-import jobContextMixin, {
-    type JobContextMixin,
-    type JobExternalContext,
-} from "../../../mixins/JobContextMixin";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
@@ -22,18 +21,27 @@ import materialsContextMixin, {
     type MaterialsContextMixin,
     type MaterialsExternalContext,
 } from "../../../mixins/MaterialsContextMixin";
-import methodDataContextMixin, {
-    type MethodDataContextMixin,
-    type MethodDataExternalContext,
-} from "../../../mixins/MethodDataContextMixin";
-import workflowContextMixin, {
-    type WorkflowContextMixin,
-    type WorkflowExternalContext,
-} from "../../../mixins/WorkflowContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
 } from "../../base/JSONSchemaDataProvider";
+
+// TODO: create a task to define correct type for MethodData
+type MethodData = BaseMethod["data"] & {
+    pseudo?: { element: AtomicElementValue; filename?: string; path?: string }[];
+};
+
+export type MethodDataExternalContext = {
+    methodData?: MethodData;
+};
+
+export type JobExternalContext = {
+    job?: Pick<JobSchema, "parent">;
+};
+
+export type WorkflowExternalContext = {
+    workflow: Workflow;
+};
 
 type Data = QEPwxContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
@@ -44,11 +52,8 @@ type ExternalContext = JinjaExternalContext &
     MethodDataExternalContext &
     MaterialsExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<JobContextMixin> &
     Constructor<MaterialContextMixin> &
-    Constructor<MaterialsContextMixin> &
-    Constructor<MethodDataContextMixin> &
-    Constructor<WorkflowContextMixin>;
+    Constructor<MaterialsContextMixin>;
 
 const jsonSchemaId = "context-providers-directory/by-application/qe-pwx-context-provider";
 
@@ -58,6 +63,12 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
     readonly domain = "executable" as const;
 
     readonly entityName = "unit" as const;
+
+    methodData?: MethodData;
+
+    job?: Pick<JobSchema, "parent">;
+
+    workflow: Workflow;
 
     isEdited = false;
 
@@ -72,10 +83,11 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
         this.initMaterialsContextMixin(externalContext);
-        this.initMethodDataContextMixin(externalContext);
-        this.initWorkflowContextMixin(externalContext);
-        this.initJobContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
+
+        this.methodData = externalContext.methodData || {};
+        this.job = externalContext.job;
+        this.workflow = externalContext.workflow;
 
         this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
     }
@@ -157,6 +169,6 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
 
 materialContextMixin(QEPWXInputDataManager.prototype);
 materialsContextMixin(QEPWXInputDataManager.prototype);
-methodDataContextMixin(QEPWXInputDataManager.prototype);
-workflowContextMixin(QEPWXInputDataManager.prototype);
-jobContextMixin(QEPWXInputDataManager.prototype);
+// methodDataContextMixin(QEPWXInputDataManager.prototype);
+// workflowContextMixin(QEPWXInputDataManager.prototype);
+// jobContextMixin(QEPWXInputDataManager.prototype);
