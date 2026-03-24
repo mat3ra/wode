@@ -34,10 +34,10 @@ export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
+    isEdited: boolean;
     methodData?: MethodData;
     job?: Pick<JobSchema, "parent">;
     workflow: Workflow;
-    isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QEPWXInputDataManager;
     readonly jsonSchema: JSONSchema7 | undefined;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
