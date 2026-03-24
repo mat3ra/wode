@@ -18,7 +18,6 @@ type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & Named
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
 declare const Workflow_base: Base;
 export declare class Workflow extends Workflow_base {
-    static usePredefinedIds: boolean;
     static readonly defaultConfig: WorkflowSchema;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     subworkflowInstances: Subworkflow[];

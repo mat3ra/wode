@@ -13,12 +13,6 @@ const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
 const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
 class BaseUnit extends entity_1.InMemoryEntity {
-    static generateFlowChartId(name) {
-        if (this.usePredefinedIds) {
-            return utils_1.Utils.uuid.getUUIDFromNamespace(`flowchart-${name}`);
-        }
-        return utils_1.Utils.uuid.getUUID();
-    }
     constructor(config) {
         super({
             results: [],
@@ -28,7 +22,7 @@ class BaseUnit extends entity_1.InMemoryEntity {
             ...config,
             status: config.status || enums_1.UnitStatus.idle,
             statusTrack: config.statusTrack || [],
-            flowchartId: config.flowchartId || BaseUnit.generateFlowChartId(config.name),
+            flowchartId: config.flowchartId || utils_1.Utils.uuid.getUUID(),
             tags: config.tags || [],
         });
         this.defaultResults = [];
@@ -53,13 +47,12 @@ class BaseUnit extends entity_1.InMemoryEntity {
     }
     clone(extraContext) {
         const flowchartIDOverrideConfigAsExtraContext = {
-            flowchartId: BaseUnit.generateFlowChartId(this.name),
+            flowchartId: utils_1.Utils.uuid.getUUID(),
             ...extraContext,
         };
         return super.clone(flowchartIDOverrideConfigAsExtraContext);
     }
 }
-BaseUnit.usePredefinedIds = false;
 (0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);
 (0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnit.prototype);
 (0, HasRepetitionMixin_1.hasRepetitionMixin)(BaseUnit.prototype);

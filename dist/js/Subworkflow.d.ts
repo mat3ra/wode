@@ -4,8 +4,8 @@ import { type DefaultableInMemoryEntityConstructor } from "@mat3ra/code/dist/js/
 import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ApplicationSchema, BaseMethod, BaseModel, JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
-import { type Method, Model, ModelFactory } from "@mat3ra/mode";
+import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { Model, ModelFactory } from "@mat3ra/mode";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
@@ -29,7 +29,6 @@ type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & Named
 type SubworkflowExternalContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & WorkflowExternalContext & JobExternalContext;
 declare const Subworkflow_base: Base;
 export default class Subworkflow extends Subworkflow_base implements SubworkflowSchema {
-    static usePredefinedIds: boolean;
     private ModelFactory;
     private applicationInstance;
     unitsInstances: AnySubworkflowUnit[];
@@ -38,7 +37,6 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
     static createDefault: () => Subworkflow;
     toJSON: () => SubworkflowSchema & AnyObject;
     constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
-    static generateSubworkflowId(name: string, application?: ApplicationSchema, model?: BaseModel, method?: BaseMethod): any;
     static get defaultConfig(): {
         _id: any;
         name: string;
@@ -55,7 +53,6 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
         units: never[];
     };
     getAsUnit(): SubworkflowUnit;
-    static fromArguments(application: ApplicationSchema, model: Model, method: Method, name: string, units?: SubworkflowSchema["units"], config?: {}): Subworkflow;
     setApplication(application: Application): void;
     setModel(model: Model): void;
     private buildExternalContext;

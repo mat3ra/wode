@@ -16,8 +16,6 @@ type Base = typeof InMemoryEntity & Constructor<NamedEntity> & Constructor<Defau
 type Schema = WorkflowBaseUnitSchema;
 declare const BaseUnit_base: Base;
 declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implements Schema {
-    static usePredefinedIds: boolean;
-    static generateFlowChartId(name: string): any;
     toJSON: () => Schema & AnyObject;
     defaultResults: NameResultSchema[];
     defaultMonitors: NameResultSchema[];

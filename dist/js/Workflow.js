@@ -250,7 +250,6 @@ class Workflow extends entity_1.InMemoryEntity {
     }
 }
 exports.Workflow = Workflow;
-Workflow.usePredefinedIds = false;
 Workflow.defaultConfig = default_1.default;
 (0, NamedEntityMixin_1.namedEntityMixin)(Workflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Workflow);

@@ -48,15 +48,6 @@ type Base = typeof InMemoryEntity &
 type Schema = WorkflowBaseUnitSchema;
 
 class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) implements Schema {
-    static usePredefinedIds = false;
-
-    static generateFlowChartId(name: string) {
-        if (this.usePredefinedIds) {
-            return Utils.uuid.getUUIDFromNamespace(`flowchart-${name}`);
-        }
-        return Utils.uuid.getUUID();
-    }
-
     declare toJSON: () => Schema & AnyObject;
 
     defaultResults: NameResultSchema[] = [];
@@ -82,7 +73,7 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
             ...config,
             status: config.status || UnitStatus.idle,
             statusTrack: config.statusTrack || [],
-            flowchartId: config.flowchartId || BaseUnit.generateFlowChartId(config.name),
+            flowchartId: config.flowchartId || Utils.uuid.getUUID(),
             tags: config.tags || [],
         });
 
@@ -107,7 +98,7 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     clone(extraContext: object) {
         const flowchartIDOverrideConfigAsExtraContext = {
-            flowchartId: BaseUnit.generateFlowChartId(this.name),
+            flowchartId: Utils.uuid.getUUID(),
             ...extraContext,
         };
         return super.clone(flowchartIDOverrideConfigAsExtraContext);

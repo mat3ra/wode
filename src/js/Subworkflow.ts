@@ -10,14 +10,8 @@ import {
 } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ApplicationSchema,
-    BaseMethod,
-    BaseModel,
-    JobSchema,
-    SubworkflowSchema,
-} from "@mat3ra/esse/dist/js/types";
-import { type Method, Model, ModelFactory } from "@mat3ra/mode";
+import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { Model, ModelFactory } from "@mat3ra/mode";
 import { setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -63,8 +57,6 @@ type SubworkflowExternalContext = MaterialExternalContext &
     JobExternalContext;
 
 export default class Subworkflow extends (InMemoryEntity as Base) implements SubworkflowSchema {
-    static usePredefinedIds = false;
-
     private ModelFactory: typeof ModelFactory;
 
     private applicationInstance: Application;
@@ -91,26 +83,10 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
         this.setUnits(this.units.map((cfg) => UnitFactory.createInSubworkflow(cfg)));
     }
 
-    static generateSubworkflowId(
-        name: string,
-        application?: ApplicationSchema,
-        model?: BaseModel,
-        method?: BaseMethod,
-    ) {
-        const appName = application?.name || "";
-        const modelInfo = model ? `${model.type}-${model.subtype || ""}` : "";
-        const methodInfo = method ? `${method.type}-${method.subtype || ""}` : "";
-        const seed = [`subworkflow-${name}`, appName, modelInfo, methodInfo]
-            .filter((p) => p)
-            .join("-");
-
-        return this.usePredefinedIds ? Utils.uuid.getUUIDFromNamespace(seed) : Utils.uuid.getUUID();
-    }
-
     static get defaultConfig() {
         const defaultName = "New Subworkflow";
         return {
-            _id: this.generateSubworkflowId(defaultName),
+            _id: Utils.uuid.getUUID(),
             name: defaultName,
             application: Application.defaultConfig,
             model: Model.defaultConfig,
@@ -129,48 +105,6 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
             monitors: [],
             results: [],
             flowchartId: "",
-        });
-    }
-
-    /*
-     * @summary Used to generate initial application tree, therefore omit setting application.
-     */
-    static fromArguments(
-        application: ApplicationSchema,
-        model: Model,
-        method: Method,
-        name: string,
-        units: SubworkflowSchema["units"] = [],
-        config = {},
-    ) {
-        // TODO: move to standata and fix types
-        // @ts-ignore
-        const nameForIdGeneration = config.attributes?.name || name;
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { functions: _functions, attributes: _attributes, ...cleanConfig } = config;
-
-        // Set the method on the model so it can be properly serialized
-        model.setMethod(method);
-
-        return new Subworkflow({
-            ...cleanConfig,
-            _id: Subworkflow.generateSubworkflowId(nameForIdGeneration, application, model, method),
-            name,
-            application,
-            properties: Array.from(
-                new Set(
-                    units
-                        .map((x) => x.results?.map((r) => r.name) || [])
-                        .flat()
-                        .sort(),
-                ),
-            ),
-            model: {
-                ...model.toJSON(),
-                method: method.toJSON(),
-            },
-            units,
         });
     }
 

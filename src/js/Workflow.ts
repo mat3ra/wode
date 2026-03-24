@@ -45,8 +45,6 @@ export type WorkflowRenderContext = MaterialExternalContext &
     JobExternalContext;
 
 export class Workflow extends (InMemoryEntity as Base) {
-    static usePredefinedIds = false;
-
     static readonly defaultConfig = defaultWorkflowConfig;
 
     static get jsonSchema() {

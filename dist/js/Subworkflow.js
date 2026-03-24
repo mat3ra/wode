@@ -23,19 +23,10 @@ class Subworkflow extends entity_1.InMemoryEntity {
         });
         this.setUnits(this.units.map((cfg) => units_1.UnitFactory.createInSubworkflow(cfg)));
     }
-    static generateSubworkflowId(name, application, model, method) {
-        const appName = (application === null || application === void 0 ? void 0 : application.name) || "";
-        const modelInfo = model ? `${model.type}-${model.subtype || ""}` : "";
-        const methodInfo = method ? `${method.type}-${method.subtype || ""}` : "";
-        const seed = [`subworkflow-${name}`, appName, modelInfo, methodInfo]
-            .filter((p) => p)
-            .join("-");
-        return this.usePredefinedIds ? utils_1.Utils.uuid.getUUIDFromNamespace(seed) : utils_1.Utils.uuid.getUUID();
-    }
     static get defaultConfig() {
         const defaultName = "New Subworkflow";
         return {
-            _id: this.generateSubworkflowId(defaultName),
+            _id: utils_1.Utils.uuid.getUUID(),
             name: defaultName,
             application: ade_1.Application.defaultConfig,
             model: mode_1.Model.defaultConfig,
@@ -53,35 +44,6 @@ class Subworkflow extends entity_1.InMemoryEntity {
             monitors: [],
             results: [],
             flowchartId: "",
-        });
-    }
-    /*
-     * @summary Used to generate initial application tree, therefore omit setting application.
-     */
-    static fromArguments(application, model, method, name, units = [], config = {}) {
-        var _a;
-        // TODO: move to standata and fix types
-        // @ts-ignore
-        const nameForIdGeneration = ((_a = config.attributes) === null || _a === void 0 ? void 0 : _a.name) || name;
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { functions: _functions, attributes: _attributes, ...cleanConfig } = config;
-        // Set the method on the model so it can be properly serialized
-        model.setMethod(method);
-        return new Subworkflow({
-            ...cleanConfig,
-            _id: Subworkflow.generateSubworkflowId(nameForIdGeneration, application, model, method),
-            name,
-            application,
-            properties: Array.from(new Set(units
-                .map((x) => { var _a; return ((_a = x.results) === null || _a === void 0 ? void 0 : _a.map((r) => r.name)) || []; })
-                .flat()
-                .sort())),
-            model: {
-                ...model.toJSON(),
-                method: method.toJSON(),
-            },
-            units,
         });
     }
     setApplication(application) {
@@ -369,7 +331,6 @@ class Subworkflow extends entity_1.InMemoryEntity {
         nextStep.next = unitForConvergence.flowchartId;
     }
 }
-Subworkflow.usePredefinedIds = false;
 exports.default = Subworkflow;
 (0, NamedEntityMixin_1.namedEntityMixin)(Subworkflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Subworkflow);
