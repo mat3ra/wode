@@ -66,7 +66,7 @@ export class Workflow extends (InMemoryEntity as Base) {
             applicationName: subworkflow.application.name,
             workflows: [] as WorkflowSchema[],
         };
-        return new Workflow(config);
+        return new this(config);
     }
 
     constructor(config: WorkflowSchema & { applicationName?: string }) {

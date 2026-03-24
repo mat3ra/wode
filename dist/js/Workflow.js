@@ -32,7 +32,7 @@ class Workflow extends entity_1.InMemoryEntity {
             applicationName: subworkflow.application.name,
             workflows: [],
         };
-        return new Workflow(config);
+        return new this(config);
     }
     constructor(config) {
         var _a;
