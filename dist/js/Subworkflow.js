@@ -5,12 +5,12 @@ const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const mode_1 = require("@mat3ra/mode");
+const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
 const factory_1 = require("./convergence/factory");
 const enums_1 = require("./enums");
 const SubworkflowSchemaMixin_1 = require("./generated/SubworkflowSchemaMixin");
 const units_1 = require("./units");
-const utils_2 = require("./workflows/utils");
 class Subworkflow extends entity_1.InMemoryEntity {
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
@@ -155,7 +155,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
     }
     setUnits(units) {
         // TODO: remove the setNextLinks and setUnitsHead and handle the logic via flowchart designer
-        this.unitsInstances = (0, utils_2.setNextLinks)((0, utils_2.setUnitsHead)(units));
+        this.unitsInstances = (0, standata_1.setUnitLinks)(units);
         this.units = units.map((x) => x.toJSON());
         this.properties = units.map((x) => x.resultNames).flat();
     }

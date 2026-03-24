@@ -16,7 +16,7 @@ import type {
     WorkflowSchema,
 } from "@mat3ra/esse/dist/js/types";
 import { tree } from "@mat3ra/mode";
-import { SubworkflowStandata } from "@mat3ra/standata";
+import { setUnitLinks, SubworkflowStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 import slugify from "slugify";
 
@@ -30,7 +30,6 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit, UnitFactory } from "./units/factory";
 import defaultWorkflowConfig from "./workflows/default";
-import { setNextLinks, setUnitsHead } from "./workflows/utils";
 
 const { MODEL_NAMES } = tree;
 
@@ -112,7 +111,7 @@ export class Workflow extends (InMemoryEntity as Base) {
     }
 
     setUnits(arr: AnyWorkflowUnit[]) {
-        this.unitInstances = setNextLinks(setUnitsHead(arr));
+        this.unitInstances = setUnitLinks(arr);
     }
 
     render(context: WorkflowRenderContext) {

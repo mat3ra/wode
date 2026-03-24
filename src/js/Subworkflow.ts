@@ -18,6 +18,7 @@ import type {
     SubworkflowSchema,
 } from "@mat3ra/esse/dist/js/types";
 import { type Method, Model, ModelFactory } from "@mat3ra/mode";
+import { setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
@@ -36,7 +37,6 @@ import {
 } from "./generated/SubworkflowSchemaMixin";
 import { AssignmentUnit, ConditionUnit, SubworkflowUnit, UnitFactory } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
-import { setNextLinks, setUnitsHead } from "./workflows/utils";
 
 type ConvergenceConfig = {
     parameter: "N_k" | "N_k_nonuniform";
@@ -255,7 +255,7 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
 
     private setUnits(units: AnySubworkflowUnit[]) {
         // TODO: remove the setNextLinks and setUnitsHead and handle the logic via flowchart designer
-        this.unitsInstances = setNextLinks(setUnitsHead(units));
+        this.unitsInstances = setUnitLinks(units);
         this.units = units.map((x) => x.toJSON());
         this.properties = units.map((x) => x.resultNames).flat();
     }

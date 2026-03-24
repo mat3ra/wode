@@ -18,7 +18,6 @@ const Subworkflow_1 = __importDefault(require("./Subworkflow"));
 const units_1 = require("./units");
 const factory_1 = require("./units/factory");
 const default_1 = __importDefault(require("./workflows/default"));
-const utils_2 = require("./workflows/utils");
 const { MODEL_NAMES } = mode_1.tree;
 class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
@@ -69,7 +68,7 @@ class Workflow extends entity_1.InMemoryEntity {
         }
     }
     setUnits(arr) {
-        this.unitInstances = (0, utils_2.setNextLinks)((0, utils_2.setUnitsHead)(arr));
+        this.unitInstances = (0, standata_1.setUnitLinks)(arr);
     }
     render(context) {
         this.subworkflowInstances.forEach((sw) => {
