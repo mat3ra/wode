@@ -56,7 +56,7 @@ class Workflow extends entity_1.InMemoryEntity {
         this.setUnits(this.units.map((unit) => factory_1.UnitFactory.createInWorkflow(unit)));
     }
     get workflows() {
-        return this.prop("workflows");
+        return this.requiredProp("workflows");
     }
     set workflows(value) {
         this.setProp("workflows", value);

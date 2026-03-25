@@ -17,7 +17,7 @@ type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & Named
 /** Context passed to Workflow.render() before workflow reference is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
 declare const Workflow_base: Base;
-export declare class Workflow extends Workflow_base {
+export declare class Workflow extends Workflow_base implements WorkflowSchema {
     static readonly defaultConfig: WorkflowSchema;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     subworkflowInstances: Subworkflow[];
@@ -31,8 +31,8 @@ export declare class Workflow extends Workflow_base {
     constructor(config: WorkflowSchema & {
         applicationName?: string;
     });
-    get workflows(): WorkflowSchema[] | undefined;
-    set workflows(value: WorkflowSchema[] | undefined);
+    get workflows(): WorkflowSchema[];
+    set workflows(value: WorkflowSchema[]);
     addSubworkflow(subworkflow: Subworkflow, head?: boolean, index?: number): void;
     removeSubworkflow(id: string): void;
     setUnits(arr: AnyWorkflowUnit[]): void;

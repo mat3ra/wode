@@ -44,7 +44,7 @@ export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsSetExternalContext &
     JobExternalContext;
 
-export class Workflow extends (InMemoryEntity as Base) {
+export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema {
     static readonly defaultConfig = defaultWorkflowConfig;
 
     static get jsonSchema() {
@@ -96,10 +96,10 @@ export class Workflow extends (InMemoryEntity as Base) {
     }
 
     get workflows() {
-        return this.prop<WorkflowSchema[]>("workflows");
+        return this.requiredProp<WorkflowSchema[]>("workflows");
     }
 
-    set workflows(value: WorkflowSchema[] | undefined) {
+    set workflows(value: WorkflowSchema[]) {
         this.setProp("workflows", value);
     }
 
