@@ -15,6 +15,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
         this.properties = [];
+        this.repetition = 0;
         this.ModelFactory = _ModelFactory;
         this.applicationInstance = new ade_1.Application(this.application);
         this.modelInstance = this.ModelFactory.create({
@@ -33,6 +34,10 @@ class Subworkflow extends entity_1.InMemoryEntity {
             properties: [],
             units: [],
         };
+    }
+    setRepetition(repetition) {
+        this.repetition = repetition;
+        this.unitsInstances.forEach((u) => u.setRepetition(repetition));
     }
     getAsUnit() {
         return new units_1.SubworkflowUnit({

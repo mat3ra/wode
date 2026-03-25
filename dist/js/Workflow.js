@@ -23,6 +23,15 @@ class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
     }
+    setTotalRepetitions(totalRepetition) {
+        this.totalRepetitions = totalRepetition;
+    }
+    setRepetition(repetition) {
+        this.repetition = repetition;
+        this.unitInstances.forEach((u) => u.setRepetition(repetition));
+        this.subworkflowInstances.forEach((sw) => sw.setRepetition(repetition));
+        this.workflowInstances.forEach((wf) => wf.setRepetition(repetition));
+    }
     static fromSubworkflow(subworkflow) {
         const config = {
             name: subworkflow.name,
@@ -40,6 +49,8 @@ class Workflow extends entity_1.InMemoryEntity {
             ...config,
             _id: config._id || utils_1.Utils.uuid.getUUID(),
         });
+        this.repetition = 0;
+        this.totalRepetitions = 1;
         this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow_1.default(x));
         this.workflowInstances = ((_a = this.workflows) === null || _a === void 0 ? void 0 : _a.map((x) => new Workflow(x))) || [];
         this.setUnits(this.units.map((unit) => factory_1.UnitFactory.createInWorkflow(unit)));

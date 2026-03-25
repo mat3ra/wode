@@ -23,6 +23,10 @@ export declare class Workflow extends Workflow_base {
     subworkflowInstances: Subworkflow[];
     private unitInstances;
     private workflowInstances;
+    repetition: number;
+    totalRepetitions: number;
+    setTotalRepetitions(totalRepetition: number): void;
+    setRepetition(repetition: number): void;
     static fromSubworkflow(subworkflow: Subworkflow): Workflow;
     constructor(config: WorkflowSchema & {
         applicationName?: string;

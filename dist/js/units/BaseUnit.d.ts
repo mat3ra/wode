@@ -1,7 +1,6 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
-import { HasRepetition } from "@mat3ra/code/dist/js/entity/mixins/HasRepetitionMixin";
 import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { type RuntimeItems } from "@mat3ra/code/dist/js/entity/mixins/RuntimeItemsMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
@@ -12,7 +11,7 @@ import type { StatusSchema, WorkflowBaseUnitSchema } from "@mat3ra/esse/dist/js/
 import { type BaseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
 import { type StatusSchemaMixin } from "../generated/StatusSchemaMixin";
 import { type RuntimeItemsUILogic } from "./mixins/RuntimeItemsUILogicMixin";
-type Base = typeof InMemoryEntity & Constructor<NamedEntity> & Constructor<Defaultable> & Constructor<HasRepetition> & Constructor<Taggable> & Constructor<HashedEntity> & Constructor<RuntimeItems> & Constructor<RuntimeItemsUILogic> & Constructor<BaseUnitSchemaMixin> & Constructor<StatusSchemaMixin>;
+type Base = typeof InMemoryEntity & Constructor<NamedEntity> & Constructor<Defaultable> & Constructor<Taggable> & Constructor<HashedEntity> & Constructor<RuntimeItems> & Constructor<RuntimeItemsUILogic> & Constructor<BaseUnitSchemaMixin> & Constructor<StatusSchemaMixin>;
 type Schema = WorkflowBaseUnitSchema;
 declare const BaseUnit_base: Base;
 declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implements Schema {
@@ -24,6 +23,7 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     allowedResults: NameResultSchema[];
     allowedMonitors: NameResultSchema[];
     allowedPostProcessors: NameResultSchema[];
+    repetition: number;
     constructor(config: Partial<S> & Pick<S, "name">);
     get lastStatusUpdate(): {
         trackedAt: number;
@@ -33,5 +33,6 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     getHashObject(): object;
     isInStatus(status: StatusSchema["status"]): boolean;
     clone(extraContext: object): this;
+    setRepetition(repetition: number): void;
 }
 export default BaseUnit;

@@ -34,6 +34,7 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
     unitsInstances: AnySubworkflowUnit[];
     modelInstance: Model;
     properties: string[];
+    repetition: number;
     static createDefault: () => Subworkflow;
     toJSON: () => SubworkflowSchema & AnyObject;
     constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
@@ -52,6 +53,7 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
         properties: never[];
         units: never[];
     };
+    setRepetition(repetition: number): void;
     getAsUnit(): SubworkflowUnit;
     setApplication(application: Application): void;
     setModel(model: Model): void;
@@ -259,6 +261,8 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
             schemaVersion?: string;
             name: string;
             isDefault?: boolean;
+            applicationName: string;
+            hasAdvancedComputeOptions?: boolean;
             preProcessors: {
                 name: string;
             }[];
@@ -268,10 +272,6 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
             monitors: {
                 name: string;
             }[];
-            results: {
-                name: string;
-            }[];
-            hasAdvancedComputeOptions?: boolean;
         };
         flavor: {
             _id?: string;

@@ -57,6 +57,21 @@ export class Workflow extends (InMemoryEntity as Base) {
 
     private workflowInstances: Workflow[];
 
+    repetition = 0;
+
+    totalRepetitions = 1;
+
+    setTotalRepetitions(totalRepetition: number) {
+        this.totalRepetitions = totalRepetition;
+    }
+
+    setRepetition(repetition: number) {
+        this.repetition = repetition;
+        this.unitInstances.forEach((u) => u.setRepetition(repetition));
+        this.subworkflowInstances.forEach((sw) => sw.setRepetition(repetition));
+        this.workflowInstances.forEach((wf) => wf.setRepetition(repetition));
+    }
+
     static fromSubworkflow(subworkflow: Subworkflow) {
         const config = {
             name: subworkflow.name,

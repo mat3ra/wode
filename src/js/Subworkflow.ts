@@ -67,6 +67,8 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
 
     properties: string[] = [];
 
+    repetition = 0;
+
     declare static createDefault: () => Subworkflow;
 
     declare toJSON: () => SubworkflowSchema & AnyObject;
@@ -93,6 +95,11 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
             properties: [],
             units: [],
         };
+    }
+
+    setRepetition(repetition: number) {
+        this.repetition = repetition;
+        this.unitsInstances.forEach((u) => u.setRepetition(repetition));
     }
 
     getAsUnit() {

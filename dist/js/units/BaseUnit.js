@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
-const HasRepetitionMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HasRepetitionMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const RuntimeItemsMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/RuntimeItemsMixin");
 const TaggableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/TaggableMixin");
@@ -32,10 +31,13 @@ class BaseUnit extends entity_1.InMemoryEntity {
         this.allowedResults = [];
         this.allowedMonitors = [];
         this.allowedPostProcessors = [];
+        this.repetition = 0;
         this._initRuntimeItems(config);
     }
     get lastStatusUpdate() {
-        const statusTrack = (this.statusTrack || []).filter((s) => (s.repetition || 0) === this.repetition);
+        const statusTrack = (this.statusTrack || []).filter((s) => {
+            return (s.repetition || 0) === this.repetition;
+        });
         const sortedStatusTrack = statusTrack.sort((a, b) => a.trackedAt - b.trackedAt); // lodash.sortBy(statusTrack, (x) => x.trackedAt);
         return sortedStatusTrack[sortedStatusTrack.length - 1];
     }
@@ -52,10 +54,12 @@ class BaseUnit extends entity_1.InMemoryEntity {
         };
         return super.clone(flowchartIDOverrideConfigAsExtraContext);
     }
+    setRepetition(repetition) {
+        this.repetition = repetition;
+    }
 }
 (0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);
 (0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnit.prototype);
-(0, HasRepetitionMixin_1.hasRepetitionMixin)(BaseUnit.prototype);
 (0, RuntimeItemsMixin_1.runtimeItemsMixin)(BaseUnit.prototype);
 (0, RuntimeItemsUILogicMixin_1.runtimeItemsUILogicMixin)(BaseUnit.prototype);
 (0, BaseUnitSchemaMixin_1.baseUnitSchemaMixin)(BaseUnit.prototype);

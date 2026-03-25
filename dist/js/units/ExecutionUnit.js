@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ade_1 = require("@mat3ra/ade");
 const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
 const providers_1 = require("../context/providers");
@@ -22,36 +21,46 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.name = this.name || ((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) || "";
     }
     setApplication({ application, executable, flavor }) {
-        this.applicationInstance = new ade_1.Application(standata.getApplication(application));
-        this.setProp("application", this.applicationInstance.toJSON());
+        this.setProp("application", application);
         this.setExecutable({ executable, flavor });
     }
     setExecutable({ executable, flavor }) {
         const { executable: executablePlain } = standata.getExecutableAndFlavorByName(this.application.name);
-        this.executableInstance = new ade_1.Executable(executable || executablePlain);
-        this.allowedResults = this.executableInstance.results;
-        this.allowedMonitors = this.executableInstance.monitors;
-        this.allowedPostProcessors = this.executableInstance.postProcessors;
-        this.setProp("executable", this.executableInstance.toJSON());
+        const finalExecutable = executable || executablePlain;
+        // TODO: clirify how allowed results should work
+        // this.allowedResults = finalExecutable.results;
+        this.allowedMonitors = finalExecutable.monitors;
+        this.allowedPostProcessors = finalExecutable.postProcessors;
+        this.setProp("executable", finalExecutable);
         this.setFlavor(flavor);
     }
     setFlavor(flavor) {
-        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName(this.application.name, this.executable.name);
-        this.flavorInstance = new ade_1.Flavor(flavor || defaultFlavor);
-        this.defaultMonitors = this.flavorInstance.monitors;
-        this.defaultResults = this.flavorInstance.results;
-        this.defaultPostProcessors = this.flavorInstance.postProcessors;
-        this.setProp("flavor", this.flavorInstance.toJSON());
+        const { executable, application } = this;
+        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName(application.name, executable.name);
+        const finalFlavor = flavor || defaultFlavor;
+        this.defaultMonitors = finalFlavor.monitors;
+        this.defaultResults = finalFlavor.results;
+        this.defaultPostProcessors = finalFlavor.postProcessors;
+        this.setProp("flavor", finalFlavor);
         this.setRuntimeItemsToDefaultValues();
         this.setDefaultInput();
     }
     setDefaultInput() {
-        const inputs = standata.getInput(this.flavorInstance);
-        this.inputInstances = inputs.map(ExecutionUnitInput_1.default.createFromTemplate);
+        this.inputInstances = standata
+            .getInput(this.flavor)
+            .map(ExecutionUnitInput_1.default.createFromTemplate);
+    }
+    render(externalContext) {
+        const contextProviders = this.getContextProvidersInstances(externalContext);
+        const fullContext = contextProviders.map((provider) => provider.getContextItemData());
+        this.saveContext(fullContext, externalContext);
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
     }
     getContextProvidersInstances(externalContext) {
         const uniqueContextProviderNames = [
-            ...new Set(this.inputInstances
+            ...new Set(this.input
                 .map((input) => {
                 return input.template.contextProviders.map((provider) => {
                     return provider.name;
@@ -80,14 +89,6 @@ class ExecutionUnit extends BaseUnit_1.default {
         });
         this.saveContext(fullContext, externalContext);
     }
-    render(externalContext) {
-        const contextProviders = this.getContextProvidersInstances(externalContext);
-        const fullContext = contextProviders.map((provider) => provider.getContextItemData());
-        this.saveContext(fullContext, externalContext);
-        this.input = this.inputInstances.map((input) => {
-            return input.render(this.renderingContext).toJSON();
-        });
-    }
     saveContext(fullContext, externalContext) {
         // persistent context
         this.context = fullContext.filter((c) => c.isEdited);
@@ -96,20 +97,15 @@ class ExecutionUnit extends BaseUnit_1.default {
             ...externalContext,
         };
     }
-    /**
-     * @summary Calculates hash on unit-specific fields.
-     * The meaningful fields of processing unit are operation, flavor and input at the moment.
-     */
     getHashObject() {
+        const { application, executable, flavor, input } = this.toJSON();
         return {
             ...super.getHashObject(),
-            application: utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.applicationInstance.toJSON()),
-            executable: utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.executableInstance.toJSON()),
-            flavor: this.flavorInstance
-                ? utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.flavorInstance.toJSON())
-                : undefined,
-            input: utils_1.Utils.hash.calculateHashFromObject(this.input.map((i) => {
-                return utils_1.Utils.str.removeEmptyLinesFromString(utils_1.Utils.str.removeCommentsFromSourceCode(i.template.content));
+            application,
+            executable,
+            flavor,
+            input: utils_1.Utils.hash.calculateHashFromObject(input.map(({ template }) => {
+                return utils_1.Utils.str.removeEmptyLinesFromString(utils_1.Utils.str.removeCommentsFromSourceCode(template.content));
             })),
         };
     }
