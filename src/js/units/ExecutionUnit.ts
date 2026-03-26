@@ -60,11 +60,6 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
         const finalExecutable = executable || executablePlain;
 
-        // TODO: clirify how allowed results should work
-        // this.allowedResults = finalExecutable.results;
-        this.allowedMonitors = finalExecutable.monitors;
-        this.allowedPostProcessors = finalExecutable.postProcessors;
-
         this.setProp("executable", finalExecutable);
         this.setFlavor(flavor);
     }

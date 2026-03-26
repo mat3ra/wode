@@ -28,9 +28,6 @@ class BaseUnit extends entity_1.InMemoryEntity {
         this.defaultMonitors = [];
         this.defaultPostProcessors = [];
         this.defaultPreProcessors = [];
-        this.allowedResults = [];
-        this.allowedMonitors = [];
-        this.allowedPostProcessors = [];
         this.repetition = 0;
         this._initRuntimeItems(config);
     }

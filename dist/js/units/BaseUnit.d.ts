@@ -20,9 +20,6 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     defaultMonitors: NameResultSchema[];
     defaultPostProcessors: NameResultSchema[];
     defaultPreProcessors: NameResultSchema[];
-    allowedResults: NameResultSchema[];
-    allowedMonitors: NameResultSchema[];
-    allowedPostProcessors: NameResultSchema[];
     repetition: number;
     constructor(config: Partial<S> & Pick<S, "name">);
     get lastStatusUpdate(): {

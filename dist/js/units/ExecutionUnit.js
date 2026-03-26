@@ -27,10 +27,6 @@ class ExecutionUnit extends BaseUnit_1.default {
     setExecutable({ executable, flavor }) {
         const { executable: executablePlain } = standata.getExecutableAndFlavorByName(this.application.name);
         const finalExecutable = executable || executablePlain;
-        // TODO: clirify how allowed results should work
-        // this.allowedResults = finalExecutable.results;
-        this.allowedMonitors = finalExecutable.monitors;
-        this.allowedPostProcessors = finalExecutable.postProcessors;
         this.setProp("executable", finalExecutable);
         this.setFlavor(flavor);
     }

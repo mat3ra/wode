@@ -54,12 +54,6 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     defaultPreProcessors: NameResultSchema[] = [];
 
-    allowedResults: NameResultSchema[] = [];
-
-    allowedMonitors: NameResultSchema[] = [];
-
-    allowedPostProcessors: NameResultSchema[] = [];
-
     repetition = 0;
 
     constructor(config: Partial<S> & Pick<S, "name">) {
