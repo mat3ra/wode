@@ -54,9 +54,10 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     setExecutable({ executable, flavor }: SetExecutableProps) {
-        const { executable: executablePlain } = standata.getExecutableAndFlavorByName(
-            this.application.name,
-        );
+        const { executable: executablePlain } = standata.getExecutableAndFlavorByName({
+            appName: this.application.name,
+            appVersion: this.application.version,
+        });
 
         const finalExecutable = executable || executablePlain;
 
@@ -66,10 +67,11 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
     setFlavor(flavor?: Flavor | FlavorSchema) {
         const { executable, application } = this;
-        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName(
-            application.name,
-            executable.name,
-        );
+        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName({
+            appName: application.name,
+            appVersion: application.version,
+            execName: executable.name,
+        });
 
         const finalFlavor = flavor || defaultFlavor;
 
