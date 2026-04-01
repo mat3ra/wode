@@ -8,17 +8,15 @@ const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-const mode_1 = require("@mat3ra/mode");
 const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
-const slugify_1 = __importDefault(require("slugify"));
 const enums_1 = require("./enums");
 const WorkflowSchemaMixin_1 = require("./generated/WorkflowSchemaMixin");
 const Subworkflow_1 = __importDefault(require("./Subworkflow"));
 const units_1 = require("./units");
 const factory_1 = require("./units/factory");
+const workflow_1 = require("./utils/workflow");
 const default_1 = __importDefault(require("./workflows/default"));
-const { MODEL_NAMES } = mode_1.tree;
 class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
@@ -90,15 +88,7 @@ class Workflow extends entity_1.InMemoryEntity {
         });
     }
     get usedApplications() {
-        const swApplications = this.subworkflows.map((sw) => sw.application);
-        const wfApplications = this.workflowInstances.map((w) => w.usedApplications).flat();
-        const usedApplications = [...swApplications, ...wfApplications].reduce((acc, app) => {
-            if (!acc.some((a) => a.name === app.name)) {
-                acc.push(app);
-            }
-            return acc;
-        }, []);
-        return usedApplications;
+        return (0, workflow_1.getUsedApplications)(this);
     }
     // return application names
     get usedApplicationNames() {
@@ -110,39 +100,33 @@ class Workflow extends entity_1.InMemoryEntity {
     get usedApplicationNamesWithVersions() {
         return this.usedApplications.map((a) => `${a.name} ${a.version}`);
     }
-    get usedModels() {
-        return Array.from(new Set(this.subworkflows.map((sw) => sw.model.type)));
+    getUsedModels() {
+        return (0, workflow_1.getUsedModels)(this);
     }
-    get humanReadableUsedModels() {
-        return this.usedModels.filter((m) => m !== "unknown").map((m) => MODEL_NAMES[m]);
+    getHumanReadableUsedModels() {
+        return (0, workflow_1.getHumanReadableUsedModels)(this);
     }
     toJSON() {
         return {
             ...super.toJSON(),
             name: this.name,
-            properties: this.properties,
+            properties: (0, workflow_1.getProperties)(this),
             units: this.unitInstances.map((x) => x.toJSON()),
             subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
             workflows: this.workflowInstances.map((x) => x.toJSON()),
         };
     }
-    get properties() {
-        return [...new Set(this.subworkflows.map((x) => x.properties || []).flat())];
+    getHumanReadableProperties() {
+        return (0, workflow_1.getHumanReadableProperties)(this);
     }
-    get humanReadableProperties() {
-        return this.properties.map((name) => name
-            .split("_")
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(" "));
+    getProperties() {
+        return (0, workflow_1.getProperties)(this);
     }
-    get systemName() {
-        const applicationNames = this.usedApplications.map((a) => a.name);
-        return (0, slugify_1.default)(`${applicationNames.join(":")}-${this.name.toLowerCase()}`);
+    getSystemName() {
+        return (0, workflow_1.getSystemName)(this);
     }
-    get defaultDescription() {
-        return `${this.usedModels.join(", ").toUpperCase()} workflow using ${this.usedApplications
-            .map((a) => a.name)
-            .join(", ")}.`;
+    getDefaultDescription() {
+        return (0, workflow_1.getDefaultDescription)(this);
     }
     addUnit(unit, head = false, index = -1) {
         const [...unitInstances] = this.unitInstances;

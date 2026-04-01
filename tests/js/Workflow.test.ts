@@ -84,11 +84,11 @@ describe("Workflow", () => {
 
             expect(workflow.usedApplications).to.be.an("array");
             expect(workflow.usedApplicationNames).to.be.an("array");
-            expect(workflow.properties).to.be.an("array");
-            expect(workflow.systemName).to.be.a("string");
-            expect(workflow.systemName.length).to.be.above(0);
-            expect(workflow.defaultDescription).to.be.a("string");
-            expect(workflow.defaultDescription.length).to.be.above(0);
+            expect(workflow.getProperties()).to.be.an("array");
+            expect(workflow.getSystemName()).to.be.a("string");
+            expect(workflow.getSystemName().length).to.be.above(0);
+            expect(workflow.getDefaultDescription()).to.be.a("string");
+            expect(workflow.getDefaultDescription().length).to.be.above(0);
         });
     });
 

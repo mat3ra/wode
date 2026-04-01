@@ -15,10 +15,8 @@ import type {
     SubworkflowSchema,
     WorkflowSchema,
 } from "@mat3ra/esse/dist/js/types";
-import { tree } from "@mat3ra/mode";
 import { setUnitLinks, SubworkflowStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
-import slugify from "slugify";
 
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
@@ -29,9 +27,16 @@ import { type WorkflowSchemaMixin, workflowSchemaMixin } from "./generated/Workf
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit, UnitFactory } from "./units/factory";
+import {
+    getDefaultDescription,
+    getHumanReadableProperties,
+    getHumanReadableUsedModels,
+    getProperties,
+    getSystemName,
+    getUsedApplications,
+    getUsedModels,
+} from "./utils/workflow";
 import defaultWorkflowConfig from "./workflows/default";
-
-const { MODEL_NAMES } = tree;
 
 type Base = typeof InMemoryEntity &
     DefaultableInMemoryEntityConstructor &
@@ -137,17 +142,7 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
     }
 
     get usedApplications(): ApplicationSchema[] {
-        const swApplications = this.subworkflows.map((sw) => sw.application);
-        const wfApplications = this.workflowInstances.map((w) => w.usedApplications).flat();
-
-        const usedApplications = [...swApplications, ...wfApplications].reduce((acc, app) => {
-            if (!acc.some((a) => a.name === app.name)) {
-                acc.push(app);
-            }
-            return acc;
-        }, [] as ApplicationSchema[]);
-
-        return usedApplications;
+        return getUsedApplications(this);
     }
 
     // return application names
@@ -163,47 +158,39 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
         return this.usedApplications.map((a) => `${a.name} ${a.version}`);
     }
 
-    get usedModels() {
-        return Array.from(new Set(this.subworkflows.map((sw) => sw.model.type)));
+    getUsedModels() {
+        return getUsedModels(this);
     }
 
-    get humanReadableUsedModels() {
-        return this.usedModels.filter((m) => m !== "unknown").map((m) => MODEL_NAMES[m]);
+    getHumanReadableUsedModels() {
+        return getHumanReadableUsedModels(this);
     }
 
     toJSON(): WorkflowSchema & AnyObject {
         return {
             ...super.toJSON(),
             name: this.name,
-            properties: this.properties,
+            properties: getProperties(this),
             units: this.unitInstances.map((x) => x.toJSON()),
             subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
             workflows: this.workflowInstances.map((x) => x.toJSON()),
         };
     }
 
-    get properties() {
-        return [...new Set(this.subworkflows.map((x) => x.properties || []).flat())];
+    getHumanReadableProperties() {
+        return getHumanReadableProperties(this);
     }
 
-    get humanReadableProperties() {
-        return this.properties.map((name) =>
-            name
-                .split("_")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-                .join(" "),
-        );
+    getProperties() {
+        return getProperties(this);
     }
 
-    get systemName() {
-        const applicationNames = this.usedApplications.map((a) => a.name);
-        return slugify(`${applicationNames.join(":")}-${this.name.toLowerCase()}`);
+    getSystemName() {
+        return getSystemName(this);
     }
 
-    get defaultDescription() {
-        return `${this.usedModels.join(", ").toUpperCase()} workflow using ${this.usedApplications
-            .map((a) => a.name)
-            .join(", ")}.`;
+    getDefaultDescription() {
+        return getDefaultDescription(this);
     }
 
     private addUnit(unit: AnyWorkflowUnit, head = false, index = -1) {
