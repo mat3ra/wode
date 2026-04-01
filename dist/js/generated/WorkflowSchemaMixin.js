@@ -16,6 +16,12 @@ function workflowSchemaMixin(item) {
         set isUsingDataset(value) {
             this.setProp("isUsingDataset", value);
         },
+        get isMultiMaterial() {
+            return this.prop("isMultiMaterial");
+        },
+        set isMultiMaterial(value) {
+            this.setProp("isMultiMaterial", value);
+        },
         get subworkflows() {
             return this.requiredProp("subworkflows");
         },
@@ -28,11 +34,17 @@ function workflowSchemaMixin(item) {
         set units(value) {
             this.setProp("units", value);
         },
-        get isMultiMaterial() {
-            return this.prop("isMultiMaterial");
+        get application() {
+            return this.prop("application");
         },
-        set isMultiMaterial(value) {
-            this.setProp("isMultiMaterial", value);
+        set application(value) {
+            this.setProp("application", value);
+        },
+        get tags() {
+            return this.prop("tags");
+        },
+        set tags(value) {
+            this.setProp("tags", value);
         },
     };
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));

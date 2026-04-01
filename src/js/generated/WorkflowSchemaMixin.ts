@@ -22,6 +22,12 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set isUsingDataset(value: BaseWorkflowSchema["isUsingDataset"]) {
             this.setProp("isUsingDataset", value);
         },
+        get isMultiMaterial() {
+            return this.prop<BaseWorkflowSchema["isMultiMaterial"]>("isMultiMaterial");
+        },
+        set isMultiMaterial(value: BaseWorkflowSchema["isMultiMaterial"]) {
+            this.setProp("isMultiMaterial", value);
+        },
         get subworkflows() {
             return this.requiredProp<BaseWorkflowSchema["subworkflows"]>("subworkflows");
         },
@@ -34,11 +40,17 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set units(value: BaseWorkflowSchema["units"]) {
             this.setProp("units", value);
         },
-        get isMultiMaterial() {
-            return this.prop<BaseWorkflowSchema["isMultiMaterial"]>("isMultiMaterial");
+        get application() {
+            return this.prop<BaseWorkflowSchema["application"]>("application");
         },
-        set isMultiMaterial(value: BaseWorkflowSchema["isMultiMaterial"]) {
-            this.setProp("isMultiMaterial", value);
+        set application(value: BaseWorkflowSchema["application"]) {
+            this.setProp("application", value);
+        },
+        get tags() {
+            return this.prop<BaseWorkflowSchema["tags"]>("tags");
+        },
+        set tags(value: BaseWorkflowSchema["tags"]) {
+            this.setProp("tags", value);
         },
     };
 

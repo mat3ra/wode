@@ -43,7 +43,7 @@
         "@exabyte-io/eslint-config": "2025.5.13-0",
         "@mat3ra/ade": "git+https://github.com/Exabyte-io/ade#0099ff1695e122c7c95183413ddf42aed809c7e4",
         "@mat3ra/code": "git+https://github.com/Exabyte-io/code.git#c3c9e5eb177fe70b8bc221832b6f9d93104d7e2d",
-        "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse#75ec994043d2dfadfff0c36a23ec9f6fbcf214e4",
+        "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse#c2077b5f7d0f394422926db4b914a5c3b77dd918",
         "@mat3ra/made": "git+https://github.com/Exabyte-io/made.git#75f9a788a20decc18570d6db68e6d83068fab37f",
         "@mat3ra/mode": "git+https://github.com/Exabyte-io/mode.git#6947554976aab835a89e92b98cc2261d1a825539",
         "@mat3ra/standata": "git+https://github.com/Exabyte-io/standata.git#03f6861665ec72045ade00c4d5c91b7d5ab97c24",
