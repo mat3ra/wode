@@ -9,7 +9,7 @@ from mat3ra.mode.model import Model
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field, field_validator
 
-from .convergence import ConvergenceMixin
+from .convergence_mixin import ConvergenceMixin
 from ..mixins import FlowchartUnitsManager
 from ..units import ExecutionUnit, SubworkflowUnit, Unit
 from ..units.builders import build_execution_unit_config

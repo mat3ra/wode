@@ -1,6 +1,6 @@
+from mat3ra.made.lattice import Lattice
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode import Workflow
-from mat3ra.wode.subworkflows.convergence import calculate_reciprocal_vector_ratios_from_lattice_vectors
 
 
 def _build_total_energy_subworkflow():
@@ -96,8 +96,8 @@ def test_add_non_uniform_energy_convergence():
     )
 
 
-def test_calculate_reciprocal_vector_ratios_from_lattice_vectors():
-    ratios = calculate_reciprocal_vector_ratios_from_lattice_vectors(
+def test_lattice_reciprocal_vector_ratios():
+    lattice = Lattice.from_vectors_array(
         [
             [1.0, 0.0, 0.0],
             [0.0, 2.0, 0.0],
@@ -105,7 +105,7 @@ def test_calculate_reciprocal_vector_ratios_from_lattice_vectors():
         ]
     )
 
-    assert ratios == [4.0, 2.0, 1.0]
+    assert lattice.reciprocal_vector_ratios == [1.0, 0.5, 0.25]
 
 
 def test_convergence_series_uses_scope_track():
