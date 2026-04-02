@@ -60,20 +60,16 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         divisor: Optional[int] = None,
     ) -> Dict[str, Any]:
         data = dict(self.default_data)
-        if dimensions is not None:
-            data["dimensions"] = dimensions
-        if shifts is not None:
-            data["shifts"] = shifts
-        if reciprocal_vector_ratios is not None:
-            data["reciprocalVectorRatios"] = reciprocal_vector_ratios
-        if grid_metric_type is not None:
-            data["gridMetricType"] = grid_metric_type
-        if grid_metric_value is not None:
-            data["gridMetricValue"] = grid_metric_value
-        if prefer_grid_metric is not None:
-            data["preferGridMetric"] = prefer_grid_metric
-        if divisor is not None:
-            data["divisor"] = divisor
+        overrides = {
+            "dimensions": dimensions,
+            "shifts": shifts,
+            "reciprocalVectorRatios": reciprocal_vector_ratios,
+            "gridMetricType": grid_metric_type,
+            "gridMetricValue": grid_metric_value,
+            "preferGridMetric": prefer_grid_metric,
+            "divisor": divisor,
+        }
+        data.update({key: value for key, value in overrides.items() if value is not None})
         return data
 
     def yield_data_with_overrides(
@@ -88,9 +84,9 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         divisor: Optional[int] = None,
         is_using_jinja_variables: bool = False,
     ) -> Dict[str, Any]:
-        provider = self.model_copy(
-            update={
-                "data": self.build_data(
+        context = self.yield_data(
+            context={
+                self.name_str: self.build_data(
                     dimensions=dimensions,
                     shifts=shifts,
                     reciprocal_vector_ratios=reciprocal_vector_ratios,
@@ -99,10 +95,9 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
                     prefer_grid_metric=prefer_grid_metric,
                     divisor=divisor,
                 ),
-                "isEdited": True,
+                self.is_edited_key: True,
             }
         )
-        context = provider.yield_data()
         if is_using_jinja_variables:
             context["isUsingJinjaVariables"] = True
         return context
