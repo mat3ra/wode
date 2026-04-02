@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Protocol, cast
 
 from ..units import Unit
 from .convergence.factory import create_convergence_parameter
@@ -6,6 +6,13 @@ from .convergence.factory import create_convergence_parameter
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
 CONVERGENCE_RESULT_TAG = "hasConvergenceResult"
 ENERGY_CONVERGENCE_RESULT = "total_energy"
+
+class ConvergenceHost(Protocol):
+    units: List[Any]
+
+    def find_unit_with_tag(self, tag: str) -> Optional[Any]: ...
+
+    def add_unit(self, unit: Unit, index: Optional[int] = None) -> None: ...
 
 
 class ConvergenceMixin:
@@ -19,12 +26,12 @@ class ConvergenceMixin:
 
     @property
     def convergence_param(self) -> Optional[str]:
-        unit = self.find_unit_with_tag(CONVERGENCE_PARAMETER_TAG)
+        unit = cast(ConvergenceHost, self).find_unit_with_tag(CONVERGENCE_PARAMETER_TAG)
         return getattr(unit, "operand", None) if unit else None
 
     @property
     def convergence_result(self) -> Optional[str]:
-        unit = self.find_unit_with_tag(CONVERGENCE_RESULT_TAG)
+        unit = cast(ConvergenceHost, self).find_unit_with_tag(CONVERGENCE_RESULT_TAG)
         return getattr(unit, "operand", None) if unit else None
 
     @property
@@ -48,7 +55,7 @@ class ConvergenceMixin:
         return series
 
     def _find_unit_for_convergence(self, result: str):
-        for unit in self.units:
+        for unit in cast(ConvergenceHost, self).units:
             for item in getattr(unit, "results", []) or []:
                 item_name = item.get("name") if isinstance(item, dict) else item
                 if item_name == result:
@@ -78,6 +85,9 @@ class ConvergenceMixin:
         tolerance: Any = 1e-5,
         max_occurrences: int = 10,
     ) -> None:
+        # Used for type checking correctness
+        host = cast(ConvergenceHost, self)
+
         if result != ENERGY_CONVERGENCE_RESULT:
             raise ValueError(f"Unsupported convergence result: {result}")
 
@@ -154,14 +164,14 @@ class ConvergenceMixin:
         setattr(condition_unit, "then", exit_unit.flowchartId)
         setattr(condition_unit, "else", store_prev_result.flowchartId)
 
-        self.add_unit(param_init, index=0)
-        self.add_unit(prev_result_init, index=1)
-        self.add_unit(iter_init, index=2)
-        self.add_unit(store_result)
-        self.add_unit(condition_unit)
-        self.add_unit(store_prev_result)
-        self.add_unit(next_iter)
-        self.add_unit(next_step)
-        self.add_unit(exit_unit)
+        host.add_unit(param_init, index=0)
+        host.add_unit(prev_result_init, index=1)
+        host.add_unit(iter_init, index=2)
+        host.add_unit(store_result)
+        host.add_unit(condition_unit)
+        host.add_unit(store_prev_result)
+        host.add_unit(next_iter)
+        host.add_unit(next_step)
+        host.add_unit(exit_unit)
 
         next_step.next = unit_for_convergence.flowchartId
