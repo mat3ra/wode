@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Protocol, cast
 
 from ..units import Unit
+from .convergence.enums import ConvergenceParameterName
 from .convergence.factory import create_convergence_parameter
 
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
@@ -18,7 +19,7 @@ class ConvergenceHost(Protocol):
 class ConvergenceMixin:
     @property
     def scope_variables(self) -> List[str]:
-        return ["N_k", "N_k_nonuniform"]
+        return [parameter_name.value for parameter_name in ConvergenceParameterName]
 
     @property
     def scalar_results(self) -> List[str]:
@@ -87,6 +88,7 @@ class ConvergenceMixin:
     ) -> None:
         # Used for type checking correctness
         host = cast(ConvergenceHost, self)
+        parameter_name = ConvergenceParameterName(parameter)
 
         if result != ENERGY_CONVERGENCE_RESULT:
             raise ValueError(f"Unsupported convergence result: {result}")
@@ -95,7 +97,10 @@ class ConvergenceMixin:
         if unit_for_convergence is None:
             raise ValueError(f"Subworkflow does not contain a unit with '{result}' as an extracted property.")
 
-        if parameter == "N_k_nonuniform" and reciprocal_vector_ratios is None:
+        if parameter_name in (
+            ConvergenceParameterName.N_k_nonuniform,
+            ConvergenceParameterName.N_k_nonuniform_2D,
+        ) and reciprocal_vector_ratios is None:
             reciprocal_vector_ratios = (
                 ((getattr(unit_for_convergence, "context", {}) or {}).get("kgrid") or {}).get("reciprocalVectorRatios")
             )
@@ -103,7 +108,7 @@ class ConvergenceMixin:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 
         param = create_convergence_parameter(
-            name=parameter,
+            name=parameter_name.value,
             initial_value=parameter_initial,
             increment=parameter_increment,
             reciprocal_vector_ratios=reciprocal_vector_ratios,

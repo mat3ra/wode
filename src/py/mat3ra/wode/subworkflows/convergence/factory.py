@@ -1,6 +1,8 @@
 from typing import Any, List, Optional
 
+from .enums import ConvergenceParameterName
 from .non_uniform_kgrid import NonUniformKGridConvergence
+from .non_uniform_kgrid_2d import NonUniformKGridConvergence2D
 from .parameter import ConvergenceParameter
 from .uniform_kgrid import UniformKGridConvergence
 
@@ -11,11 +13,20 @@ def create_convergence_parameter(
     increment: Any,
     reciprocal_vector_ratios: Optional[List[float]] = None,
 ) -> ConvergenceParameter:
-    if name == "N_k":
-        return UniformKGridConvergence(name=name, initial_value=initial_value, increment=increment)
-    if name == "N_k_nonuniform":
+    parameter_name = ConvergenceParameterName(name)
+
+    if parameter_name == ConvergenceParameterName.N_k:
+        return UniformKGridConvergence(name=parameter_name.value, initial_value=initial_value, increment=increment)
+    if parameter_name == ConvergenceParameterName.N_k_nonuniform:
         return NonUniformKGridConvergence(
-            name=name,
+            name=parameter_name.value,
+            initial_value=initial_value,
+            increment=increment,
+            reciprocal_vector_ratios=reciprocal_vector_ratios,
+        )
+    if parameter_name == ConvergenceParameterName.N_k_nonuniform_2D:
+        return NonUniformKGridConvergence2D(
+            name=parameter_name.value,
             initial_value=initial_value,
             increment=increment,
             reciprocal_vector_ratios=reciprocal_vector_ratios,
