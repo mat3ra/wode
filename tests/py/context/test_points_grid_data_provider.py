@@ -1,6 +1,6 @@
 import pytest
-from mat3ra.wode.context.providers import PointsGridDataProvider
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import GridMetricType
+from mat3ra.wode.context.providers import PointsGridDataProvider
 
 # Test data constants
 DIMENSIONS_DEFAULT = [1, 1, 1]
@@ -20,6 +20,18 @@ KGRID_DATA = {
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
     },
     "isKgridEdited": True,
+}
+
+KGRID_TEMPLATE_DATA = {
+    "kgrid": {
+        "dimensions": ["{{N_k}}", "{{N_k}}", "{{N_k}}"],
+        "shifts": SHIFTS_DEFAULT,
+        "divisor": DIVISOR_DEFAULT,
+        "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
+        "reciprocalVectorRatios": [1.0, 0.667, 0.5],
+    },
+    "isKgridEdited": True,
+    "isUsingJinjaVariables": True,
 }
 
 
@@ -72,3 +84,31 @@ def test_points_grid_data_provider_yield_data(init_params, expected_data):
     actual_data = kgrid_context_provider.yield_data()
     assert actual_data == expected_data
 
+
+def test_points_grid_data_provider_get_reciprocal_vector_ratios_from_provider_data():
+    provider = PointsGridDataProvider(reciprocal_vector_ratios=[1.0, 0.667, 0.5])
+
+    assert provider.get_reciprocal_vector_ratios() == [1.0, 0.667, 0.5]
+
+
+def test_points_grid_data_provider_yield_data_with_overrides():
+    provider = PointsGridDataProvider()
+
+    actual_data = provider.yield_data_with_overrides(
+        dimensions=["{{N_k}}", "{{N_k}}", "{{N_k}}"],
+        reciprocal_vector_ratios=[1.0, 0.667, 0.5],
+        is_using_jinja_variables=True,
+    )
+
+    assert actual_data == KGRID_TEMPLATE_DATA
+
+
+def test_points_grid_data_provider_get_reciprocal_vector_ratios_from_context():
+    provider = PointsGridDataProvider(
+        context={
+            "kgrid": {"reciprocalVectorRatios": [1.0, 0.8, 0.6]},
+            "isKgridEdited": True,
+        }
+    )
+
+    assert provider.get_reciprocal_vector_ratios() == [1.0, 0.8, 0.6]
