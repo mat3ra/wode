@@ -10,14 +10,9 @@ class UniformKGridConvergence(ConvergenceParameter):
 
     @property
     def unit_context(self) -> Dict[str, Any]:
-        return {
-            "kgrid": {
-                "dimensions": [f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}"],
-                "shifts": [0, 0, 0],
-            },
-            "isKgridEdited": True,
-            "isUsingJinjaVariables": True,
-        }
+        return self.build_points_grid_context(
+            [f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}"]
+        )
 
     @property
     def final_value(self) -> str:

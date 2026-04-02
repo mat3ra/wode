@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Protocol, cast
 
+from ..context.providers import PointsGridDataProvider
 from ..units import Unit
 from .convergence.enums import ConvergenceParameterName
 from .convergence.factory import create_convergence_parameter
@@ -57,7 +58,7 @@ class ConvergenceMixin:
 
     def _find_unit_for_convergence(self, result: str):
         for unit in cast(ConvergenceHost, self).units:
-            for item in getattr(unit, "results", []) or []:
+            for item in unit.results or []:
                 item_name = item.get("name") if isinstance(item, dict) else item
                 if item_name == result:
                     return unit
@@ -101,9 +102,9 @@ class ConvergenceMixin:
             ConvergenceParameterName.N_k_nonuniform,
             ConvergenceParameterName.N_k_nonuniform_2D,
         ) and reciprocal_vector_ratios is None:
-            reciprocal_vector_ratios = (
-                ((getattr(unit_for_convergence, "context", {}) or {}).get("kgrid") or {}).get("reciprocalVectorRatios")
-            )
+            reciprocal_vector_ratios = PointsGridDataProvider(
+                context=unit_for_convergence.context
+            ).get_reciprocal_vector_ratios()
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 
@@ -115,7 +116,7 @@ class ConvergenceMixin:
         )
 
         merged_context = self._merge_convergence_context(
-            getattr(unit_for_convergence, "context", {}) or {},
+            unit_for_convergence.context,
             param.unit_context,
         )
         unit_for_convergence.set_context(merged_context)

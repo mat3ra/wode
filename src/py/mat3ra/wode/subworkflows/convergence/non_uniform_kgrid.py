@@ -23,22 +23,14 @@ class NonUniformKGridConvergence(ConvergenceParameter):
 
     @property
     def unit_context(self) -> Dict[str, Any]:
-        kgrid_context: Dict[str, Any] = {
-            "dimensions": [
+        return self.build_points_grid_context(
+            dimensions=[
                 f"{{{{{self.name}[0]}}}}",
                 f"{{{{{self.name}[1]}}}}",
                 f"{{{{{self.name}[2]}}}}",
             ],
-            "shifts": [0, 0, 0],
-        }
-        if self._reciprocal_vector_ratios is not None:
-            kgrid_context["reciprocalVectorRatios"] = self._reciprocal_vector_ratios
-
-        return {
-            "kgrid": kgrid_context,
-            "isKgridEdited": True,
-            "isUsingJinjaVariables": True,
-        }
+            reciprocal_vector_ratios=self._reciprocal_vector_ratios,
+        )
 
     def use_variables_from_unit_context(self, flowchart_id: str) -> List[Dict[str, str]]:
         return [{"scope": flowchart_id, "name": "context"}]
