@@ -1,6 +1,6 @@
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { MODEL_NAMES } from "@mat3ra/mode/dist/js/tree";
-import slugify from "slugify";
+import s from "underscore.string";
 
 export function getUsedApplications(workflow: WorkflowSchema): ApplicationSchema[] {
     const swApplications = workflow.subworkflows.map((sw) => sw.application);
@@ -17,8 +17,7 @@ export function getUsedApplications(workflow: WorkflowSchema): ApplicationSchema
 
 export function getSystemName(workflow: WorkflowSchema): string {
     const applicationNames = getUsedApplications(workflow).map((a) => a.name);
-
-    return slugify(`${applicationNames.join(":")}-${workflow.name.toLowerCase()}`);
+    return s.slugify(`${applicationNames.join(":")}-${workflow.name}`);
 }
 
 export function getUsedModels(workflow: WorkflowSchema) {

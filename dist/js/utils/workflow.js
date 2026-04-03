@@ -11,7 +11,7 @@ exports.getProperties = getProperties;
 exports.getHumanReadableProperties = getHumanReadableProperties;
 exports.getHumanReadableUsedModels = getHumanReadableUsedModels;
 const tree_1 = require("@mat3ra/mode/dist/js/tree");
-const slugify_1 = __importDefault(require("slugify"));
+const underscore_string_1 = __importDefault(require("underscore.string"));
 function getUsedApplications(workflow) {
     const swApplications = workflow.subworkflows.map((sw) => sw.application);
     const nestedWorkflows = workflow.workflows;
@@ -25,7 +25,7 @@ function getUsedApplications(workflow) {
 }
 function getSystemName(workflow) {
     const applicationNames = getUsedApplications(workflow).map((a) => a.name);
-    return (0, slugify_1.default)(`${applicationNames.join(":")}-${workflow.name.toLowerCase()}`);
+    return underscore_string_1.default.slugify(`${applicationNames.join(":")}-${workflow.name}`);
 }
 function getUsedModels(workflow) {
     return workflow.subworkflows.map((sw) => sw.model.type);
