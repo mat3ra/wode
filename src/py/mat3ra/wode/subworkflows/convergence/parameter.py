@@ -1,8 +1,6 @@
 import json
 from typing import Any, Dict, List
 
-from ...context.providers import PointsGridDataProvider
-
 
 class ConvergenceParameter:
     def __init__(self, name: str, initial_value: Any, increment: Any):
@@ -27,17 +25,6 @@ class ConvergenceParameter:
     @property
     def final_value(self) -> str:
         return self.name
-
-    @staticmethod
-    def build_points_grid_context(
-        dimensions: List[Any],
-        reciprocal_vector_ratios: Any = None,
-    ) -> Dict[str, Any]:
-        return PointsGridDataProvider().yield_data_with_overrides(
-            dimensions=dimensions,
-            reciprocal_vector_ratios=reciprocal_vector_ratios,
-            is_using_jinja_variables=True,
-        )
 
     def use_variables_from_unit_context(self, flowchart_id: str) -> List[Dict[str, str]]:
         return []

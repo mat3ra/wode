@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
-from .parameter import ConvergenceParameter
+from .uniform_kgrid import UniformKGridConvergence
 
 
-class NonUniformKGridConvergence(ConvergenceParameter):
+class NonUniformKGridConvergence(UniformKGridConvergence):
     def __init__(
         self,
         name: str,
@@ -23,7 +23,7 @@ class NonUniformKGridConvergence(ConvergenceParameter):
 
     @property
     def unit_context(self) -> Dict[str, Any]:
-        return self.build_points_grid_context(
+        return self._points_grid_context(
             dimensions=[
                 f"{{{{{self.name}[0]}}}}",
                 f"{{{{{self.name}[1]}}}}",
