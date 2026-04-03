@@ -31,4 +31,5 @@ def create_convergence_parameter(
             increment=increment,
             reciprocal_vector_ratios=reciprocal_vector_ratios,
         )
-    raise ValueError(f"Unsupported convergence parameter: {name}")
+    else:
+        return ConvergenceParameter(name=parameter_name.value, initial_value=initial_value, increment=increment)

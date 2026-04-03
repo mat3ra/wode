@@ -1,7 +1,7 @@
 from mat3ra.made.lattice import Lattice
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode import Workflow
-from mat3ra.wode.subworkflows.convergence import ConvergenceParameterName
+from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 
 
 def _build_total_energy_subworkflow():
@@ -14,7 +14,7 @@ def test_add_uniform_energy_convergence():
     subworkflow = _build_total_energy_subworkflow()
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterName.N_k,
+        parameter=ConvergenceParameterNameEnum.N_k,
         parameter_initial=1,
         parameter_increment=1,
         result="total_energy",
@@ -44,13 +44,13 @@ def test_add_uniform_energy_convergence():
     assert pw_scf.context["isKgridEdited"] is True
     assert pw_scf.context["isUsingJinjaVariables"] is True
 
-    assert subworkflow.convergence_param == ConvergenceParameterName.N_k.value
+    assert subworkflow.convergence_param == ConvergenceParameterNameEnum.N_k.value
     assert subworkflow.convergence_result == "total_energy"
     assert subworkflow.has_convergence is True
 
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
-    assert update_parameter.operand == ConvergenceParameterName.N_k.value
-    assert update_parameter.value == f"{ConvergenceParameterName.N_k.value} + 1"
+    assert update_parameter.operand == ConvergenceParameterNameEnum.N_k.value
+    assert update_parameter.value == f"{ConvergenceParameterNameEnum.N_k.value} + 1"
     assert update_parameter.next == pw_scf.flowchartId
 
     check_convergence = subworkflow.get_unit_by_name(name="check convergence")
@@ -58,7 +58,7 @@ def test_add_uniform_energy_convergence():
     assert check_convergence.statement == "abs((prev_result-total_energy)/total_energy) < 0.001"
     assert check_convergence.maxOccurrences == 10
 
-    assert subworkflow.find_unit_with_tag("hasConvergenceParam").operand == ConvergenceParameterName.N_k.value
+    assert subworkflow.find_unit_with_tag("hasConvergenceParam").operand == ConvergenceParameterNameEnum.N_k.value
     assert subworkflow.find_unit_with_tag("hasConvergenceResult").operand == "total_energy"
 
 
@@ -67,7 +67,7 @@ def test_add_non_uniform_energy_convergence():
     reciprocal_vector_ratios = [1.0, 1.5, 2.0]
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterName.N_k_nonuniform,
+        parameter=ConvergenceParameterNameEnum.N_k_nonuniform,
         parameter_initial=[2, 2, 1],
         parameter_increment=2,
         reciprocal_vector_ratios=reciprocal_vector_ratios,
@@ -81,14 +81,14 @@ def test_add_non_uniform_energy_convergence():
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
     assert pw_scf.context["kgrid"]["dimensions"] == [
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform.value}[0]}}}}",
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform.value}[1]}}}}",
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform.value}[2]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[0]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[1]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[2]}}}}",
     ]
     assert pw_scf.context["kgrid"]["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
-    assert update_parameter.operand == ConvergenceParameterName.N_k_nonuniform.value
+    assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform.value
     assert update_parameter.input == [{"scope": pw_scf.flowchartId, "name": "context"}]
     assert (
         update_parameter.value
@@ -102,7 +102,7 @@ def test_add_non_uniform_2d_energy_convergence():
     reciprocal_vector_ratios = [1.0, 1.5, 0.25]
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterName.N_k_nonuniform_2D,
+        parameter=ConvergenceParameterNameEnum.N_k_nonuniform_2D,
         parameter_initial=[2, 2, 1],
         parameter_increment=2,
         reciprocal_vector_ratios=reciprocal_vector_ratios,
@@ -116,14 +116,14 @@ def test_add_non_uniform_2d_energy_convergence():
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
     assert pw_scf.context["kgrid"]["dimensions"] == [
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform_2D.value}[0]}}}}",
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform_2D.value}[1]}}}}",
-        f"{{{{{ConvergenceParameterName.N_k_nonuniform_2D.value}[2]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[0]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[1]}}}}",
+        f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[2]}}}}",
     ]
     assert pw_scf.context["kgrid"]["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
-    assert update_parameter.operand == ConvergenceParameterName.N_k_nonuniform_2D.value
+    assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform_2D.value
     assert update_parameter.input == [{"scope": pw_scf.flowchartId, "name": "context"}]
     assert (
         update_parameter.value
@@ -148,7 +148,7 @@ def test_convergence_series_uses_scope_track():
     subworkflow = _build_total_energy_subworkflow()
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterName.N_k,
+        parameter=ConvergenceParameterNameEnum.N_k,
         parameter_initial=1,
         parameter_increment=1,
         result="total_energy",
@@ -157,10 +157,10 @@ def test_convergence_series_uses_scope_track():
     )
 
     scope_track = [
-        {"scope": {"global": {ConvergenceParameterName.N_k.value: 1, "total_energy": -10.0}}},
-        {"scope": {"global": {ConvergenceParameterName.N_k.value: 1, "total_energy": -10.0}}},
-        {"scope": {"global": {ConvergenceParameterName.N_k.value: 2, "total_energy": -10.5}}},
-        {"scope": {"global": {ConvergenceParameterName.N_k.value: 3}}},
+        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 1, "total_energy": -10.0}}},
+        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 1, "total_energy": -10.0}}},
+        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 2, "total_energy": -10.5}}},
+        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 3}}},
     ]
 
     assert subworkflow.convergence_series(scope_track) == [

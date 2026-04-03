@@ -2,12 +2,14 @@ from typing import Any, Dict, List, Optional, Protocol, cast
 
 from ..context.providers import PointsGridDataProvider
 from ..units import Unit
-from .convergence.enums import ConvergenceParameterName
+
+from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 from .convergence.factory import create_convergence_parameter
 
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
 CONVERGENCE_RESULT_TAG = "hasConvergenceResult"
 ENERGY_CONVERGENCE_RESULT = "total_energy"
+
 
 class ConvergenceHost(Protocol):
     units: List[Any]
@@ -20,7 +22,7 @@ class ConvergenceHost(Protocol):
 class ConvergenceMixin:
     @property
     def scope_variables(self) -> List[str]:
-        return [parameter_name.value for parameter_name in ConvergenceParameterName]
+        return [parameter_name.value for parameter_name in ConvergenceParameterNameEnum]
 
     @property
     def scalar_results(self) -> List[str]:
@@ -89,7 +91,7 @@ class ConvergenceMixin:
     ) -> None:
         # Used for type checking correctness
         host = cast(ConvergenceHost, self)
-        parameter_name = ConvergenceParameterName(parameter)
+        parameter_name = ConvergenceParameterNameEnum(parameter)
 
         if result != ENERGY_CONVERGENCE_RESULT:
             raise ValueError(f"Unsupported convergence result: {result}")
@@ -98,10 +100,14 @@ class ConvergenceMixin:
         if unit_for_convergence is None:
             raise ValueError(f"Subworkflow does not contain a unit with '{result}' as an extracted property.")
 
-        if parameter_name in (
-            ConvergenceParameterName.N_k_nonuniform,
-            ConvergenceParameterName.N_k_nonuniform_2D,
-        ) and reciprocal_vector_ratios is None:
+        if (
+            parameter_name
+            in (
+                ConvergenceParameterNameEnum.N_k_nonuniform,
+                ConvergenceParameterNameEnum.N_k_nonuniform_2D,
+            )
+            and reciprocal_vector_ratios is None
+        ):
             reciprocal_vector_ratios = PointsGridDataProvider(
                 context=unit_for_convergence.context
             ).get_reciprocal_vector_ratios()
