@@ -62,13 +62,13 @@ class Subworkflow(
 
     @classmethod
     def from_arguments(
-            cls,
-            application: Application,
-            model: Model,
-            method: Method,
-            name: str,
-            units: Optional[List] = None,
-            config: Optional[dict] = None,
+        cls,
+        application: Application,
+        model: Model,
+        method: Method,
+        name: str,
+        units: Optional[List] = None,
+        config: Optional[dict] = None,
     ) -> "Subworkflow":
         if units is None:
             units = []
