@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from .enums import ConvergenceParameterName
+from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 from .non_uniform_kgrid import NonUniformKGridConvergence
 from .non_uniform_kgrid_2d import NonUniformKGridConvergence2D
 from .parameter import ConvergenceParameter
@@ -13,18 +13,18 @@ def create_convergence_parameter(
     increment: Any,
     reciprocal_vector_ratios: Optional[List[float]] = None,
 ) -> ConvergenceParameter:
-    parameter_name = ConvergenceParameterName(name)
+    parameter_name = ConvergenceParameterNameEnum(name)
 
-    if parameter_name == ConvergenceParameterName.N_k:
+    if parameter_name == ConvergenceParameterNameEnum.N_k:
         return UniformKGridConvergence(name=parameter_name.value, initial_value=initial_value, increment=increment)
-    if parameter_name == ConvergenceParameterName.N_k_nonuniform:
+    if parameter_name == ConvergenceParameterNameEnum.N_k_nonuniform:
         return NonUniformKGridConvergence(
             name=parameter_name.value,
             initial_value=initial_value,
             increment=increment,
             reciprocal_vector_ratios=reciprocal_vector_ratios,
         )
-    if parameter_name == ConvergenceParameterName.N_k_nonuniform_2D:
+    if parameter_name == ConvergenceParameterNameEnum.N_k_nonuniform_2D:
         return NonUniformKGridConvergence2D(
             name=parameter_name.value,
             initial_value=initial_value,
