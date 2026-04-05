@@ -16,6 +16,7 @@ var _enums = require("../enums");
 var _units = require("../units");
 var _utils2 = require("../utils");
 var _convergence = require("./convergence");
+var _enums2 = require("./convergence/enums");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
@@ -231,7 +232,7 @@ class Subworkflow extends BaseSubworkflow {
 
   // eslint-disable-next-line class-methods-use-this
   get scopeVariables() {
-    return ["N_k", "N_k_nonuniform"];
+    return [_enums2.ConvergenceParameterName.N_k, _enums2.ConvergenceParameterName.N_k_nonuniform];
   }
 
   // eslint-disable-next-line class-methods-use-this

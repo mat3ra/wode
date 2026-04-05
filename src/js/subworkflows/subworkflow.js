@@ -14,6 +14,7 @@ import { UNIT_TYPES } from "../enums";
 import { UnitFactory } from "../units";
 import { setNextLinks, setUnitsHead } from "../utils";
 import { ConvergenceMixin } from "./convergence";
+import { ConvergenceParameterName } from "./convergence/enums";
 
 /* eslint max-classes-per-file:0 */
 class BaseSubworkflow extends mix(NamedDefaultableRepetitionImportantSettingsInMemoryEntity).with(
@@ -285,7 +286,7 @@ export class Subworkflow extends BaseSubworkflow {
 
     // eslint-disable-next-line class-methods-use-this
     get scopeVariables() {
-        return ["N_k", "N_k_nonuniform"];
+        return [ConvergenceParameterName.N_k, ConvergenceParameterName.N_k_nonuniform];
     }
 
     // eslint-disable-next-line class-methods-use-this
