@@ -46,7 +46,7 @@ def test_add_uniform_energy_convergence():
     assert pw_scf.context["isKgridEdited"] is True
     assert pw_scf.context["isUsingJinjaVariables"] is True
 
-    assert subworkflow.convergence_param == ConvergenceParameterNameEnum.N_k.value
+    assert subworkflow.convergence_parameter == ConvergenceParameterNameEnum.N_k.value
     assert subworkflow.convergence_result == "total_energy"
     assert subworkflow.has_convergence is True
 
@@ -166,8 +166,8 @@ def test_convergence_series_uses_scope_track():
     ]
 
     assert subworkflow.convergence_series(scope_track) == [
-        {"x": 1, "param": 1, "y": -10.0},
-        {"x": 2, "param": 2, "y": -10.5},
+        {"x": 1, "parameter": 1, "y": -10.0},
+        {"x": 2, "parameter": 2, "y": -10.5},
     ]
 
 
@@ -197,10 +197,10 @@ TEMPLATE_PARAM_TEST_CASES = [
 def test_add_template_param_convergence(param_name, param_initial, param_increment, result_name, original_pattern):
     subworkflow = _build_total_energy_subworkflow()
 
-    subworkflow.add_template_param_convergence(
-        param_name=param_name,
-        param_initial=param_initial,
-        param_increment=param_increment,
+    subworkflow.add_template_parameter_convergence(
+        parameter_name=param_name,
+        parameter_initial=param_initial,
+        parameter_increment=param_increment,
         result_name=result_name,
         tolerance=1e-3,
     )
@@ -225,7 +225,7 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     assert f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}" in template_content
     assert original_pattern not in template_content
 
-    assert subworkflow.convergence_param == param_name
+    assert subworkflow.convergence_parameter == param_name
     assert subworkflow.convergence_result == result_name
     assert subworkflow.has_convergence is True
 
@@ -245,10 +245,10 @@ def test_add_template_param_convergence_multi_unit():
     workflow = Workflow.create(workflow_config)
     subworkflow = workflow.subworkflows[0]
 
-    subworkflow.add_template_param_convergence(
-        param_name="ecutwfc",
-        param_initial=20,
-        param_increment=10,
+    subworkflow.add_template_parameter_convergence(
+        parameter_name="ecutwfc",
+        parameter_initial=20,
+        parameter_increment=10,
         result_name="total_energy",
     )
 
@@ -265,5 +265,5 @@ def test_add_template_param_convergence_multi_unit():
         assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content
         assert "ecutwfc = {{ cutoffs.wavefunction }}" not in template_content
 
-    assert subworkflow.convergence_param == "ecutwfc"
+    assert subworkflow.convergence_parameter == "ecutwfc"
     assert subworkflow.convergence_result == "total_energy"

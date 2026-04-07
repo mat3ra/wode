@@ -30,7 +30,7 @@ class ConvergenceMixin:
         return [ENERGY_CONVERGENCE_RESULT]
 
     @property
-    def convergence_param(self) -> Optional[str]:
+    def convergence_parameter(self) -> Optional[str]:
         unit = cast(ConvergenceHost, self).find_unit_with_tag(CONVERGENCE_PARAMETER_TAG)
         return getattr(unit, "operand", None) if unit else None
 
@@ -41,7 +41,7 @@ class ConvergenceMixin:
 
     @property
     def has_convergence(self) -> bool:
-        return bool(self.convergence_param and self.convergence_result)
+        return bool(self.convergence_parameter and self.convergence_result)
 
     def convergence_series(self, scope_track: Optional[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
         if not self.has_convergence or not scope_track:
@@ -51,12 +51,12 @@ class ConvergenceMixin:
         series: List[Dict[str, Any]] = []
         for scope_item in scope_track:
             global_scope = ((scope_item or {}).get("scope") or {}).get("global") or {}
-            param = global_scope.get(self.convergence_param)
+            parameter = global_scope.get(self.convergence_parameter)
             result = global_scope.get(self.convergence_result)
             is_new_result = result is not None and result != last_result
             last_result = result
             if is_new_result:
-                series.append({"x": len(series) + 1, "param": param, "y": result})
+                series.append({"x": len(series) + 1, "parameter": parameter, "y": result})
         return series
 
     def _find_unit_for_convergence(self, result: str):
@@ -79,11 +79,11 @@ class ConvergenceMixin:
 
     def _build_convergence_units(
         self,
-        param_name: str,
-        param_initial_value: str,
-        param_increment_expr: str,
-        param_final_value: str,
-        param_input: List[Dict[str, str]],
+        parameter_name: str,
+        parameter_initial_value: str,
+        parameter_increment_expr: str,
+        parameter_final_value: str,
+        parameter_input: List[Dict[str, str]],
         result_name: str,
         result_unit_flowchart_id: str,
         execution_unit_flowchart_id: str,
@@ -101,8 +101,8 @@ class ConvergenceMixin:
         param_init = Unit(
             name="init parameter",
             type="assignment",
-            operand=param_name,
-            value=param_initial_value,
+            operand=parameter_name,
+            value=parameter_initial_value,
             tags=[CONVERGENCE_PARAMETER_TAG],
         )
         prev_result_init = Unit(name="init result", type="assignment", operand=prev_result, value=result_initial)
@@ -126,12 +126,12 @@ class ConvergenceMixin:
         next_step = Unit(
             name="update parameter",
             type="assignment",
-            input=param_input,
-            operand=param_name,
-            value=param_increment_expr,
+            input=parameter_input,
+            operand=parameter_name,
+            value=parameter_increment_expr,
             next=execution_unit_flowchart_id,
         )
-        exit_unit = Unit(name="exit", type="assignment", operand=param_name, value=param_final_value)
+        exit_unit = Unit(name="exit", type="assignment", operand=parameter_name, value=parameter_final_value)
         condition_unit = Unit(
             name="check convergence",
             type="condition",
@@ -191,7 +191,7 @@ class ConvergenceMixin:
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 
-        param = create_convergence_parameter(
+        parameter = create_convergence_parameter(
             name=parameter_name.value,
             initial_value=parameter_initial,
             increment=parameter_increment,
@@ -200,16 +200,16 @@ class ConvergenceMixin:
 
         merged_context = self._merge_convergence_context(
             unit_for_convergence.context,
-            param.unit_context,
+            parameter.unit_context,
         )
         unit_for_convergence.set_context(merged_context)
 
         self._build_convergence_units(
-            param_name=param.name,
-            param_initial_value=param.initial_value,
-            param_increment_expr=param.increment,
-            param_final_value=param.final_value,
-            param_input=param.use_variables_from_unit_context(unit_for_convergence.flowchartId),
+            parameter_name=parameter.name,
+            parameter_initial_value=parameter.initial_value,
+            parameter_increment_expr=parameter.increment,
+            parameter_final_value=parameter.final_value,
+            parameter_input=parameter.use_variables_from_unit_context(unit_for_convergence.flowchartId),
             result_name=result,
             result_unit_flowchart_id=unit_for_convergence.flowchartId,
             execution_unit_flowchart_id=unit_for_convergence.flowchartId,
@@ -220,11 +220,11 @@ class ConvergenceMixin:
             max_occurrences=max_occurrences,
         )
 
-    def add_template_param_convergence(
+    def add_template_parameter_convergence(
         self,
-        param_name: str,
-        param_initial: Any,
-        param_increment: Any,
+        parameter_name: str,
+        parameter_initial: Any,
+        parameter_increment: Any,
         result_name: str,
         result_initial: Any = 0,
         condition: Optional[str] = None,
@@ -239,9 +239,9 @@ class ConvergenceMixin:
         execution unit's input template, then delegates to _build_convergence_units.
 
         Args:
-            param_name: Parameter name as it appears in the input template (e.g. "degauss").
-            param_initial: Starting value of the parameter.
-            param_increment: Scalar step added each iteration.
+            parameter_name: Parameter name as it appears in the input template (e.g. "degauss").
+            parameter_initial: Starting value of the parameter.
+            parameter_increment: Scalar step added each iteration.
             result_name: Name of the result property to monitor (must exist in a unit's results).
             result_initial: Seed value for the result before the first iteration.
             condition: Optional custom convergence condition expression.
@@ -258,17 +258,17 @@ class ConvergenceMixin:
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
-        scope_reference = Template.make_raw_scope_reference(param_name)
+        scope_reference = Template.make_raw_scope_reference(parameter_name)
         for execution_unit in execution_units:
-            execution_unit.replace_variable_value_in_inputs(param_name, scope_reference)
-            execution_unit.set_context({**execution_unit.context, param_name: param_initial})
+            execution_unit.replace_variable_value_in_inputs(parameter_name, scope_reference)
+            execution_unit.set_context({**execution_unit.context, parameter_name: parameter_initial})
 
         self._build_convergence_units(
-            param_name=param_name,
-            param_initial_value=param_initial,
-            param_increment_expr=f"{param_name} + {param_increment}",
-            param_final_value=param_name,
-            param_input=[],
+            parameter_name=parameter_name,
+            parameter_initial_value=parameter_initial,
+            parameter_increment_expr=f"{parameter_name} + {parameter_increment}",
+            parameter_final_value=parameter_name,
+            parameter_input=[],
             result_name=result_name,
             result_unit_flowchart_id=result_unit.flowchartId,
             execution_unit_flowchart_id=execution_units[0].flowchartId,
