@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal
 
 from mat3ra.ade import Application, Executable, Flavor, Template
 from mat3ra.code.entity import InMemoryEntitySnakeCase

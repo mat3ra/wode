@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Optional, Protocol, cast
 from mat3ra.ade import Template
 from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 
+from .convergence.factory import create_convergence_parameter
 from ..context.providers import PointsGridDataProvider
 from ..units import Unit
-from .convergence.factory import create_convergence_parameter
 
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
 CONVERGENCE_RESULT_TAG = "hasConvergenceResult"
