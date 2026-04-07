@@ -51,15 +51,6 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             isDefault?: boolean;
             applicationName: string;
             hasAdvancedComputeOptions?: boolean;
-            preProcessors: {
-                name: string;
-            }[];
-            postProcessors: {
-                name: string;
-            }[];
-            monitors: {
-                name: string;
-            }[];
         };
         flavor: {
             _id?: string;

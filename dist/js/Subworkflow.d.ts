@@ -263,15 +263,6 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
             isDefault?: boolean;
             applicationName: string;
             hasAdvancedComputeOptions?: boolean;
-            preProcessors: {
-                name: string;
-            }[];
-            postProcessors: {
-                name: string;
-            }[];
-            monitors: {
-                name: string;
-            }[];
         };
         flavor: {
             _id?: string;
