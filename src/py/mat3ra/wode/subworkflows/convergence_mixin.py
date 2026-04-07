@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, Protocol, cast
 
 from ..context.providers import PointsGridDataProvider
@@ -76,6 +77,84 @@ class ConvergenceMixin:
             merged_context["kgrid"] = merged_kgrid_context
         return merged_context
 
+    def _build_convergence_units(
+        self,
+        param_name: str,
+        param_initial_value: str,
+        param_increment_expr: str,
+        param_final_value: str,
+        param_input: List[Dict[str, str]],
+        result_name: str,
+        result_unit_flowchart_id: str,
+        execution_unit_flowchart_id: str,
+        result_initial: Any = 0,
+        condition: Optional[str] = None,
+        operator: str = "<",
+        tolerance: Any = 1e-5,
+        max_occurrences: int = 10,
+    ) -> None:
+        host = cast(ConvergenceHost, self)
+        prev_result = "prev_result"
+        iteration = "iteration"
+        condition_expression = condition or f"abs(({prev_result}-{result_name})/{result_name})"
+
+        param_init = Unit(
+            name="init parameter",
+            type="assignment",
+            operand=param_name,
+            value=param_initial_value,
+            tags=[CONVERGENCE_PARAMETER_TAG],
+        )
+        prev_result_init = Unit(name="init result", type="assignment", operand=prev_result, value=result_initial)
+        iter_init = Unit(name="init counter", type="assignment", operand=iteration, value=1)
+        store_result = Unit(
+            name="update result",
+            type="assignment",
+            input=[{"scope": result_unit_flowchart_id, "name": result_name}],
+            operand=result_name,
+            value=result_name,
+            tags=[CONVERGENCE_RESULT_TAG],
+        )
+        store_prev_result = Unit(
+            name="store result",
+            type="assignment",
+            input=[{"scope": result_unit_flowchart_id, "name": result_name}],
+            operand=prev_result,
+            value=result_name,
+        )
+        next_iter = Unit(name="update counter", type="assignment", operand=iteration, value=f"{iteration} + 1")
+        next_step = Unit(
+            name="update parameter",
+            type="assignment",
+            input=param_input,
+            operand=param_name,
+            value=param_increment_expr,
+            next=execution_unit_flowchart_id,
+        )
+        exit_unit = Unit(name="exit", type="assignment", operand=param_name, value=param_final_value)
+        condition_unit = Unit(
+            name="check convergence",
+            type="condition",
+            input=[],
+            statement=f"{condition_expression} {operator} {tolerance}",
+            maxOccurrences=max_occurrences,
+            next=store_prev_result.flowchartId,
+        )
+        setattr(condition_unit, "then", exit_unit.flowchartId)
+        setattr(condition_unit, "else", store_prev_result.flowchartId)
+
+        host.add_unit(param_init, index=0)
+        host.add_unit(prev_result_init, index=1)
+        host.add_unit(iter_init, index=2)
+        host.add_unit(store_result)
+        host.add_unit(condition_unit)
+        host.add_unit(store_prev_result)
+        host.add_unit(next_iter)
+        host.add_unit(next_step)
+        host.add_unit(exit_unit)
+
+        next_step.next = execution_unit_flowchart_id
+
     def add_convergence(
         self,
         parameter: str,
@@ -89,8 +168,6 @@ class ConvergenceMixin:
         tolerance: Any = 1e-5,
         max_occurrences: int = 10,
     ) -> None:
-        # Used for type checking correctness
-        host = cast(ConvergenceHost, self)
         parameter_name = ConvergenceParameterNameEnum(parameter)
 
         if result != ENERGY_CONVERGENCE_RESULT:
@@ -127,63 +204,90 @@ class ConvergenceMixin:
         )
         unit_for_convergence.set_context(merged_context)
 
-        prev_result = "prev_result"
-        iteration = "iteration"
-        condition_expression = condition or f"abs(({prev_result}-{result})/{result})"
+        self._build_convergence_units(
+            param_name=param.name,
+            param_initial_value=param.initial_value,
+            param_increment_expr=param.increment,
+            param_final_value=param.final_value,
+            param_input=param.use_variables_from_unit_context(unit_for_convergence.flowchartId),
+            result_name=result,
+            result_unit_flowchart_id=unit_for_convergence.flowchartId,
+            execution_unit_flowchart_id=unit_for_convergence.flowchartId,
+            result_initial=result_initial,
+            condition=condition,
+            operator=operator,
+            tolerance=tolerance,
+            max_occurrences=max_occurrences,
+        )
 
-        param_init = Unit(
-            name="init parameter",
-            type="assignment",
-            operand=param.name,
-            value=param.initial_value,
-            tags=[CONVERGENCE_PARAMETER_TAG],
-        )
-        prev_result_init = Unit(name="init result", type="assignment", operand=prev_result, value=result_initial)
-        iter_init = Unit(name="init counter", type="assignment", operand=iteration, value=1)
-        store_result = Unit(
-            name="update result",
-            type="assignment",
-            input=[{"scope": unit_for_convergence.flowchartId, "name": result}],
-            operand=result,
-            value=result,
-            tags=[CONVERGENCE_RESULT_TAG],
-        )
-        store_prev_result = Unit(
-            name="store result",
-            type="assignment",
-            input=[{"scope": unit_for_convergence.flowchartId, "name": result}],
-            operand=prev_result,
-            value=result,
-        )
-        next_iter = Unit(name="update counter", type="assignment", operand=iteration, value=f"{iteration} + 1")
-        next_step = Unit(
-            name="update parameter",
-            type="assignment",
-            input=param.use_variables_from_unit_context(unit_for_convergence.flowchartId),
-            operand=param.name,
-            value=param.increment,
-            next=unit_for_convergence.flowchartId,
-        )
-        exit_unit = Unit(name="exit", type="assignment", operand=param.name, value=param.final_value)
-        condition_unit = Unit(
-            name="check convergence",
-            type="condition",
-            input=[],
-            statement=f"{condition_expression} {operator} {tolerance}",
-            maxOccurrences=max_occurrences,
-            next=store_prev_result.flowchartId,
-        )
-        setattr(condition_unit, "then", exit_unit.flowchartId)
-        setattr(condition_unit, "else", store_prev_result.flowchartId)
+    def add_template_param_convergence(
+        self,
+        param_name: str,
+        param_initial: Any,
+        param_increment: Any,
+        result_name: str,
+        result_initial: Any = 0,
+        condition: Optional[str] = None,
+        operator: str = "<",
+        tolerance: Any = 1e-3,
+        max_occurrences: int = 10,
+    ) -> None:
+        """
+        Add a convergence loop for an arbitrary template parameter.
 
-        host.add_unit(param_init, index=0)
-        host.add_unit(prev_result_init, index=1)
-        host.add_unit(iter_init, index=2)
-        host.add_unit(store_result)
-        host.add_unit(condition_unit)
-        host.add_unit(store_prev_result)
-        host.add_unit(next_iter)
-        host.add_unit(next_step)
-        host.add_unit(exit_unit)
+        Uses regex substitution to inject the parameter as a runtime scope variable into the
+        execution unit's input template, then delegates to _build_convergence_units.
 
-        next_step.next = unit_for_convergence.flowchartId
+        Args:
+            param_name: Parameter name as it appears in the input template (e.g. "degauss").
+            param_initial: Starting value of the parameter.
+            param_increment: Scalar step added each iteration.
+            result_name: Name of the result property to monitor (must exist in a unit's results).
+            result_initial: Seed value for the result before the first iteration.
+            condition: Optional custom convergence condition expression.
+            operator: Comparison operator for the convergence condition (default "<").
+            tolerance: Convergence threshold.
+            max_occurrences: Maximum number of loop iterations.
+        """
+        host = cast(ConvergenceHost, self)
+        execution_unit = next((u for u in host.units if u.type == "execution"), None)
+        if execution_unit is None:
+            raise ValueError("No execution unit found in subworkflow.")
+
+        result_unit = self._find_unit_for_convergence(result_name)
+        if result_unit is None:
+            raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
+
+        self._inject_template_variable(execution_unit, param_name)
+        execution_unit.set_context({**execution_unit.context, param_name: param_initial})
+
+        self._build_convergence_units(
+            param_name=param_name,
+            param_initial_value=param_initial,
+            param_increment_expr=f"{param_name} + {param_increment}",
+            param_final_value=param_name,
+            param_input=[],
+            result_name=result_name,
+            result_unit_flowchart_id=result_unit.flowchartId,
+            execution_unit_flowchart_id=execution_unit.flowchartId,
+            result_initial=result_initial,
+            condition=condition,
+            operator=operator,
+            tolerance=tolerance,
+            max_occurrences=max_occurrences,
+        )
+
+    @staticmethod
+    def _inject_template_variable(unit, param_name: str) -> None:
+        """Replace a value assignment for param_name in the unit's input template.
+
+        Auto-generates a regex matching either a bare numeric value or an existing Jinja2
+        expression (e.g. `ecutwfc = {{ cutoffs.wavefunction }}`), replacing it with a runtime
+        scope variable wrapped in {%raw%}...{%endraw%} so Jinja2 pre-rendering leaves it intact.
+        """
+        numeric = r"[\d.e+\-]+"
+        jinja_var = r"\{\{[^}]+\}\}"
+        pattern = rf"{param_name}\s*=\s*(?:{numeric}|{jinja_var})"
+        replacement = f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}"
+        for input_item in unit.input:
+            input_item["content"] = re.sub(pattern, replacement, input_item["content"])
