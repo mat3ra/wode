@@ -1,10 +1,10 @@
-import re
 from typing import Any, Dict, List, Optional, Protocol, cast
+
+from mat3ra.ade import Template
+from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 
 from ..context.providers import PointsGridDataProvider
 from ..units import Unit
-
-from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 from .convergence.factory import create_convergence_parameter
 
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
@@ -258,8 +258,9 @@ class ConvergenceMixin:
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
+        scope_reference = Template.make_raw_scope_reference(param_name)
         for execution_unit in execution_units:
-            self._inject_template_variable(execution_unit, param_name)
+            execution_unit.replace_variable_value_in_inputs(param_name, scope_reference)
             execution_unit.set_context({**execution_unit.context, param_name: param_initial})
 
         self._build_convergence_units(
@@ -277,18 +278,3 @@ class ConvergenceMixin:
             tolerance=tolerance,
             max_occurrences=max_occurrences,
         )
-
-    @staticmethod
-    def _inject_template_variable(unit, param_name: str) -> None:
-        """Replace a value assignment for param_name in the unit's input template.
-
-        Auto-generates a regex matching either a bare numeric value or an existing Jinja2
-        expression (e.g. `ecutwfc = {{ cutoffs.wavefunction }}`), replacing it with a runtime
-        scope variable wrapped in {%raw%}...{%endraw%} so Jinja2 pre-rendering leaves it intact.
-        """
-        numeric = r"[\d.e+\-]+"
-        jinja_var = r"\{\{[^}]+\}\}"
-        pattern = rf"{param_name}\s*=\s*(?:{numeric}|{jinja_var})"
-        replacement = f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}"
-        for input_item in unit.input:
-            input_item["content"] = re.sub(pattern, replacement, input_item["content"])
