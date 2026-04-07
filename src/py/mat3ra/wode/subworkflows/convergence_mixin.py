@@ -250,16 +250,17 @@ class ConvergenceMixin:
             max_occurrences: Maximum number of loop iterations.
         """
         host = cast(ConvergenceHost, self)
-        execution_unit = next((u for u in host.units if u.type == "execution"), None)
-        if execution_unit is None:
+        execution_units = [u for u in host.units if u.type == "execution"]
+        if not execution_units:
             raise ValueError("No execution unit found in subworkflow.")
 
         result_unit = self._find_unit_for_convergence(result_name)
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
-        self._inject_template_variable(execution_unit, param_name)
-        execution_unit.set_context({**execution_unit.context, param_name: param_initial})
+        for execution_unit in execution_units:
+            self._inject_template_variable(execution_unit, param_name)
+            execution_unit.set_context({**execution_unit.context, param_name: param_initial})
 
         self._build_convergence_units(
             param_name=param_name,
@@ -269,7 +270,7 @@ class ConvergenceMixin:
             param_input=[],
             result_name=result_name,
             result_unit_flowchart_id=result_unit.flowchartId,
-            execution_unit_flowchart_id=execution_unit.flowchartId,
+            execution_unit_flowchart_id=execution_units[0].flowchartId,
             result_initial=result_initial,
             condition=condition,
             operator=operator,

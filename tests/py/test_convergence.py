@@ -237,3 +237,31 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     exit_unit = subworkflow.get_unit_by_name(name="exit")
     assert exit_unit.operand == param_name
     assert exit_unit.value == param_name
+
+
+def test_add_template_param_convergence_multi_unit():
+    workflow_config = WorkflowStandata.filter_by_application("espresso").get_by_name_first_match("band_structure.json")
+    workflow = Workflow.create(workflow_config)
+    subworkflow = workflow.subworkflows[0]
+
+    subworkflow.add_template_param_convergence(
+        param_name="ecutwfc",
+        param_initial=20,
+        param_increment=10,
+        result_name="total_energy",
+    )
+
+    execution_units = [u for u in subworkflow.units if u.type == "execution"]
+    assert len(execution_units) == 3
+
+    pw_scf = subworkflow.get_unit_by_name("pw_scf")
+    pw_bands = subworkflow.get_unit_by_name("pw_bands")
+
+    for unit in [pw_scf, pw_bands]:
+        assert unit.context["ecutwfc"] == 20
+        template_content = unit.input[0]["content"]
+        assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content
+        assert "ecutwfc = {{ cutoffs.wavefunction }}" not in template_content
+
+    assert subworkflow.convergence_param == "ecutwfc"
+    assert subworkflow.convergence_result == "total_energy"
