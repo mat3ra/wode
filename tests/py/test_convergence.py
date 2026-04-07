@@ -1,7 +1,9 @@
+import pytest
+from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 from mat3ra.made.lattice import Lattice
 from mat3ra.standata.workflows import WorkflowStandata
+
 from mat3ra.wode import Workflow
-from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 
 
 def _build_total_energy_subworkflow():
@@ -167,3 +169,71 @@ def test_convergence_series_uses_scope_track():
         {"x": 1, "param": 1, "y": -10.0},
         {"x": 2, "param": 2, "y": -10.5},
     ]
+
+
+TEMPLATE_PARAM_TEST_CASES = [
+    pytest.param(
+        "degauss",
+        0.001,
+        0.002,
+        "total_energy",
+        "degauss = 0.005",
+        id="degauss_bare_numeric",
+    ),
+    pytest.param(
+        "ecutwfc",
+        20,
+        10,
+        "total_energy",
+        "ecutwfc = {{ cutoffs.wavefunction }}",
+        id="ecutwfc_jinja_expression",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "param_name,param_initial,param_increment,result_name,original_pattern", TEMPLATE_PARAM_TEST_CASES
+)
+def test_add_template_param_convergence(param_name, param_initial, param_increment, result_name, original_pattern):
+    subworkflow = _build_total_energy_subworkflow()
+
+    subworkflow.add_template_param_convergence(
+        param_name=param_name,
+        param_initial=param_initial,
+        param_increment=param_increment,
+        result_name=result_name,
+        tolerance=1e-3,
+    )
+
+    assert [unit.name for unit in subworkflow.units] == [
+        "init parameter",
+        "init result",
+        "init counter",
+        "pw_scf",
+        "update result",
+        "check convergence",
+        "store result",
+        "update counter",
+        "update parameter",
+        "exit",
+    ]
+
+    pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
+    assert pw_scf.context[param_name] == param_initial
+    template_content = pw_scf.input[0]["content"]
+    assert f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}" in template_content
+    assert original_pattern not in template_content
+
+    assert subworkflow.convergence_param == param_name
+    assert subworkflow.convergence_result == result_name
+    assert subworkflow.has_convergence is True
+
+    update_parameter = subworkflow.get_unit_by_name(name="update parameter")
+    assert update_parameter.operand == param_name
+    assert update_parameter.value == f"{param_name} + {param_increment}"
+    assert update_parameter.input == []
+    assert update_parameter.next == pw_scf.flowchartId
+
+    exit_unit = subworkflow.get_unit_by_name(name="exit")
+    assert exit_unit.operand == param_name
+    assert exit_unit.value == param_name
