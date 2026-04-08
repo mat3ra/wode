@@ -1,15 +1,16 @@
-import { Application } from "@mat3ra/ade";
-import { Made } from "@mat3ra/made";
+import type { ApplicationStandata } from "@mat3ra/standata";
+type Instance = InstanceType<typeof ApplicationStandata>;
+type ApplicationsDriver = {
+    getExecutableAndFlavorByName: Instance["getExecutableAndFlavorByName"];
+    getInput: Instance["getInput"];
+};
 declare class GlobalSettings {
     "PointsGridFormDataProvider.defaultKPPRA": number;
-    Material: typeof import("@mat3ra/made").Material;
-    Application: typeof Application;
-    constructor();
     get defaultKPPRA(): number;
-    setApplication(application: typeof Application): void;
-    setMaterial(material: typeof Made.Material): void;
     setDefaultKPPRA(kppra: number): void;
-    resetDefaults(): void;
+    private applicationsDriver;
+    setupApplicationsDriver(driver: ApplicationsDriver): void;
+    getApplicationsDriver(): ApplicationsDriver;
 }
 export declare const globalSettings: GlobalSettings;
 export {};

@@ -9,11 +9,11 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
-import { WorkflowStandata } from "@mat3ra/standata";
+import { ApplicationStandata, WorkflowStandata } from "@mat3ra/standata";
 import { expect } from "chai";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { Subworkflow, Workflow } from "../../src/js";
+import { globalSettings, Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 
 type Base = typeof Material &
@@ -147,6 +147,7 @@ describe("Workflow", () => {
 
     describe("render", () => {
         it("invokes each subworkflow render with spread context and parent workflow", () => {
+            globalSettings.setupApplicationsDriver(new ApplicationStandata());
             const standataWorkflows = new WorkflowStandata().getAll();
             expect(standataWorkflows.length).to.be.above(0);
 

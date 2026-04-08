@@ -3,13 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
 const providers_1 = require("../context/providers");
+const settings_1 = require("../context/providers/settings");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
-const standata = new standata_1.ApplicationStandata();
 class ExecutionUnit extends BaseUnit_1.default {
     constructor(config) {
         var _a;
@@ -25,7 +24,9 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setExecutable({ executable, flavor });
     }
     setExecutable({ executable, flavor }) {
-        const { executable: executablePlain } = standata.getExecutableAndFlavorByName({
+        const { executable: executablePlain } = settings_1.globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
             appName: this.application.name,
             appVersion: this.application.version,
         });
@@ -35,7 +36,9 @@ class ExecutionUnit extends BaseUnit_1.default {
     }
     setFlavor(flavor) {
         const { executable, application } = this;
-        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName({
+        const { flavor: defaultFlavor } = settings_1.globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
             appName: application.name,
             appVersion: application.version,
             execName: executable.name,
@@ -49,7 +52,8 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setDefaultInput();
     }
     setDefaultInput() {
-        this.inputInstances = standata
+        this.inputInstances = settings_1.globalSettings
+            .getApplicationsDriver()
             .getInput(this.flavor)
             .map(ExecutionUnitInput_1.default.createFromTemplate);
     }

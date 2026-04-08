@@ -1,37 +1,34 @@
-import { Application } from "@mat3ra/ade";
-import { Made } from "@mat3ra/made";
+import type { ApplicationStandata } from "@mat3ra/standata";
+
+type Instance = InstanceType<typeof ApplicationStandata>;
+
+type ApplicationsDriver = {
+    getExecutableAndFlavorByName: Instance["getExecutableAndFlavorByName"];
+    getInput: Instance["getInput"];
+};
 
 class GlobalSettings {
     "PointsGridFormDataProvider.defaultKPPRA" = 5;
 
-    Material = Made.Material;
-
-    Application = Application;
-
-    constructor() {
-        this.resetDefaults();
-    }
-
     get defaultKPPRA() {
         return this["PointsGridFormDataProvider.defaultKPPRA"];
-    }
-
-    setApplication(application: typeof Application) {
-        this.Application = application;
-    }
-
-    setMaterial(material: typeof Made.Material) {
-        this.Material = material;
     }
 
     setDefaultKPPRA(kppra: number) {
         this["PointsGridFormDataProvider.defaultKPPRA"] = kppra;
     }
 
-    resetDefaults() {
-        this.Material = Made.Material;
-        this.Application = Application;
-        this["PointsGridFormDataProvider.defaultKPPRA"] = 5;
+    private applicationsDriver: ApplicationsDriver | null = null;
+
+    setupApplicationsDriver(driver: ApplicationsDriver) {
+        this.applicationsDriver = driver;
+    }
+
+    getApplicationsDriver() {
+        if (!this.applicationsDriver) {
+            throw new Error("Wode Applications driver not set");
+        }
+        return this.applicationsDriver;
     }
 }
 

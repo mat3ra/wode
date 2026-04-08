@@ -6,10 +6,10 @@ import type {
     ExecutionUnitSchema,
     FlavorSchema,
 } from "@mat3ra/esse/dist/js/types";
-import { ApplicationStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
 import { type ExternalContext, createProvider } from "../context/providers";
+import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import {
     type ExecutionUnitSchemaMixin,
@@ -26,8 +26,6 @@ type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutable
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 
 type SetExecutableProps = Partial<Pick<Schema, "executable" | "flavor">>;
-
-const standata = new ApplicationStandata();
 
 class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
@@ -54,10 +52,12 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     setExecutable({ executable, flavor }: SetExecutableProps) {
-        const { executable: executablePlain } = standata.getExecutableAndFlavorByName({
-            appName: this.application.name,
-            appVersion: this.application.version,
-        });
+        const { executable: executablePlain } = globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
+                appName: this.application.name,
+                appVersion: this.application.version,
+            });
 
         const finalExecutable = executable || executablePlain;
 
@@ -67,11 +67,13 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
     setFlavor(flavor?: Flavor | FlavorSchema) {
         const { executable, application } = this;
-        const { flavor: defaultFlavor } = standata.getExecutableAndFlavorByName({
-            appName: application.name,
-            appVersion: application.version,
-            execName: executable.name,
-        });
+        const { flavor: defaultFlavor } = globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
+                appName: application.name,
+                appVersion: application.version,
+                execName: executable.name,
+            });
 
         const finalFlavor = flavor || defaultFlavor;
 
@@ -85,7 +87,8 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     setDefaultInput() {
-        this.inputInstances = standata
+        this.inputInstances = globalSettings
+            .getApplicationsDriver()
             .getInput(this.flavor)
             .map(ExecutionUnitInput.createFromTemplate);
     }
