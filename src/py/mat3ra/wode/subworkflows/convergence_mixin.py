@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Protocol, cast
 
-from mat3ra.ade import Template
 from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 
 from .convergence.factory import create_convergence_parameter
@@ -258,10 +257,11 @@ class ConvergenceMixin:
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
-        scope_reference = Template.format_as_scope_reference(parameter_name)
+        # TODO: should come from mat3ra.utils
+        scope_reference = format_as_scope_reference(parameter_name)
         for execution_unit in execution_units:
-            execution_unit.replace_variable_value_in_inputs(parameter_name, scope_reference)
-            execution_unit.set_context({**execution_unit.context, parameter_name: parameter_initial})
+            # TODO: should come from mat3ra.utils
+            execution_unit.input.content = replace_variable_value(parameter_name, scope_reference)
 
         self._build_convergence_units(
             parameter_name=parameter_name,
