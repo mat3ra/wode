@@ -21,7 +21,7 @@ classifiers = [
 dependencies = [
     "numpy",
     "mat3ra-code",
-    "mat3ra-utils @ git+https://github.com/Exabyte-io/utils.git@5f17ac3e7ab242f2c387b5691c8d8cacc6d59f3f",
+    "mat3ra-utils @ git+https://github.com/Exabyte-io/utils.git@704e12d343e01454fe3d7619b1b671b3044f2bd1",
     "mat3ra-esse",
     "mat3ra-mode",
     "mat3ra-ade",
