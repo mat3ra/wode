@@ -9,44 +9,33 @@ from mat3ra.utils import (
     remove_empty_lines_from_string,
     remove_timestampable_keys,
 )
-from pydantic import Field, model_validator
+from pydantic import Field, model_serializer, model_validator
 
 from .unit import Unit
+
+_ITEM_KEYS = {"rendered", "isManuallyChanged"}
 
 
 # TODO: use from ESSE when epic/SOF-7756 merged
 class ExecutionUnitInputItem(InMemoryEntitySnakeCase):
     template: Template = Field(default_factory=Template)
-    rendered: str
+    rendered: str = ""
     isManuallyChanged: bool = False
 
     @model_validator(mode="before")
     @classmethod
-    def handle_legacy_flat_structure(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "name" in data and "content" in data and "template" not in data:
-            template_fields = {
-                k: v
-                for k, v in data.items()
-                if k
-                in [
-                    "_id",
-                    "slug",
-                    "systemName",
-                    "schemaVersion",
-                    "name",
-                    "applicationName",
-                    "applicationVersion",
-                    "executableName",
-                    "contextProviders",
-                    "content",
-                ]
-            }
+    def from_flat(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "template" not in data:
             return {
-                "template": template_fields,
+                "template": {k: v for k, v in data.items() if k not in _ITEM_KEYS},
                 "rendered": data.get("rendered", ""),
                 "isManuallyChanged": data.get("isManuallyChanged", False),
             }
         return data
+
+    @model_serializer(mode="plain")
+    def to_flat(self) -> Dict[str, Any]:
+        return {**self.template.to_dict(), "rendered": self.rendered, "isManuallyChanged": self.isManuallyChanged}
 
 
 class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
