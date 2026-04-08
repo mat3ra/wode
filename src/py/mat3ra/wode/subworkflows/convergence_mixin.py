@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Protocol, cast
 
 from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
+from mat3ra.utils.extra.jinja import JINJA_EXPRESSION_PATTERN, NUMERIC_VALUE_PATTERN, wrap_in_raw_block
 
 from .convergence.factory import create_convergence_parameter
 from ..context.providers import PointsGridDataProvider
@@ -257,11 +258,11 @@ class ConvergenceMixin:
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
-        # TODO: should come from mat3ra.utils
-        scope_reference = format_as_scope_reference(parameter_name)
+        scope_reference = wrap_in_raw_block("{{ " + parameter_name + " }}")
+        pattern = rf"{parameter_name}\s*=\s*(?:{NUMERIC_VALUE_PATTERN}|{JINJA_EXPRESSION_PATTERN})"
         for execution_unit in execution_units:
-            # TODO: should come from mat3ra.utils
-            execution_unit.input.content = replace_variable_value(parameter_name, scope_reference)
+            execution_unit.replace_in_input_content(pattern, f"{parameter_name} = {scope_reference}")
+            execution_unit.add_context({parameter_name: parameter_initial})
 
         self._build_convergence_units(
             parameter_name=parameter_name,

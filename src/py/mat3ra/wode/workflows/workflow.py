@@ -91,6 +91,11 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
         if existing is not None:
             self.remove_subworkflow_by_id(existing.id)
 
+    @classmethod
+    def convergence_series_from_job(cls, finished_job: Dict[str, Any], subworkflow_index: int = 0) -> List[Dict[str, Any]]:
+        workflow = cls.create(finished_job["workflow"])
+        return workflow.subworkflows[subworkflow_index].convergence_series(finished_job.get("scopeTrack"))
+
     def to_dict_without_special_keys(self, special_keys=["context"]) -> Dict[str, Any]:
         workflow_dict = self.to_dict()
         for swf in workflow_dict.get("subworkflows", []):
