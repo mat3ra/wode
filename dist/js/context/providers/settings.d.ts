@@ -1,9 +1,9 @@
 import type { ApplicationStandata } from "@mat3ra/standata";
 type Instance = InstanceType<typeof ApplicationStandata>;
-type ApplicationsDriver = {
+export interface ApplicationsDriver {
     getExecutableAndFlavorByName: Instance["getExecutableAndFlavorByName"];
     getInput: Instance["getInput"];
-};
+}
 declare class GlobalSettings {
     "PointsGridFormDataProvider.defaultKPPRA": number;
     get defaultKPPRA(): number;
