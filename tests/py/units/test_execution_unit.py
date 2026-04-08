@@ -2,12 +2,18 @@ import pytest
 from mat3ra.ade import Template
 from mat3ra.wode.units.execution import ExecutionUnit, ExecutionUnitInputItem
 
-CONTENT_DEGAUSS = "degauss = 0.005\n"
+CONTENT_DEGAUSS_NUMERIC = "degauss = 0.005\n"
 CONTENT_ECUTWFC_JINJA = "ecutwfc = {{ cutoffs.wavefunction }}\n"
-CONTENT_MULTI = "degauss = 0.005\necutwfc = 40\n"
+
+PATTERN_DEGAUSS_NUMERIC = r"degauss\s*=\s*[\d.e+\-]+"
 
 RAW_SCOPE_DEGAUSS = "{% raw %}{{ degauss }}{% endraw %}"
 RAW_SCOPE_ECUTWFC = "{% raw %}{{ ecutwfc }}{% endraw %}"
+
+REPLACEMENT_DEGAUSS_RAW = f"degauss = {RAW_SCOPE_DEGAUSS}"
+
+EXPECTED_DEGAUSS_REPLACED = f"degauss = {RAW_SCOPE_DEGAUSS}\n"
+EXPECTED_ECUTWFC_REPLACED = f"ecutwfc = {RAW_SCOPE_ECUTWFC}\n"
 
 
 def _make_unit(*contents: str) -> ExecutionUnit:
@@ -18,56 +24,37 @@ def _make_unit(*contents: str) -> ExecutionUnit:
     return ExecutionUnit(name="pw_scf", input=inputs)
 
 
-REPLACE_IN_INPUT_CONTENT_CASES = [
-    pytest.param(
-        [CONTENT_DEGAUSS],
-        r"degauss\s*=\s*[\d.e+\-]+",
-        f"degauss = {RAW_SCOPE_DEGAUSS}",
-        [f"degauss = {RAW_SCOPE_DEGAUSS}\n"],
-        id="single_input_numeric",
-    ),
-    pytest.param(
-        [CONTENT_DEGAUSS, CONTENT_ECUTWFC_JINJA],
-        r"degauss\s*=\s*[\d.e+\-]+",
-        f"degauss = {RAW_SCOPE_DEGAUSS}",
-        [f"degauss = {RAW_SCOPE_DEGAUSS}\n", CONTENT_ECUTWFC_JINJA],
-        id="multiple_inputs_only_first_matches",
-    ),
-]
-
-REPLACE_VARIABLE_VALUE_IN_INPUTS_CASES = [
-    pytest.param(
-        [CONTENT_DEGAUSS],
-        "degauss",
-        RAW_SCOPE_DEGAUSS,
-        [f"degauss = {RAW_SCOPE_DEGAUSS}\n"],
-        id="bare_numeric",
-    ),
-    pytest.param(
-        [CONTENT_ECUTWFC_JINJA],
-        "ecutwfc",
-        RAW_SCOPE_ECUTWFC,
-        [f"ecutwfc = {RAW_SCOPE_ECUTWFC}\n"],
-        id="jinja_expression",
-    ),
-    pytest.param(
-        [CONTENT_DEGAUSS, CONTENT_ECUTWFC_JINJA],
-        "degauss",
-        RAW_SCOPE_DEGAUSS,
-        [f"degauss = {RAW_SCOPE_DEGAUSS}\n", CONTENT_ECUTWFC_JINJA],
-        id="multi_input_partial_match",
-    ),
-]
-
-
-@pytest.mark.parametrize("contents,pattern,replacement,expected_contents", REPLACE_IN_INPUT_CONTENT_CASES)
+@pytest.mark.parametrize(
+    "contents,pattern,replacement,expected_contents",
+    [
+        ([CONTENT_DEGAUSS_NUMERIC], PATTERN_DEGAUSS_NUMERIC, REPLACEMENT_DEGAUSS_RAW, [EXPECTED_DEGAUSS_REPLACED]),
+        (
+            [CONTENT_DEGAUSS_NUMERIC, CONTENT_ECUTWFC_JINJA],
+            PATTERN_DEGAUSS_NUMERIC,
+            REPLACEMENT_DEGAUSS_RAW,
+            [EXPECTED_DEGAUSS_REPLACED, CONTENT_ECUTWFC_JINJA],
+        ),
+    ],
+)
 def test_replace_in_input_content(contents, pattern, replacement, expected_contents):
     unit = _make_unit(*contents)
     unit.replace_in_input_content(pattern, replacement)
     assert [item.template.content for item in unit.input] == expected_contents
 
 
-@pytest.mark.parametrize("contents,variable_name,new_value,expected_contents", REPLACE_VARIABLE_VALUE_IN_INPUTS_CASES)
+@pytest.mark.parametrize(
+    "contents,variable_name,new_value,expected_contents",
+    [
+        ([CONTENT_DEGAUSS_NUMERIC], "degauss", RAW_SCOPE_DEGAUSS, [EXPECTED_DEGAUSS_REPLACED]),
+        ([CONTENT_ECUTWFC_JINJA], "ecutwfc", RAW_SCOPE_ECUTWFC, [EXPECTED_ECUTWFC_REPLACED]),
+        (
+            [CONTENT_DEGAUSS_NUMERIC, CONTENT_ECUTWFC_JINJA],
+            "degauss",
+            RAW_SCOPE_DEGAUSS,
+            [EXPECTED_DEGAUSS_REPLACED, CONTENT_ECUTWFC_JINJA],
+        ),
+    ],
+)
 def test_replace_variable_value_in_inputs(contents, variable_name, new_value, expected_contents):
     unit = _make_unit(*contents)
     unit.replace_variable_value_in_inputs(variable_name, new_value)

@@ -258,7 +258,7 @@ class ConvergenceMixin:
         if result_unit is None:
             raise ValueError(f"No unit with result '{result_name}' found in subworkflow.")
 
-        scope_reference = Template.make_raw_scope_reference(parameter_name)
+        scope_reference = Template.format_as_scope_reference(parameter_name)
         for execution_unit in execution_units:
             execution_unit.replace_variable_value_in_inputs(parameter_name, scope_reference)
             execution_unit.set_context({**execution_unit.context, parameter_name: parameter_initial})
