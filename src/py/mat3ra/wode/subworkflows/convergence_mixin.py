@@ -227,6 +227,7 @@ class ConvergenceMixin:
         parameter_increment: Any,
         result_name: str,
         result_initial: Any = 0,
+        input_name: Optional[str] = None,
         condition: Optional[str] = None,
         operator: str = "<",
         tolerance: Any = 1e-3,
@@ -244,6 +245,7 @@ class ConvergenceMixin:
             parameter_increment: Scalar step added each iteration.
             result_name: Name of the result property to monitor (must exist in a unit's results).
             result_initial: Seed value for the result before the first iteration.
+            input_name: Name of the input to target for parameter injection (if None, all inputs will be targeted).
             condition: Optional custom convergence condition expression.
             operator: Comparison operator for the convergence condition (default "<").
             tolerance: Convergence threshold.
@@ -261,7 +263,9 @@ class ConvergenceMixin:
         scope_reference = wrap_text_in_raw_block("{{ " + parameter_name + " }}")
         pattern = rf"{parameter_name}\s*=\s*(?:{NUMERIC_VALUE_PATTERN}|{JINJA_EXPRESSION_PATTERN})"
         for execution_unit in execution_units:
-            execution_unit.replace_in_input_content(pattern, f"{parameter_name} = {scope_reference}")
+            execution_unit.replace_in_input_content(
+                pattern, f"{parameter_name} = {scope_reference}", input_name=input_name
+            )
             execution_unit.add_context({parameter_name: parameter_initial})
 
         self._build_convergence_units(
