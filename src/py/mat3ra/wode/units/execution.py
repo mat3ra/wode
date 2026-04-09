@@ -21,9 +21,9 @@ class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
     application: Application = None
     input: List = Field(default_factory=list)
 
-    def replace_in_input_content(self, pattern: str, replacement: str) -> None:
+    def replace_in_input_content(self, pattern: str, replacement: str, input_name=None) -> None:
         for item in self.input:
-            if isinstance(item, dict) and "content" in item:
+            if isinstance(item, dict) and "content" in item and (input_name is None or item.get("name") == input_name):
                 item["content"] = replace_in_text(item["content"], pattern, replacement)
 
     def get_hash_object(self) -> Dict[str, Any]:
