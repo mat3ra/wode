@@ -54,6 +54,8 @@ export type WorkflowRenderContext = MaterialExternalContext &
 export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema {
     static readonly defaultConfig = defaultWorkflowConfig;
 
+    declare _json: WorkflowSchema & AnyObject;
+
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow");
     }

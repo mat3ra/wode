@@ -21,6 +21,7 @@ export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalC
 declare const Workflow_base: Base;
 export declare class Workflow extends Workflow_base implements WorkflowSchema {
     static readonly defaultConfig: WorkflowSchema;
+    _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     subworkflowInstances: Subworkflow[];
     private unitInstances;
