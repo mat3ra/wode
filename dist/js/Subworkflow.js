@@ -226,6 +226,54 @@ class Subworkflow extends entity_1.InMemoryEntity {
             };
         });
     }
+    updateMethodData(materials, metaProperties) {
+        const method = this.modelInstance.Method;
+        const { model } = this;
+        const uniqueElements = [...new Set(materials.map((m) => m.uniqueElements).flat())];
+        const appName = this.application.name;
+        const methodDataItems = metaProperties
+            .filter((metaProperty) => {
+            return (
+            // @ts-ignore TODO: fix types
+            uniqueElements.includes(metaProperty.data.element) &&
+                metaProperty.data.apps.includes(appName));
+        })
+            .map((metaProperty) => metaProperty.property);
+        if (!(method instanceof mode_1.PseudopotentialMethod) || !methodDataItems.length) {
+            return;
+        }
+        const filters = {
+            appName,
+            exchangeCorrelation: {
+                approximation: model.subtype,
+                functional: "functional" in model ? model.functional : undefined,
+            },
+        };
+        // We cycle materials in reverse order below b/c of render(),
+        // since the default state index is zero, the last material thus corresponds to index 0.
+        // Without reversing, context providers in workflow consider material as changed when any update to the workflow
+        // is triggered.
+        // TODO: figure out how to simplify or remove the need for the above
+        (materials || [])
+            .concat()
+            .reverse()
+            .forEach((material) => {
+            // updates methodData & overwrites method in subworkflow.model
+            method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                elements: material.uniqueElements,
+                ...filters,
+            });
+            this.modelInstance.setMethod(method);
+        });
+        // TODO: Try if/else instead of running both
+        if (materials.length > 1) {
+            method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                elements: uniqueElements,
+                ...filters,
+            });
+            this.modelInstance.setMethod(method);
+        }
+    }
     addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }) {
         // Find unit to converge: should contain passed result in its results list
         // TODO: make user to select unit for convergence explicitly

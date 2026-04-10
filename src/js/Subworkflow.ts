@@ -11,7 +11,9 @@ import {
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
-import { Model, ModelFactory } from "@mat3ra/mode";
+import type { Material } from "@mat3ra/made";
+import { Model, ModelFactory, PseudopotentialMethod } from "@mat3ra/mode";
+import type { MetaPropertyHolder } from "@mat3ra/prode";
 import { setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -317,6 +319,63 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
                     y: item.y,
                 };
             });
+    }
+
+    updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]) {
+        const method = this.modelInstance.Method;
+        const { model } = this;
+        const uniqueElements = [...new Set(materials.map((m) => m.uniqueElements).flat())];
+        const appName = this.application.name;
+
+        const methodDataItems = metaProperties
+            .filter((metaProperty) => {
+                return (
+                    // @ts-ignore TODO: fix types
+                    uniqueElements.includes(metaProperty.data.element) &&
+                    metaProperty.data.apps.includes(appName)
+                );
+            })
+            .map((metaProperty) => metaProperty.property);
+
+        if (!(method instanceof PseudopotentialMethod) || !methodDataItems.length) {
+            return;
+        }
+
+        const filters = {
+            appName,
+            exchangeCorrelation: {
+                approximation: model.subtype,
+                functional: "functional" in model ? model.functional : undefined,
+            },
+        };
+
+        // We cycle materials in reverse order below b/c of render(),
+        // since the default state index is zero, the last material thus corresponds to index 0.
+        // Without reversing, context providers in workflow consider material as changed when any update to the workflow
+        // is triggered.
+        // TODO: figure out how to simplify or remove the need for the above
+        (materials || [])
+            .concat()
+            .reverse()
+            .forEach((material) => {
+                // updates methodData & overwrites method in subworkflow.model
+                method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                    elements: material.uniqueElements,
+                    ...filters,
+                });
+
+                this.modelInstance.setMethod(method);
+            });
+
+        // TODO: Try if/else instead of running both
+        if (materials.length > 1) {
+            method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                elements: uniqueElements,
+                ...filters,
+            });
+
+            this.modelInstance.setMethod(method);
+        }
     }
 
     addConvergence({

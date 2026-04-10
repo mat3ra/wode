@@ -4,6 +4,8 @@ import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type { Material } from "@mat3ra/made";
+import type { MetaPropertyHolder } from "@mat3ra/prode";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
@@ -34,6 +36,7 @@ export declare class Workflow extends Workflow_base implements WorkflowSchema {
     get workflows(): WorkflowSchema[];
     set workflows(value: WorkflowSchema[]);
     addSubworkflow(subworkflow: Subworkflow, head?: boolean, index?: number): void;
+    updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]): void;
     removeSubworkflow(id: string): void;
     setUnits(arr: AnyWorkflowUnit[]): void;
     render(context: WorkflowRenderContext): void;

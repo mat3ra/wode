@@ -15,6 +15,8 @@ import type {
     SubworkflowSchema,
     WorkflowSchema,
 } from "@mat3ra/esse/dist/js/types";
+import type { Material } from "@mat3ra/made";
+import type { MetaPropertyHolder } from "@mat3ra/prode";
 import { setUnitLinks, SubworkflowStandata } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -118,6 +120,12 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
             this.subworkflowInstances.push(subworkflow);
             this.addUnit(subworkflowUnit, head, index);
         }
+    }
+
+    updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]) {
+        this.subworkflowInstances.forEach((sw) => {
+            sw.updateMethodData(materials, metaProperties);
+        });
     }
 
     removeSubworkflow(id: string) {

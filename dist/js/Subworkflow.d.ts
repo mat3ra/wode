@@ -5,7 +5,9 @@ import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory } from "@mat3ra/mode";
+import type { MetaPropertyHolder } from "@mat3ra/prode";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
 import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
 import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
@@ -671,6 +673,7 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
         param: any;
         y: any;
     }[];
+    updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]): void;
     addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }: ConvergenceConfig): void;
 }
 export {};

@@ -70,6 +70,11 @@ class Workflow extends entity_1.InMemoryEntity {
             this.addUnit(subworkflowUnit, head, index);
         }
     }
+    updateMethodData(materials, metaProperties) {
+        this.subworkflowInstances.forEach((sw) => {
+            sw.updateMethodData(materials, metaProperties);
+        });
+    }
     removeSubworkflow(id) {
         const subworkflowUnit = this.unitInstances.find((u) => u.id === id);
         if (subworkflowUnit) {
