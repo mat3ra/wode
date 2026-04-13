@@ -62,9 +62,9 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
 
     subworkflowInstances: Subworkflow[];
 
-    private unitInstances!: AnyWorkflowUnit[];
+    unitInstances!: AnyWorkflowUnit[];
 
-    private workflowInstances: Workflow[];
+    workflowInstances: Workflow[];
 
     repetition = 0;
 

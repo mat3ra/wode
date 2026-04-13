@@ -24,8 +24,8 @@ export declare class Workflow extends Workflow_base implements WorkflowSchema {
     _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     subworkflowInstances: Subworkflow[];
-    private unitInstances;
-    private workflowInstances;
+    unitInstances: AnyWorkflowUnit[];
+    workflowInstances: Workflow[];
     repetition: number;
     totalRepetitions: number;
     setTotalRepetitions(totalRepetition: number): void;
