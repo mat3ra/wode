@@ -20,7 +20,7 @@ export default class QENEBInputDataManager extends QENEBInputDataManager_base {
     readonly entityName: "unit";
     isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QENEBInputDataManager;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): Data;
 }

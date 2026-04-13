@@ -11,7 +11,7 @@ export default class PlanewaveCutoffDataManager extends PlanewaveCutoffDataManag
     readonly name: "cutoffs";
     readonly domain: "important";
     readonly entityName: "subworkflow";
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     readonly uiSchema: {
         readonly wavefunction: {};
         readonly density: {};

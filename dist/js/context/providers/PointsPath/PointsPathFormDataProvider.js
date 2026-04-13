@@ -45,7 +45,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         }
     }
     get jsonSchema() {
-        return JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.point": {
                 default: defaultPoint,
                 enum: this.reciprocalLattice.symmetryPoints.map((x) => x.point),
@@ -54,6 +54,10 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
                 default: defaultSteps,
             },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        return jsonSchema;
     }
     setData(path) {
         const rawData = path.map((pathItem) => {

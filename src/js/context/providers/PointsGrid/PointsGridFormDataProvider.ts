@@ -80,7 +80,7 @@ export default abstract class PointsGridFormDataProvider<
         value: number;
     };
 
-    abstract readonly jsonSchema: JSONSchema7 | undefined;
+    abstract readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);

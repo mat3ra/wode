@@ -21,7 +21,11 @@ class VASPInputDataManager extends JSONSchemaDataProvider_1.default {
         this.isEdited = false;
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
-        this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     // eslint-disable-next-line class-methods-use-this
     buildVASPContext(material) {

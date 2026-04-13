@@ -1,6 +1,7 @@
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
+import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type {
     PathContextItemSchema,
     PointsPathDataProviderSchema,
@@ -82,8 +83,8 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
         }
     }
 
-    get jsonSchema() {
-        return JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+    get jsonSchema(): JSONSchema {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.point": {
                 default: defaultPoint,
                 enum: this.reciprocalLattice.symmetryPoints.map((x) => x.point),
@@ -92,6 +93,12 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
                 default: defaultSteps,
             },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        return jsonSchema;
     }
 
     setData(path: Data) {

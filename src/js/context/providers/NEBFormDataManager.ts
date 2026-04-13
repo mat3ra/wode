@@ -32,16 +32,22 @@ export default class NEBFormDataManager extends JSONSchemaFormDataProvider<Schem
         nImages: {},
     } as const;
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     readonly extraData = {};
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             nImages: { default: defaultData.nImages },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     // eslint-disable-next-line class-methods-use-this

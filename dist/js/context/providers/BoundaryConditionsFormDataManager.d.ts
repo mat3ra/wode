@@ -1,4 +1,5 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type { BoundaryConditionsContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
@@ -25,6 +26,6 @@ export default class BoundaryConditionsFormDataManager extends BoundaryCondition
     };
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): Schema["data"];
-    get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
+    get jsonSchema(): JSONSchema;
 }
 export {};

@@ -29,7 +29,7 @@ export default class MLSettingsDataManager extends (JSONSchemaDataProvider as Ba
         return new MLSettingsDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     readonly uiSchema = {
         target_column_name: {},
@@ -41,10 +41,16 @@ export default class MLSettingsDataManager extends (JSONSchemaDataProvider as Ba
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             target_column_name: { default: defaultData.target_column_name },
             problem_category: { default: defaultData.problem_category },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     // eslint-disable-next-line class-methods-use-this

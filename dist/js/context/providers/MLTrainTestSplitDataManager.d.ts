@@ -11,7 +11,7 @@ export default class MLTrainTestSplitDataManager extends MLTrainTestSplitDataMan
     readonly domain: "important";
     readonly entityName: "unit";
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): MLTrainTestSplitDataManager;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     readonly uiSchema: {
         readonly target_column_name: {};
         readonly problem_category: {};

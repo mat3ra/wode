@@ -15,7 +15,7 @@ export default class IonDynamicsDataManager extends JSONSchemaFormDataProvider<S
         readonly temperature: {};
     };
     readonly extraData: {};
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: BaseExternalContext);
     getDefaultData(): {
         numberOfSteps: number;

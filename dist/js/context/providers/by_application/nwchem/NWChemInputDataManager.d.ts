@@ -18,7 +18,7 @@ export default class NWChemInputDataManager extends NWChemInputDataManager_base 
     isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): NWChemInputDataManager;
     readonly contextProviderName: "nwchem-total-energy";
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): {
         CHARGE: number;

@@ -39,7 +39,7 @@ export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
     job?: Pick<JobSchema, "parent">;
     workflow: Workflow;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QEPWXInputDataManager;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     private buildQEPWXContext;
     getDefaultData(): {

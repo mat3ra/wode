@@ -37,10 +37,14 @@ class PlanewaveCutoffDataManager extends ContextProvider_1.default {
         this.extraData = {};
         this.initApplicationContextMixin(externalContext);
         const { wavefunction, density } = this.getDefaultData();
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             wavefunction: { default: wavefunction },
             density: { default: density },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         const applicationName = this.application.name;

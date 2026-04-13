@@ -10,7 +10,11 @@ class IGridFormDataManager extends PointsGridFormDataProvider_1.default {
         super(contextItem, externalContext);
         this.name = "igrid";
         this.divisor = 0.2;
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     static createFromUnitContext(unitContext, externalContext) {
         const contextItem = this.findContextItem(unitContext, "igrid");

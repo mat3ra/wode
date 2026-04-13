@@ -44,12 +44,16 @@ class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider_1.default
     // }
     get jsonSchema() {
         const defaults = this.getDefaultData();
-        return JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             type: { default: defaults.type },
             offset: { default: defaults.offset },
             electricField: { default: defaults.electricField },
             targetFermiEnergy: { default: defaults.targetFermiEnergy },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        return jsonSchema;
     }
 }
 exports.default = BoundaryConditionsFormDataManager;

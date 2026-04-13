@@ -13,7 +13,7 @@ export default class NEBFormDataManager extends JSONSchemaFormDataProvider<Schem
     readonly uiSchema: {
         readonly nImages: {};
     };
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     readonly extraData: {};
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): {

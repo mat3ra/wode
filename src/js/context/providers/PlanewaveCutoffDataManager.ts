@@ -44,7 +44,7 @@ export default class PlanewaveCutoffDataManager extends (ContextProvider as Base
 
     readonly entityName = "subworkflow" as const;
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     readonly uiSchema = {
         wavefunction: {},
@@ -68,10 +68,16 @@ export default class PlanewaveCutoffDataManager extends (ContextProvider as Base
 
         const { wavefunction, density } = this.getDefaultData();
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             wavefunction: { default: wavefunction },
             density: { default: density },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData() {

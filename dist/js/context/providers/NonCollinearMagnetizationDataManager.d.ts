@@ -20,7 +20,7 @@ export default class NonCollinearMagnetizationDataManager extends NonCollinearMa
     readonly isArbitrarySpinDirection: boolean;
     readonly isFixedMagnetization: boolean;
     readonly constrainedMagnetization: Data["constrainedMagnetization"];
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     private readonly uniqueElementsWithLabels;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): Data;

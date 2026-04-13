@@ -41,12 +41,12 @@ export default class HubbardUContextManager extends HubbardContextProvider<Schem
         },
     } as const;
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: HubbardExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.atomicSpecies": {
                 enum: this.uniqueElementsWithLabels,
                 default: this.firstElement,
@@ -59,6 +59,12 @@ export default class HubbardUContextManager extends HubbardContextProvider<Schem
                 default: defaultHubbardConfig.hubbardUValue,
             },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData(): Data {

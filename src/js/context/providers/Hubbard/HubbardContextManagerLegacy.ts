@@ -33,7 +33,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
         return new HubbardContextManagerLegacy(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     readonly uiSchemaStyled = {
         "ui:options": {
@@ -49,7 +49,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
     constructor(contextItem: Partial<Schema>, externalContext: HubbardExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.atomicSpecies": {
                 enum: this.uniqueElementsWithLabels,
             },
@@ -57,6 +57,12 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
                 default: defaultHubbardConfig.hubbardUValue,
             },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData(): Data {

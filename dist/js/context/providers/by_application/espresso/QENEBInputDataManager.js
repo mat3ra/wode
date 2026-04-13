@@ -24,7 +24,11 @@ class QENEBInputDataManager extends JSONSchemaDataProvider_1.default {
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
         this.initMaterialsSetContextMixin(externalContext);
-        this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         const PWXContexts = this.sortMaterialsByIndexInSet(this.materials).map((material) => {

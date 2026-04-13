@@ -30,7 +30,7 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.default
         this.firstElement =
             ((_c = this.uniqueElementsWithLabels) === null || _c === void 0 ? void 0 : _c.length) > 0 ? this.uniqueElementsWithLabels[0] : "";
         this.isTotalMagnetization = ((_d = this.data) === null || _d === void 0 ? void 0 : _d.isTotalMagnetization) || false;
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             "properties.startingMagnetization": {
                 maxItems: this.uniqueElementsWithLabels.length,
             },
@@ -48,6 +48,10 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.default
                 default: defaultData.totalMagnetization,
             },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         return {

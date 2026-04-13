@@ -15,7 +15,7 @@ export default class HubbardVContextManager extends HubbardContextProvider<Schem
             readonly removable: true;
         };
     };
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: HubbardExternalContext);
     getDefaultData(): Data;
 }

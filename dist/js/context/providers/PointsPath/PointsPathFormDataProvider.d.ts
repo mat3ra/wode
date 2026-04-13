@@ -1,4 +1,5 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type { PathContextItemSchema, PointsPathDataProviderSchema } from "@mat3ra/esse/dist/js/types";
 import { type ApplicationContextMixin, type ApplicationExternalContext } from "../../mixins/ApplicationContextMixin";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../mixins/MaterialContextMixin";
@@ -23,7 +24,7 @@ declare abstract class PointsPathFormDataProvider<N extends Schema["name"]> exte
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): Data;
     updateMaterialHash(): void;
-    get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
+    get jsonSchema(): JSONSchema;
     setData(path: Data): void;
     private convertToExplicitPath;
 }

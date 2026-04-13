@@ -28,7 +28,7 @@ export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider
         return new MLTrainTestSplitDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     readonly uiSchema = {
         target_column_name: {},
@@ -40,9 +40,15 @@ export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             fraction_held_as_test_set: { default: defaultData.fraction_held_as_test_set },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     // eslint-disable-next-line class-methods-use-this

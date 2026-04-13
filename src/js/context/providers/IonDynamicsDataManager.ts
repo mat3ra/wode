@@ -38,17 +38,23 @@ export default class IonDynamicsDataManager extends JSONSchemaFormDataProvider<S
 
     readonly extraData = {};
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: BaseExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             numberOfSteps: { default: defaultData.numberOfSteps },
             timeStep: { default: defaultData.timeStep },
             electronMass: { default: defaultData.electronMass },
             temperature: { default: defaultData.temperature },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     // eslint-disable-next-line class-methods-use-this

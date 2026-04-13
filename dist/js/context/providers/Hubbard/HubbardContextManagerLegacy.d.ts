@@ -9,7 +9,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
     readonly domain: "important";
     readonly entityName: "unit";
     static createFromUnitContext(unitContext: UnitContext, externalContext: HubbardExternalContext): HubbardContextManagerLegacy;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     readonly uiSchemaStyled: {
         readonly "ui:options": {
             readonly addable: true;

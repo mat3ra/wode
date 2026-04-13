@@ -64,7 +64,7 @@ export default class NonCollinearMagnetizationDataManager extends (JSONSchemaDat
 
     readonly constrainedMagnetization: Data["constrainedMagnetization"];
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     private readonly uniqueElementsWithLabels: string[];
 
@@ -85,7 +85,7 @@ export default class NonCollinearMagnetizationDataManager extends (JSONSchemaDat
             ...new Set(this.material?.Basis?.elementsWithLabelsArray || []),
         ];
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             isExistingChargeDensity: { default: defaultData.isExistingChargeDensity },
             isStartingMagnetization: { default: defaultData.isStartingMagnetization },
             isArbitrarySpinAngle: { default: defaultData.isArbitrarySpinAngle },
@@ -114,6 +114,12 @@ export default class NonCollinearMagnetizationDataManager extends (JSONSchemaDat
             "fixedMagnetization.properties.y": { default: defaultData.fixedMagnetizationY },
             "fixedMagnetization.properties.z": { default: defaultData.fixedMagnetizationZ },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData(): Data {

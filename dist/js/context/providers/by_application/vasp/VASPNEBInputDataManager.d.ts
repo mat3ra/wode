@@ -19,7 +19,7 @@ export default class VASPNEBInputDataManager extends VASPNEBInputDataManager_bas
     readonly entityName: "unit";
     isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): VASPNEBInputDataManager;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): {
         FIRST_IMAGE: string;

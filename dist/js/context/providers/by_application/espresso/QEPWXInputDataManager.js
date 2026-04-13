@@ -26,7 +26,11 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         this.methodData = externalContext.methodData || {};
         this.job = externalContext.job;
         this.workflow = externalContext.workflow;
-        this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     buildQEPWXContext(material) {
         const { Basis: basis, Lattice: lattice } = material;

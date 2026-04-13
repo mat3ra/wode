@@ -29,7 +29,7 @@ class HubbardContextManagerLegacy extends HubbardContextProvider_1.default {
                 atomicSpeciesIndex: { "ui:readonly": true },
             },
         };
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.atomicSpecies": {
                 enum: this.uniqueElementsWithLabels,
             },
@@ -37,6 +37,10 @@ class HubbardContextManagerLegacy extends HubbardContextProvider_1.default {
                 default: defaultHubbardConfig.hubbardUValue,
             },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         var _a;

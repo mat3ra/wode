@@ -78,7 +78,7 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
         return new QEPWXInputDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
@@ -89,7 +89,13 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
         this.job = externalContext.job;
         this.workflow = externalContext.workflow;
 
-        this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     private buildQEPWXContext(material: Material): Data {

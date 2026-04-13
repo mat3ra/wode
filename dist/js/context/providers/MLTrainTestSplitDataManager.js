@@ -24,9 +24,13 @@ class MLTrainTestSplitDataManager extends JSONSchemaDataProvider_1.default {
             problem_category: {},
         };
         this.extraData = {};
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             fraction_held_as_test_set: { default: defaultData.fraction_held_as_test_set },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     // eslint-disable-next-line class-methods-use-this
     getDefaultData() {

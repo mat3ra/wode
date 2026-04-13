@@ -18,7 +18,7 @@ export default class VASPInputDataManager extends VASPInputDataManager_base {
     readonly entityName: "unit";
     isEdited: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): VASPInputDataManager;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     private buildVASPContext;
     private getDataPerMaterial;

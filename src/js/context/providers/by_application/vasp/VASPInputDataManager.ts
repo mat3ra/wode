@@ -41,14 +41,20 @@ export default class VASPInputDataManager extends (JSONSchemaDataProvider as Bas
         return new VASPInputDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     // eslint-disable-next-line class-methods-use-this

@@ -29,12 +29,16 @@ class IonDynamicsDataManager extends JSONSchemaFormDataProvider_1.default {
             temperature: {},
         };
         this.extraData = {};
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             numberOfSteps: { default: defaultData.numberOfSteps },
             timeStep: { default: defaultData.timeStep },
             electronMass: { default: defaultData.electronMass },
             temperature: { default: defaultData.temperature },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     // eslint-disable-next-line class-methods-use-this
     getDefaultData() {

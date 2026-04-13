@@ -1,5 +1,6 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
+import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type { BoundaryConditionsContextItemSchema } from "@mat3ra/esse/dist/js/types";
 
 import materialContextMixin, {
@@ -61,14 +62,20 @@ export default class BoundaryConditionsFormDataManager extends (JSONSchemaDataPr
     //     return data;
     // }
 
-    get jsonSchema() {
+    get jsonSchema(): JSONSchema {
         const defaults = this.getDefaultData();
-        return JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             type: { default: defaults.type },
             offset: { default: defaults.offset },
             electricField: { default: defaults.electricField },
             targetFermiEnergy: { default: defaults.targetFermiEnergy },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        return jsonSchema;
     }
 }
 

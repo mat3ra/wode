@@ -24,7 +24,11 @@ class VASPNEBInputDataManager extends JSONSchemaDataProvider_1.default {
         this.initMaterialContextMixin(externalContext);
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialsSetContextMixin(externalContext);
-        this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         const VASPContexts = this.sortMaterialsByIndexInSet(this.materials).map((material) => {

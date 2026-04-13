@@ -24,7 +24,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     private reciprocalVectorRatios;
     abstract readonly divisor: number;
     private defaultMetric;
-    abstract readonly jsonSchema: JSONSchema7 | undefined;
+    abstract readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     private initInstanceFields;
     private getDefaultGridMetricValue;

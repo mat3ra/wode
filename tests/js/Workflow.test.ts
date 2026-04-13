@@ -7,10 +7,13 @@ import {
     type OrderedInMemoryEntityInSetConstructor,
     orderedEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
+import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationStandata, WorkflowStandata } from "@mat3ra/standata";
 import { expect } from "chai";
+import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { globalSettings, Subworkflow, Workflow } from "../../src/js";
@@ -146,6 +149,12 @@ describe("Workflow", () => {
     });
 
     describe("render", () => {
+        before(() => {
+            // Context providers resolve JSON Schemas from ESSE at construction time.
+            // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+        });
+
         it("invokes each subworkflow render with spread context and parent workflow", () => {
             globalSettings.setupApplicationsDriver(new ApplicationStandata());
             const standataWorkflows = new WorkflowStandata().getAll();

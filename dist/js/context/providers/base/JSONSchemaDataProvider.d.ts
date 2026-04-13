@@ -8,7 +8,7 @@ export interface JinjaExternalContext {
  * @summary Provides jsonSchema only.
  */
 declare abstract class JSONSchemaDataProvider<S extends ContextItemSchema = ContextItemSchema, EC extends JinjaExternalContext = JinjaExternalContext> extends ContextProvider<S, EC> {
-    abstract readonly jsonSchema: JSONSchema | undefined;
+    abstract readonly jsonSchema: JSONSchema;
     readonly entityName: "unit";
     isUsingJinjaVariables: boolean;
     constructor(contextItem: Partial<S>, externalContext: EC);

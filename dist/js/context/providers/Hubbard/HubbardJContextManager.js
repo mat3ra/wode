@@ -28,7 +28,7 @@ class HubbardJContextManager extends HubbardContextProvider_1.default {
                 removable: true,
             },
         };
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.paramType": {
                 default: defaultHubbardConfig.paramType,
             },
@@ -44,6 +44,10 @@ class HubbardJContextManager extends HubbardContextProvider_1.default {
                 default: defaultHubbardConfig.value,
             },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     getDefaultData() {
         return [

@@ -15,7 +15,7 @@ abstract class JSONSchemaDataProvider<
     EC extends JinjaExternalContext = JinjaExternalContext,
     // eslint-disable-next-line prettier/prettier
 > extends ContextProvider<S, EC> {
-    abstract readonly jsonSchema: JSONSchema | undefined;
+    abstract readonly jsonSchema: JSONSchema;
 
     readonly entityName = "unit" as const;
 

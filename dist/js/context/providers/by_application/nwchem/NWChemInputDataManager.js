@@ -21,7 +21,11 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
         this.isEdited = false;
         this.contextProviderName = "nwchem-total-energy";
         this.initMaterialContextMixin(externalContext);
-        this.jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     /*
      * TODO: Create ability for user to define CHARGE, MULT, BASIS and FUNCTIONAL parameters.

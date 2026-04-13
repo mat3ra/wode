@@ -40,7 +40,7 @@ export default class CollinearMagnetizationDataManager extends (JSONSchemaDataPr
         return new CollinearMagnetizationDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     private readonly isTotalMagnetization: boolean;
 
@@ -61,7 +61,7 @@ export default class CollinearMagnetizationDataManager extends (JSONSchemaDataPr
 
         this.isTotalMagnetization = this.data?.isTotalMagnetization || false;
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             "properties.startingMagnetization": {
                 maxItems: this.uniqueElementsWithLabels.length,
             },
@@ -79,6 +79,12 @@ export default class CollinearMagnetizationDataManager extends (JSONSchemaDataPr
                 default: defaultData.totalMagnetization,
             },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData(): Data {

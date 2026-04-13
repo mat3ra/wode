@@ -7,7 +7,7 @@ type Schema = GridContextItemSchema;
 export default class IGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name: "igrid";
     readonly divisor: 0.2;
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): IGridFormDataManager;
 }

@@ -23,9 +23,13 @@ class NEBFormDataManager extends JSONSchemaFormDataProvider_1.default {
             nImages: {},
         };
         this.extraData = {};
-        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             nImages: { default: defaultData.nImages },
         });
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        this.jsonSchema = jsonSchema;
     }
     // eslint-disable-next-line class-methods-use-this
     getDefaultData() {

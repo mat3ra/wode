@@ -57,7 +57,7 @@ export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Ba
         return new QENEBInputDataManager(contextItem, externalContext);
     }
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
@@ -65,7 +65,13 @@ export default class QENEBInputDataManager extends (JSONSchemaDataProvider as Ba
         this.initMaterialContextMixin(externalContext);
         this.initMaterialsSetContextMixin(externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+        const jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     getDefaultData(): Data {

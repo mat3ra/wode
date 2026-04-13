@@ -13,15 +13,21 @@ export default class IGridFormDataManager extends PointsGridFormDataProvider<Nam
 
     readonly divisor = 0.2 as const;
 
-    readonly jsonSchema: JSONSchema7 | undefined;
+    readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
 
-        this.jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
             this.jsonSchemaId,
             this.jsonSchemaPatchConfig,
         );
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        this.jsonSchema = jsonSchema;
     }
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
