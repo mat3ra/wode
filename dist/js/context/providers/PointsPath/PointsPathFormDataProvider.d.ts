@@ -25,6 +25,12 @@ declare abstract class PointsPathFormDataProvider<N extends Schema["name"]> exte
     getDefaultData(): Data;
     updateMaterialHash(): void;
     get jsonSchema(): JSONSchema;
+    readonly uiSchemaStyled: {
+        items: {
+            point: {};
+            steps: {};
+        };
+    };
     setData(path: Data): void;
     private convertToExplicitPath;
 }

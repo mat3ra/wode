@@ -27,6 +27,12 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         this.domain = "important";
         this.entityName = "unit";
         this.is2PIBA = false;
+        this.uiSchemaStyled = {
+            items: {
+                point: {},
+                steps: {},
+            },
+        };
         this.reciprocalLattice = new made_1.Made.ReciprocalLattice(this.material.lattice);
         this.useExplicitPath = this.application.name === "vasp";
     }

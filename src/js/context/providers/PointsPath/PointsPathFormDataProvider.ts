@@ -101,6 +101,13 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
         return jsonSchema;
     }
 
+    readonly uiSchemaStyled = {
+        items: {
+            point: {},
+            steps: {},
+        },
+    };
+
     setData(path: Data) {
         const rawData: DataItem[] = path.map((pathItem) => {
             const point = this.reciprocalLattice.symmetryPoints.find((sp) => {
