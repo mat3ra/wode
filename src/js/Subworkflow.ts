@@ -176,6 +176,9 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
                 u.render(ctx);
             }
         });
+
+        // Keep serialized `units` in sync with instances after execution units update `input`.
+        this.units = this.unitsInstances.map((u) => u.toJSON());
     }
 
     /**

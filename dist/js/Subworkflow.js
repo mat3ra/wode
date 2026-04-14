@@ -101,6 +101,8 @@ class Subworkflow extends entity_1.InMemoryEntity {
                 u.render(ctx);
             }
         });
+        // Keep serialized `units` in sync with instances after execution units update `input`.
+        this.units = this.unitsInstances.map((u) => u.toJSON());
     }
     /**
      * TODO: reuse workflow function instead

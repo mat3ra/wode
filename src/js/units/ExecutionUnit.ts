@@ -3,6 +3,7 @@ import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
     ContextItemSchema,
+    ExecutionUnitInputItemSchema,
     ExecutionUnitSchema,
     FlavorSchema,
 } from "@mat3ra/esse/dist/js/types";
@@ -86,13 +87,56 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.setDefaultInput();
     }
 
-    setDefaultInput() {
-        this.inputInstances = globalSettings
-            .getApplicationsDriver()
-            .getInput(this.flavor)
-            .map(ExecutionUnitInput.createFromTemplate);
+    /**
+     * Persisted `input[].template` must match the current application/executable (and optional
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
+     */
+    private isPersistedInputItemCompatible(item: ExecutionUnitInputItemSchema): boolean {
+        const { template } = item;
+
+        if (
+            template.applicationName !== this.application.name ||
+            template.executableName !== this.executable.name
+        ) {
+            return false;
+        }
+
+        const { applicationVersion } = template;
+        if (applicationVersion && applicationVersion !== this.application.version) {
+            return false;
+        }
+
+        return true;
     }
 
+    /**
+     * Build `inputInstances` from the current flavor’s defaults (`getInput(this.flavor)`), merged with
+     * persisted `this.input` from saved workflow JSON. For each driver slot we prefer a compatible
+     * persisted row matched by `template.name`, else by index; incompatible or missing rows use the
+     * driver template. `render()` then serializes from these instances into `this.input`, so UI and
+     * saved JSON stay aligned when Subworkflow re-serializes units after render.
+     */
+    setDefaultInput() {
+        const driverTemplates = globalSettings.getApplicationsDriver().getInput(this.flavor);
+        const persisted = Array.isArray(this.input) ? this.input : [];
+
+        this.inputInstances = driverTemplates.map((driverTemplate, index) => {
+            const persistedItem =
+                persisted.find((item) => item?.template?.name === driverTemplate.name) ??
+                persisted[index];
+
+            if (persistedItem && this.isPersistedInputItemCompatible(persistedItem)) {
+                return new ExecutionUnitInput(persistedItem);
+            }
+
+            return ExecutionUnitInput.createFromTemplate(driverTemplate);
+        });
+    }
+
+    /**
+     * Resolves context from providers discovered on hydrated `inputInstances` (same source `render`
+     * uses to write `this.input`), not stale serialized `this.input` alone.
+     */
     render(externalContext: ExternalContext) {
         const contextProviders = this.getContextProvidersInstances(externalContext);
         const fullContext = contextProviders.map((provider) => provider.getContextItemData());

@@ -22,7 +22,23 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     setApplication({ application, executable, flavor }: SetApplicationProps): void;
     setExecutable({ executable, flavor }: SetExecutableProps): void;
     setFlavor(flavor?: Flavor | FlavorSchema): void;
+    /**
+     * Persisted `input[].template` must match the current application/executable (and optional
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
+     */
+    private isPersistedInputItemCompatible;
+    /**
+     * Build `inputInstances` from the current flavor’s defaults (`getInput(this.flavor)`), merged with
+     * persisted `this.input` from saved workflow JSON. For each driver slot we prefer a compatible
+     * persisted row matched by `template.name`, else by index; incompatible or missing rows use the
+     * driver template. `render()` then serializes from these instances into `this.input`, so UI and
+     * saved JSON stay aligned when Subworkflow re-serializes units after render.
+     */
     setDefaultInput(): void;
+    /**
+     * Resolves context from providers discovered on hydrated `inputInstances` (same source `render`
+     * uses to write `this.input`), not stale serialized `this.input` alone.
+     */
     render(externalContext: ExternalContext): void;
     getContextProvidersInstances(externalContext: ExternalContext): import("../context/providers").AnyContextProvider[];
     addConvergenceContext(parameter: ConvergenceParameter, externalContext: ExternalContext): void;
