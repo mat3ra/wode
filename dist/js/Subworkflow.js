@@ -294,7 +294,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
             increment: parameterIncrement,
         });
         const context = this.buildExternalContext(externalContext);
-        unitForConvergence.addConvergenceContext(convergenceParameter, context);
+        unitForConvergence.render(context, convergenceParameter);
         const prevResult = "prev_result";
         const iteration = "iteration";
         // Assignment with result's initial value

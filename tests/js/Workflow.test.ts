@@ -155,7 +155,7 @@ describe("Workflow", () => {
             JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
         });
 
-        it("invokes each subworkflow render with spread context and parent workflow", () => {
+        it("invokes each subworkflow render with spread context and workflowHasRelaxation", () => {
             globalSettings.setupApplicationsDriver(new ApplicationStandata());
             const standataWorkflows = new WorkflowStandata().getAll();
             expect(standataWorkflows.length).to.be.above(0);
@@ -173,7 +173,7 @@ describe("Workflow", () => {
             const context: WorkflowRenderContext = {
                 material,
                 materials: [material, material, material],
-                job: {},
+                jobHasParent: false,
             };
 
             workflows.forEach((workflow) => {
@@ -187,7 +187,10 @@ describe("Workflow", () => {
                             expect(unit.renderingContext).to.have.property("methodData");
                             expect(unit.renderingContext).to.have.property("application");
                             expect(unit.renderingContext).to.have.property("subworkflowContext");
-                            expect(unit.renderingContext).to.have.property("workflow");
+                            expect(unit.renderingContext).to.have.property(
+                                "workflowHasRelaxation",
+                                workflow.hasRelaxation,
+                            );
                             expect(unit.context).to.be.deep.equal([]);
                         });
                 });

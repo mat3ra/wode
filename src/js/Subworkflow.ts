@@ -416,7 +416,7 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
 
         const context = this.buildExternalContext(externalContext);
 
-        unitForConvergence.addConvergenceContext(convergenceParameter, context);
+        unitForConvergence.render(context, convergenceParameter);
 
         const prevResult = "prev_result";
         const iteration = "iteration";

@@ -34,7 +34,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly string[] | readonly number[] | undefined;
+                default?: string | number | readonly number[] | readonly string[] | undefined;
                 type: string;
             };
             minItems: number;
@@ -44,7 +44,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly string[] | readonly number[] | undefined;
+                default?: string | number | readonly number[] | readonly string[] | undefined;
                 type: string;
             };
             minItems: number;
@@ -54,7 +54,7 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
             default?: any[] | undefined;
             type: string;
             items: {
-                default?: string | number | readonly string[] | readonly number[] | undefined;
+                default?: string | number | readonly number[] | readonly string[] | undefined;
                 type: string;
             };
             minItems: number;

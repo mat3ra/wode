@@ -45,7 +45,7 @@ type Base = typeof InMemoryEntity &
     NamedInMemoryEntityConstructor &
     Constructor<WorkflowSchemaMixin>;
 
-/** Context passed to Workflow.render() before workflow reference is injected for subworkflows. */
+/** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsExternalContext &
     MaterialsSetExternalContext &
@@ -146,7 +146,7 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
         this.subworkflowInstances.forEach((sw) => {
             sw.render({
                 ...context,
-                workflow: this,
+                workflowHasRelaxation: this.hasRelaxation,
             });
         });
     }

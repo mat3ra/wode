@@ -4,14 +4,12 @@ import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface
 import type {
     BaseMethod,
     InputContextItemSchema,
-    JobSchema,
     QEPwxContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
 import type { Material } from "@mat3ra/made";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
 import path from "path";
-import type { Workflow } from "src/js/Workflow";
 
 import materialContextMixin, {
     type MaterialContextMixin,
@@ -36,11 +34,11 @@ export type MethodDataExternalContext = {
 };
 
 export type JobExternalContext = {
-    job?: Pick<JobSchema, "parent">;
+    jobHasParent: boolean;
 };
 
 export type WorkflowExternalContext = {
-    workflow: Workflow;
+    workflowHasRelaxation: boolean;
 };
 
 type Data = QEPwxContextProviderSchema;
@@ -68,9 +66,9 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
 
     methodData?: MethodData;
 
-    job?: Pick<JobSchema, "parent">;
+    jobHasParent: boolean;
 
-    workflow: Workflow;
+    workflowHasRelaxation: boolean;
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
@@ -86,8 +84,8 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
         this.initMaterialContextMixin(externalContext);
 
         this.methodData = externalContext.methodData || {};
-        this.job = externalContext.job;
-        this.workflow = externalContext.workflow;
+        this.jobHasParent = externalContext.jobHasParent;
+        this.workflowHasRelaxation = externalContext.workflowHasRelaxation;
 
         const jsonSchema = JSONSchemasInterface.getSchemaById(jsonSchemaId);
 
@@ -100,7 +98,7 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
 
     private buildQEPWXContext(material: Material): Data {
         const { Basis: basis, Lattice: lattice } = material;
-        const { job, workflow } = this;
+        const { jobHasParent, workflowHasRelaxation } = this;
 
         const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {
             const pseudo = (this.methodData?.pseudo || []).find((p) => p.element === symbol);
@@ -148,7 +146,7 @@ export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Ba
 
         return {
             IBRAV: 0,
-            RESTART_MODE: job?.parent || workflow.hasRelaxation ? "restart" : "from_scratch",
+            RESTART_MODE: jobHasParent || workflowHasRelaxation ? "restart" : "from_scratch",
             ATOMIC_SPECIES,
             ATOMIC_SPECIES_WITH_LABELS,
             NAT: basis.atomicPositions.length,

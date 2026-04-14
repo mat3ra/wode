@@ -6,12 +6,12 @@ import { type MaterialsContextMixin, type MaterialsExternalContext } from "../..
 import { type MaterialsSetContextMixin, type MaterialsSetExternalContext } from "../../../mixins/MaterialsSetContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../../base/JSONSchemaDataProvider";
-import { type MethodDataExternalContext, type WorkflowExternalContext } from "./QEPWXInputDataManager";
+import { type JobExternalContext, type MethodDataExternalContext, type WorkflowExternalContext } from "./QEPWXInputDataManager";
 type Data = QENEBContextProviderSchema;
 type Schema = InputContextItemSchema & {
     data: Data;
 };
-type ExternalContext = JinjaExternalContext & WorkflowExternalContext & MaterialsExternalContext & MethodDataExternalContext & MaterialsSetExternalContext & MaterialExternalContext;
+type ExternalContext = JinjaExternalContext & WorkflowExternalContext & JobExternalContext & MaterialsExternalContext & MethodDataExternalContext & MaterialsSetExternalContext & MaterialExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin> & Constructor<MaterialsSetContextMixin>;
 declare const QENEBInputDataManager_base: Base;
 export default class QENEBInputDataManager extends QENEBInputDataManager_base {

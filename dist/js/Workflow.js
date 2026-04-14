@@ -88,7 +88,7 @@ class Workflow extends entity_1.InMemoryEntity {
         this.subworkflowInstances.forEach((sw) => {
             sw.render({
                 ...context,
-                workflow: this,
+                workflowHasRelaxation: this.hasRelaxation,
             });
         });
     }

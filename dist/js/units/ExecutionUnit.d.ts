@@ -2,7 +2,7 @@ import { Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ExecutionUnitSchema, FlavorSchema } from "@mat3ra/esse/dist/js/types";
-import { type ExternalContext } from "../context/providers";
+import { type AnyContextProvider, type ExternalContext } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { type ExecutionUnitSchemaMixin } from "../generated/ExecutionUnitSchemaMixin";
 import BaseUnit from "./BaseUnit";
@@ -16,6 +16,7 @@ declare const ExecutionUnit_base: Base;
 declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     inputInstances: ExecutionUnitInput[];
     renderingContext: Partial<ExternalContext>;
+    contextProvidersInstances: AnyContextProvider[];
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
     constructor(config: ExecutionUnitConfig);
@@ -35,13 +36,8 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
      * saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
     setDefaultInput(): void;
-    /**
-     * Resolves context from providers discovered on hydrated `inputInstances` (same source `render`
-     * uses to write `this.input`), not stale serialized `this.input` alone.
-     */
-    render(externalContext: ExternalContext): void;
-    getContextProvidersInstances(externalContext: ExternalContext): import("../context/providers").AnyContextProvider[];
-    addConvergenceContext(parameter: ConvergenceParameter, externalContext: ExternalContext): void;
+    render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;
+    private getContextProvidersInstances;
     private saveContext;
     getHashObject(): {
         application: {

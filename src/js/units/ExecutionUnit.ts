@@ -9,7 +9,11 @@ import type {
 } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
-import { type ExternalContext, createProvider } from "../context/providers";
+import {
+    type AnyContextProvider,
+    type ExternalContext,
+    createProvider,
+} from "../context/providers";
 import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import {
@@ -32,6 +36,8 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
 
     renderingContext: Partial<ExternalContext> = {};
+
+    contextProvidersInstances: AnyContextProvider[] = [];
 
     declare toJSON: () => Schema & AnyObject;
 
@@ -133,22 +139,20 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         });
     }
 
-    /**
-     * Resolves context from providers discovered on hydrated `inputInstances` (same source `render`
-     * uses to write `this.input`), not stale serialized `this.input` alone.
-     */
-    render(externalContext: ExternalContext) {
-        const contextProviders = this.getContextProvidersInstances(externalContext);
-        const fullContext = contextProviders.map((provider) => provider.getContextItemData());
+    render(externalContext: ExternalContext, convergence?: ConvergenceParameter) {
+        this.contextProvidersInstances = this.getContextProvidersInstances(
+            externalContext,
+            convergence,
+        );
+        const fullContext = this.contextProvidersInstances.map((p) => p.getContextItemData());
 
         this.saveContext(fullContext, externalContext);
-
-        this.input = this.inputInstances.map((input) => {
-            return input.render(this.renderingContext).toJSON();
-        });
     }
 
-    getContextProvidersInstances(externalContext: ExternalContext) {
+    private getContextProvidersInstances(
+        externalContext: ExternalContext,
+        convergence?: ConvergenceParameter,
+    ) {
         const uniqueContextProviderNames = [
             ...new Set(
                 this.input
@@ -161,30 +165,25 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             ),
         ];
 
-        return uniqueContextProviderNames.map((name) => {
-            return createProvider(name, this.context, externalContext);
-        });
-    }
-
-    addConvergenceContext(parameter: ConvergenceParameter, externalContext: ExternalContext) {
         // TODO: kgrid should be abstracted and selected by user
         const parameterToContextProviderMap = {
             N_k: "kgrid",
             N_k_nonuniform: "kgrid",
         } as const;
 
-        const contextName = parameterToContextProviderMap[parameter.name];
-        const contextProviders = this.getContextProvidersInstances(externalContext);
-
-        const fullContext = contextProviders.map((provider) => {
-            if (provider.name === contextName) {
-                provider.applyConvergenceParameter(parameter);
-                return provider.getContextItemData();
-            }
-            return provider.getContextItemData();
-        });
-
-        this.saveContext(fullContext, externalContext);
+        return uniqueContextProviderNames
+            .map((name) => {
+                return createProvider(name, this.context, externalContext);
+            })
+            .map((provider) => {
+                if (
+                    convergence &&
+                    provider.name === parameterToContextProviderMap[convergence.name]
+                ) {
+                    provider.applyConvergenceParameter(convergence);
+                }
+                return provider;
+            });
     }
 
     private saveContext(fullContext: ContextItemSchema[], externalContext: ExternalContext) {
@@ -195,6 +194,10 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             ...Object.fromEntries(fullContext.map((context) => [context.name, context.data])),
             ...externalContext,
         };
+
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
     }
 
     getHashObject() {

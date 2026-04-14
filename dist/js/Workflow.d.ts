@@ -16,7 +16,7 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
 type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & NamedInMemoryEntityConstructor & Constructor<WorkflowSchemaMixin>;
-/** Context passed to Workflow.render() before workflow reference is injected for subworkflows. */
+/** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
 declare const Workflow_base: Base;
 export declare class Workflow extends Workflow_base implements WorkflowSchema {

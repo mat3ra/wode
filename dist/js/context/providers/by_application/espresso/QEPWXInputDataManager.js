@@ -24,8 +24,8 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         this.initMaterialsContextMixin(externalContext);
         this.initMaterialContextMixin(externalContext);
         this.methodData = externalContext.methodData || {};
-        this.job = externalContext.job;
-        this.workflow = externalContext.workflow;
+        this.jobHasParent = externalContext.jobHasParent;
+        this.workflowHasRelaxation = externalContext.workflowHasRelaxation;
         const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
         if (!jsonSchema) {
             throw new Error("Failed to get JSON schema");
@@ -34,7 +34,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
     }
     buildQEPWXContext(material) {
         const { Basis: basis, Lattice: lattice } = material;
-        const { job, workflow } = this;
+        const { jobHasParent, workflowHasRelaxation } = this;
         const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {
             var _a;
             const pseudo = (((_a = this.methodData) === null || _a === void 0 ? void 0 : _a.pseudo) || []).find((p) => p.element === symbol);
@@ -74,7 +74,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         });
         return {
             IBRAV: 0,
-            RESTART_MODE: (job === null || job === void 0 ? void 0 : job.parent) || workflow.hasRelaxation ? "restart" : "from_scratch",
+            RESTART_MODE: jobHasParent || workflowHasRelaxation ? "restart" : "from_scratch",
             ATOMIC_SPECIES,
             ATOMIC_SPECIES_WITH_LABELS,
             NAT: basis.atomicPositions.length,

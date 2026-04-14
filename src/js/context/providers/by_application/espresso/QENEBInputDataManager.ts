@@ -23,6 +23,7 @@ import JSONSchemaDataProvider, {
     type JinjaExternalContext,
 } from "../../base/JSONSchemaDataProvider";
 import QEPWXInputDataManager, {
+    type JobExternalContext,
     type MethodDataExternalContext,
     type WorkflowExternalContext,
 } from "./QEPWXInputDataManager";
@@ -33,6 +34,7 @@ type Data = QENEBContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
 type ExternalContext = JinjaExternalContext &
     WorkflowExternalContext &
+    JobExternalContext &
     MaterialsExternalContext &
     MethodDataExternalContext &
     MaterialsSetExternalContext &

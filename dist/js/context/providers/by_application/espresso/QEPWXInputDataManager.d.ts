@@ -1,8 +1,7 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { BaseMethod, InputContextItemSchema, JobSchema, QEPwxContextProviderSchema } from "@mat3ra/esse/dist/js/types";
+import type { BaseMethod, InputContextItemSchema, QEPwxContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
-import type { Workflow } from "src/js/Workflow";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
 import { type MaterialsContextMixin, type MaterialsExternalContext } from "../../../mixins/MaterialsContextMixin";
 import type { UnitContext } from "../../base/ContextProvider";
@@ -18,10 +17,10 @@ export type MethodDataExternalContext = {
     methodData?: MethodData;
 };
 export type JobExternalContext = {
-    job?: Pick<JobSchema, "parent">;
+    jobHasParent: boolean;
 };
 export type WorkflowExternalContext = {
-    workflow: Workflow;
+    workflowHasRelaxation: boolean;
 };
 type Data = QEPwxContextProviderSchema;
 type Schema = InputContextItemSchema & {
@@ -36,8 +35,8 @@ export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
     readonly entityName: "unit";
     isEdited: boolean;
     methodData?: MethodData;
-    job?: Pick<JobSchema, "parent">;
-    workflow: Workflow;
+    jobHasParent: boolean;
+    workflowHasRelaxation: boolean;
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QEPWXInputDataManager;
     readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);

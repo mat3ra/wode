@@ -15,6 +15,7 @@ class ExecutionUnit extends BaseUnit_1.default {
         super(config);
         this.inputInstances = [];
         this.renderingContext = {};
+        this.contextProvidersInstances = [];
         const { application, executable, flavor } = config;
         this.setApplication({ application, executable, flavor });
         this.name = this.name || ((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) || "";
@@ -86,19 +87,12 @@ class ExecutionUnit extends BaseUnit_1.default {
             return ExecutionUnitInput_1.default.createFromTemplate(driverTemplate);
         });
     }
-    /**
-     * Resolves context from providers discovered on hydrated `inputInstances` (same source `render`
-     * uses to write `this.input`), not stale serialized `this.input` alone.
-     */
-    render(externalContext) {
-        const contextProviders = this.getContextProvidersInstances(externalContext);
-        const fullContext = contextProviders.map((provider) => provider.getContextItemData());
+    render(externalContext, convergence) {
+        this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
+        const fullContext = this.contextProvidersInstances.map((p) => p.getContextItemData());
         this.saveContext(fullContext, externalContext);
-        this.input = this.inputInstances.map((input) => {
-            return input.render(this.renderingContext).toJSON();
-        });
     }
-    getContextProvidersInstances(externalContext) {
+    getContextProvidersInstances(externalContext, convergence) {
         const uniqueContextProviderNames = [
             ...new Set(this.input
                 .map((input) => {
@@ -108,26 +102,22 @@ class ExecutionUnit extends BaseUnit_1.default {
             })
                 .flat()),
         ];
-        return uniqueContextProviderNames.map((name) => {
-            return (0, providers_1.createProvider)(name, this.context, externalContext);
-        });
-    }
-    addConvergenceContext(parameter, externalContext) {
         // TODO: kgrid should be abstracted and selected by user
         const parameterToContextProviderMap = {
             N_k: "kgrid",
             N_k_nonuniform: "kgrid",
         };
-        const contextName = parameterToContextProviderMap[parameter.name];
-        const contextProviders = this.getContextProvidersInstances(externalContext);
-        const fullContext = contextProviders.map((provider) => {
-            if (provider.name === contextName) {
-                provider.applyConvergenceParameter(parameter);
-                return provider.getContextItemData();
+        return uniqueContextProviderNames
+            .map((name) => {
+            return (0, providers_1.createProvider)(name, this.context, externalContext);
+        })
+            .map((provider) => {
+            if (convergence &&
+                provider.name === parameterToContextProviderMap[convergence.name]) {
+                provider.applyConvergenceParameter(convergence);
             }
-            return provider.getContextItemData();
+            return provider;
         });
-        this.saveContext(fullContext, externalContext);
     }
     saveContext(fullContext, externalContext) {
         // persistent context
@@ -136,6 +126,9 @@ class ExecutionUnit extends BaseUnit_1.default {
             ...Object.fromEntries(fullContext.map((context) => [context.name, context.data])),
             ...externalContext,
         };
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
     }
     getHashObject() {
         const { application, executable, flavor, input } = this.toJSON();
