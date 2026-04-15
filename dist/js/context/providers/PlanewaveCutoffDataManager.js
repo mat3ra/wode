@@ -65,5 +65,5 @@ class PlanewaveCutoffDataManager extends ContextProvider_1.default {
         };
     }
 }
-exports.default = PlanewaveCutoffDataManager;
 (0, ApplicationContextMixin_1.default)(PlanewaveCutoffDataManager.prototype);
+exports.default = PlanewaveCutoffDataManager;

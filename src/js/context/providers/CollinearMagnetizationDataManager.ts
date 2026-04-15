@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     CollinearMagnetizationContextItemSchema,
@@ -16,8 +15,9 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 type Data = CollinearMagnetizationContextProviderSchema;
 type Schema = CollinearMagnetizationContextItemSchema;
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface CollinearMagnetizationDataManager extends MaterialContextMixin {}
 
 const defaultData = {
     value: 0.0,
@@ -27,7 +27,7 @@ const defaultData = {
 
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
 
-export default class CollinearMagnetizationDataManager extends (JSONSchemaDataProvider as Base) {
+class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "collinearMagnetization" as const;
 
     readonly domain = "important" as const;
@@ -136,3 +136,5 @@ export default class CollinearMagnetizationDataManager extends (JSONSchemaDataPr
 }
 
 materialContextMixin(CollinearMagnetizationDataManager.prototype);
+
+export default CollinearMagnetizationDataManager;

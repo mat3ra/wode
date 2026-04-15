@@ -1,5 +1,4 @@
 import { PERIODIC_TABLE } from "@exabyte-io/periodic-table.js";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     InputContextItemSchema,
@@ -19,13 +18,14 @@ import JSONSchemaDataProvider, {
 type Data = NWChemTotalEnergyContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface NWChemInputDataManager extends MaterialContextMixin {}
 
 const jsonSchemaId =
     "context-providers-directory/by-application/nwchem-total-energy-context-provider";
 
-export default class NWChemInputDataManager extends (JSONSchemaDataProvider as Base) {
+class NWChemInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "input" as const;
 
     readonly domain = "executable" as const;
@@ -89,3 +89,5 @@ export default class NWChemInputDataManager extends (JSONSchemaDataProvider as B
 }
 
 materialContextMixin(NWChemInputDataManager.prototype);
+
+export default NWChemInputDataManager;

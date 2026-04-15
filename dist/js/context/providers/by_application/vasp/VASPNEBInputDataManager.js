@@ -44,7 +44,7 @@ class VASPNEBInputDataManager extends JSONSchemaDataProvider_1.default {
         };
     }
 }
-exports.default = VASPNEBInputDataManager;
 (0, MaterialContextMixin_1.default)(VASPNEBInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(VASPNEBInputDataManager.prototype);
 (0, MaterialsSetContextMixin_1.default)(VASPNEBInputDataManager.prototype);
+exports.default = VASPNEBInputDataManager;

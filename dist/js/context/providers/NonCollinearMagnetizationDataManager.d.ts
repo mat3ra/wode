@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { NonCollinearMagnetizationContextItemSchema, NonCollinearMagnetizationContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../mixins/MaterialContextMixin";
@@ -7,9 +6,9 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 type Data = NonCollinearMagnetizationContextProviderSchema;
 type Schema = NonCollinearMagnetizationContextItemSchema;
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
-declare const NonCollinearMagnetizationDataManager_base: Base;
-export default class NonCollinearMagnetizationDataManager extends NonCollinearMagnetizationDataManager_base {
+interface NonCollinearMagnetizationDataManager extends MaterialContextMixin {
+}
+declare class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "nonCollinearMagnetization";
     readonly domain: "important";
     readonly entityName: "unit";
@@ -76,4 +75,4 @@ export default class NonCollinearMagnetizationDataManager extends NonCollinearMa
         };
     };
 }
-export {};
+export default NonCollinearMagnetizationDataManager;

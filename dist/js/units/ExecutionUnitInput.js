@@ -43,5 +43,5 @@ class ExecutionUnitInput extends entity_1.InMemoryEntity {
         }
     }
 }
-exports.default = ExecutionUnitInput;
 (0, ExecutionUnitInputSchemaMixin_1.executionUnitInputSchemaMixin)(ExecutionUnitInput.prototype);
+exports.default = ExecutionUnitInput;

@@ -16,7 +16,7 @@ import {
 import { UnitFactory } from "./units/factory";
 import { defaultMapConfig } from "./units/MapUnit";
 import * as utils from "./utils";
-import { Workflow } from "./Workflow";
+import Workflow from "./Workflow";
 
 export {
     Subworkflow,

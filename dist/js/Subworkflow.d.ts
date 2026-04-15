@@ -1,8 +1,5 @@
 import { Application } from "@mat3ra/ade";
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { type DefaultableInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
-import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import type { Material } from "@mat3ra/made";
@@ -27,10 +24,10 @@ type ConvergenceConfig = {
     maxOccurrences: number;
     externalContext: SubworkflowExternalContext;
 };
-type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & NamedInMemoryEntityConstructor & Constructor<SubworkflowSchemaMixin>;
+interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin {
+}
 type SubworkflowExternalContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & WorkflowExternalContext & JobExternalContext;
-declare const Subworkflow_base: Base;
-export default class Subworkflow extends Subworkflow_base implements SubworkflowSchema {
+declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     private ModelFactory;
     private applicationInstance;
     unitsInstances: AnySubworkflowUnit[];
@@ -676,4 +673,4 @@ export default class Subworkflow extends Subworkflow_base implements Subworkflow
     updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]): void;
     addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }: ConvergenceConfig): void;
 }
-export {};
+export default Subworkflow;

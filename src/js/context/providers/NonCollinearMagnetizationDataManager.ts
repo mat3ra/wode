@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     NonCollinearMagnetizationContextItemSchema,
@@ -16,8 +15,9 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 type Data = NonCollinearMagnetizationContextProviderSchema;
 type Schema = NonCollinearMagnetizationContextItemSchema;
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface NonCollinearMagnetizationDataManager extends MaterialContextMixin {}
 
 const defaultData = {
     isExistingChargeDensity: false,
@@ -39,7 +39,7 @@ const defaultData = {
 
 const jsonSchemaId = "context-providers-directory/non-collinear-magnetization-context-provider";
 
-export default class NonCollinearMagnetizationDataManager extends (JSONSchemaDataProvider as Base) {
+class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "nonCollinearMagnetization" as const;
 
     readonly domain = "important" as const;
@@ -225,3 +225,5 @@ export default class NonCollinearMagnetizationDataManager extends (JSONSchemaDat
 }
 
 materialContextMixin(NonCollinearMagnetizationDataManager.prototype);
+
+export default NonCollinearMagnetizationDataManager;

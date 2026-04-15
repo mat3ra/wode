@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { CollinearMagnetizationContextItemSchema, CollinearMagnetizationContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../mixins/MaterialContextMixin";
@@ -7,9 +6,9 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 type Data = CollinearMagnetizationContextProviderSchema;
 type Schema = CollinearMagnetizationContextItemSchema;
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
-declare const CollinearMagnetizationDataManager_base: Base;
-export default class CollinearMagnetizationDataManager extends CollinearMagnetizationDataManager_base {
+interface CollinearMagnetizationDataManager extends MaterialContextMixin {
+}
+declare class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "collinearMagnetization";
     readonly domain: "important";
     readonly entityName: "unit";
@@ -40,4 +39,4 @@ export default class CollinearMagnetizationDataManager extends CollinearMagnetiz
         };
     };
 }
-export {};
+export default CollinearMagnetizationDataManager;

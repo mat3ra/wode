@@ -30,11 +30,12 @@ type Data = PointsPathFormDataProviderData;
 type DataItem = Data[0];
 type Schema = PathContextItemSchema;
 type ExternalContext = PointsPathFormDataProviderExternalContext;
+
+const jsonSchemaId = "context-providers-directory/points-path-data-provider";
+
 type Base = typeof JSONSchemaDataProvider<Schema> &
     Constructor<MaterialContextMixin> &
     Constructor<ApplicationContextMixin>;
-
-const jsonSchemaId = "context-providers-directory/points-path-data-provider";
 
 abstract class MixinsContextProvider extends (JSONSchemaDataProvider as Base) {
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {

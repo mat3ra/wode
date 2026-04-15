@@ -43,5 +43,5 @@ class HubbardContextProvider extends JSONSchemaDataProvider_1.default {
                 : this.firstElement;
     }
 }
-exports.default = HubbardContextProvider;
 (0, MaterialContextMixin_1.default)(HubbardContextProvider.prototype);
+exports.default = HubbardContextProvider;

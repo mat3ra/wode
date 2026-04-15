@@ -1,13 +1,11 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
-    type DefaultableInMemoryEntityConstructor,
-    defaultableEntityMixin,
-} from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
-import {
-    type NamedInMemoryEntityConstructor,
-    namedEntityMixin,
-} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+    type DefaultableInMemoryEntity,
+    type NamedInMemoryEntity,
+    InMemoryEntity,
+} from "@mat3ra/code/dist/js/entity";
+import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
@@ -15,6 +13,7 @@ import type {
     SubworkflowSchema,
     WorkflowSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
 import { setUnitLinks, SubworkflowStandata } from "@mat3ra/standata";
@@ -40,10 +39,12 @@ import {
 } from "./utils/workflow";
 import defaultWorkflowConfig from "./workflows/default";
 
-type Base = typeof InMemoryEntity &
-    DefaultableInMemoryEntityConstructor &
-    NamedInMemoryEntityConstructor &
-    Constructor<WorkflowSchemaMixin>;
+interface Workflow
+    extends DefaultableInMemoryEntity,
+        NamedInMemoryEntity,
+        WorkflowSchemaMixin,
+        Taggable,
+        ComputedEntityMixin {}
 
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext &
@@ -51,7 +52,7 @@ export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsSetExternalContext &
     JobExternalContext;
 
-export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema {
+class Workflow extends InMemoryEntity implements WorkflowSchema {
     static readonly defaultConfig = defaultWorkflowConfig;
 
     declare _json: WorkflowSchema & AnyObject;
@@ -341,3 +342,7 @@ export class Workflow extends (InMemoryEntity as Base) implements WorkflowSchema
 namedEntityMixin(Workflow.prototype);
 defaultableEntityMixin(Workflow);
 workflowSchemaMixin(Workflow.prototype);
+taggableMixin(Workflow.prototype);
+computedEntityMixin(Workflow.prototype);
+
+export default Workflow;

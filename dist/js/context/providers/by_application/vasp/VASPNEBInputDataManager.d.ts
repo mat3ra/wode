@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { InputContextItemSchema, VASPNEBContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
@@ -11,9 +10,9 @@ type Schema = InputContextItemSchema & {
     data: Data;
 };
 type ExternalContext = JinjaExternalContext & MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin> & Constructor<MaterialsSetContextMixin>;
-declare const VASPNEBInputDataManager_base: Base;
-export default class VASPNEBInputDataManager extends VASPNEBInputDataManager_base {
+interface VASPNEBInputDataManager extends MaterialContextMixin, MaterialsContextMixin, MaterialsSetContextMixin {
+}
+declare class VASPNEBInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
@@ -28,4 +27,4 @@ export default class VASPNEBInputDataManager extends VASPNEBInputDataManager_bas
         contextProviderName: "vasp-neb";
     };
 }
-export {};
+export default VASPNEBInputDataManager;

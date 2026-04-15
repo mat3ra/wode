@@ -1,9 +1,8 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { type DefaultableInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
-import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
@@ -15,11 +14,11 @@ import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
-type Base = typeof InMemoryEntity & DefaultableInMemoryEntityConstructor & NamedInMemoryEntityConstructor & Constructor<WorkflowSchemaMixin>;
+interface Workflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, ComputedEntityMixin {
+}
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
-declare const Workflow_base: Base;
-export declare class Workflow extends Workflow_base implements WorkflowSchema {
+declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     static readonly defaultConfig: WorkflowSchema;
     _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
@@ -67,4 +66,4 @@ export declare class Workflow extends Workflow_base implements WorkflowSchema {
     private getStandataRelaxationSubworkflow;
     private getRelaxationSubworkflow;
 }
-export {};
+export default Workflow;

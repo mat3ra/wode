@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { BaseMethod, InputContextItemSchema, QEPwxContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
@@ -27,9 +26,9 @@ type Schema = InputContextItemSchema & {
     data: Data;
 };
 type ExternalContext = JinjaExternalContext & WorkflowExternalContext & MaterialExternalContext & JobExternalContext & MethodDataExternalContext & MaterialsExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin>;
-declare const QEPWXInputDataManager_base: Base;
-export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
+interface QEPWXInputDataManager extends MaterialContextMixin, MaterialsContextMixin {
+}
+declare class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
@@ -76,4 +75,4 @@ export default class QEPWXInputDataManager extends QEPWXInputDataManager_base {
         contextProviderName: "qe-pwx";
     };
 }
-export {};
+export default QEPWXInputDataManager;

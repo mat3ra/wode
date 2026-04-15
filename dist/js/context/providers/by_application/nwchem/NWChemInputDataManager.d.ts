@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { InputContextItemSchema, NWChemTotalEnergyContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
@@ -9,9 +8,9 @@ type Schema = InputContextItemSchema & {
     data: Data;
 };
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
-declare const NWChemInputDataManager_base: Base;
-export default class NWChemInputDataManager extends NWChemInputDataManager_base {
+interface NWChemInputDataManager extends MaterialContextMixin {
+}
+declare class NWChemInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
@@ -34,4 +33,4 @@ export default class NWChemInputDataManager extends NWChemInputDataManager_base 
         contextProviderName: "nwchem-total-energy";
     };
 }
-export {};
+export default NWChemInputDataManager;

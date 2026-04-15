@@ -1,14 +1,11 @@
 import { Application } from "@mat3ra/ade";
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
-    type DefaultableInMemoryEntityConstructor,
-    defaultableEntityMixin,
-} from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
-import {
-    type NamedInMemoryEntityConstructor,
-    namedEntityMixin,
-} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+    type DefaultableInMemoryEntity,
+    type NamedInMemoryEntity,
+    InMemoryEntity,
+} from "@mat3ra/code/dist/js/entity";
+import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import type { Material } from "@mat3ra/made";
@@ -47,10 +44,10 @@ type ConvergenceConfig = {
     externalContext: SubworkflowExternalContext;
 };
 
-type Base = typeof InMemoryEntity &
-    DefaultableInMemoryEntityConstructor &
-    NamedInMemoryEntityConstructor &
-    Constructor<SubworkflowSchemaMixin>;
+interface Subworkflow
+    extends DefaultableInMemoryEntity,
+        NamedInMemoryEntity,
+        SubworkflowSchemaMixin {}
 
 type SubworkflowExternalContext = MaterialExternalContext &
     MaterialsExternalContext &
@@ -58,7 +55,7 @@ type SubworkflowExternalContext = MaterialExternalContext &
     WorkflowExternalContext &
     JobExternalContext;
 
-export default class Subworkflow extends (InMemoryEntity as Base) implements SubworkflowSchema {
+class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     private ModelFactory: typeof ModelFactory;
 
     private applicationInstance: Application;
@@ -524,3 +521,5 @@ export default class Subworkflow extends (InMemoryEntity as Base) implements Sub
 namedEntityMixin(Subworkflow.prototype);
 defaultableEntityMixin(Subworkflow);
 subworkflowSchemaMixin(Subworkflow.prototype);
+
+export default Subworkflow;

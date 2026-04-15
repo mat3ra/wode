@@ -48,7 +48,7 @@ class QENEBInputDataManager extends JSONSchemaDataProvider_1.default {
         };
     }
 }
-exports.default = QENEBInputDataManager;
 (0, MaterialContextMixin_1.default)(QENEBInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(QENEBInputDataManager.prototype);
 (0, MaterialsSetContextMixin_1.default)(QENEBInputDataManager.prototype);
+exports.default = QENEBInputDataManager;

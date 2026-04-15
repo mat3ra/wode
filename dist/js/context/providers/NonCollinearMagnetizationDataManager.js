@@ -177,5 +177,5 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.defa
         };
     }
 }
-exports.default = NonCollinearMagnetizationDataManager;
 (0, MaterialContextMixin_1.default)(NonCollinearMagnetizationDataManager.prototype);
+exports.default = NonCollinearMagnetizationDataManager;

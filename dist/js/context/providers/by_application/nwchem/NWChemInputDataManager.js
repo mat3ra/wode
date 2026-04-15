@@ -54,5 +54,5 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
         };
     }
 }
-exports.default = NWChemInputDataManager;
 (0, MaterialContextMixin_1.default)(NWChemInputDataManager.prototype);
+exports.default = NWChemInputDataManager;

@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { InputContextItemSchema, QENEBContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../../mixins/MaterialContextMixin";
@@ -12,9 +11,9 @@ type Schema = InputContextItemSchema & {
     data: Data;
 };
 type ExternalContext = JinjaExternalContext & WorkflowExternalContext & JobExternalContext & MaterialsExternalContext & MethodDataExternalContext & MaterialsSetExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin> & Constructor<MaterialsContextMixin> & Constructor<MaterialsSetContextMixin>;
-declare const QENEBInputDataManager_base: Base;
-export default class QENEBInputDataManager extends QENEBInputDataManager_base {
+interface QENEBInputDataManager extends MaterialContextMixin, MaterialsContextMixin, MaterialsSetContextMixin {
+}
+declare class QENEBInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "input";
     readonly domain: "executable";
     readonly entityName: "unit";
@@ -24,4 +23,4 @@ export default class QENEBInputDataManager extends QENEBInputDataManager_base {
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): Data;
 }
-export {};
+export default QENEBInputDataManager;

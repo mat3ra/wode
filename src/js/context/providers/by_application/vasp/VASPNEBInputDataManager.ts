@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     InputContextItemSchema,
@@ -30,14 +29,15 @@ type ExternalContext = JinjaExternalContext &
     MaterialExternalContext &
     MaterialsExternalContext &
     MaterialsSetExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin> &
-    Constructor<MaterialsContextMixin> &
-    Constructor<MaterialsSetContextMixin>;
+
+interface VASPNEBInputDataManager
+    extends MaterialContextMixin,
+        MaterialsContextMixin,
+        MaterialsSetContextMixin {}
 
 const jsonSchemaId = "context-providers-directory/by-application/vasp-neb-context-provider";
 
-export default class VASPNEBInputDataManager extends (JSONSchemaDataProvider as Base) {
+class VASPNEBInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "input" as const;
 
     readonly domain = "executable" as const;
@@ -88,3 +88,5 @@ export default class VASPNEBInputDataManager extends (JSONSchemaDataProvider as 
 materialContextMixin(VASPNEBInputDataManager.prototype);
 materialsContextMixin(VASPNEBInputDataManager.prototype);
 materialsSetContextMixin(VASPNEBInputDataManager.prototype);
+
+export default VASPNEBInputDataManager;

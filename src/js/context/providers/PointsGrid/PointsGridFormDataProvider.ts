@@ -20,6 +20,7 @@ import { globalSettings } from "../settings";
 type Schema = GridContextItemSchema;
 type Data = PointsGridDataProviderSchema;
 export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
+
 type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> &
     Constructor<MaterialContextMixin>;
 
@@ -46,7 +47,7 @@ const vector = (
 const defaultShift = 0;
 const defaultShifts: Vector3DSchema = [defaultShift, defaultShift, defaultShift];
 
-export default abstract class PointsGridFormDataProvider<
+abstract class PointsGridFormDataProvider<
     N extends Schema["name"],
 > extends (JSONSchemaFormDataProvider as Base) {
     abstract readonly name: N;
@@ -316,3 +317,5 @@ export default abstract class PointsGridFormDataProvider<
 }
 
 materialContextMixin(PointsGridFormDataProvider.prototype);
+
+export default PointsGridFormDataProvider;

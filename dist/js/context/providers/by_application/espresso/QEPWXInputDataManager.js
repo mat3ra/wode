@@ -96,9 +96,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
         };
     }
 }
-exports.default = QEPWXInputDataManager;
 (0, MaterialContextMixin_1.default)(QEPWXInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(QEPWXInputDataManager.prototype);
 // methodDataContextMixin(QEPWXInputDataManager.prototype);
 // workflowContextMixin(QEPWXInputDataManager.prototype);
 // jobContextMixin(QEPWXInputDataManager.prototype);
+exports.default = QEPWXInputDataManager;

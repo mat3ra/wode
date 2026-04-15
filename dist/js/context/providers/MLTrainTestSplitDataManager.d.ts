@@ -4,9 +4,7 @@ import { type UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
 type Schema = MlTrainTestSplitContextItemSchema;
 type ExternalContext = JinjaExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext>;
-declare const MLTrainTestSplitDataManager_base: Base;
-export default class MLTrainTestSplitDataManager extends MLTrainTestSplitDataManager_base {
+declare class MLTrainTestSplitDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "mlTrainTestSplit";
     readonly domain: "important";
     readonly entityName: "unit";
@@ -22,4 +20,4 @@ export default class MLTrainTestSplitDataManager extends MLTrainTestSplitDataMan
         fraction_held_as_test_set: number;
     };
 }
-export {};
+export default MLTrainTestSplitDataManager;

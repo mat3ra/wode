@@ -9,7 +9,7 @@ type Data = PointsGridDataProviderSchema;
 export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
 declare const PointsGridFormDataProvider_base: Base;
-export default abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends PointsGridFormDataProvider_base {
+declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends PointsGridFormDataProvider_base {
     abstract readonly name: N;
     readonly domain: "important";
     readonly entityName: "unit";
@@ -141,4 +141,4 @@ export default abstract class PointsGridFormDataProvider<N extends Schema["name"
     private calculateGridMetric;
     setData(data: Data): void;
 }
-export {};
+export default PointsGridFormDataProvider;

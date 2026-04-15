@@ -7,7 +7,6 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 
 type Schema = MlTrainTestSplitContextItemSchema;
 type ExternalContext = JinjaExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext>;
 
 const jsonSchemaId = "context-providers-directory/ml-train-test-split-context-provider";
 
@@ -15,7 +14,7 @@ const defaultData = {
     fraction_held_as_test_set: 0.2,
 };
 
-export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider as Base) {
+class MLTrainTestSplitDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "mlTrainTestSplit" as const;
 
     readonly domain = "important" as const;
@@ -56,3 +55,5 @@ export default class MLTrainTestSplitDataManager extends (JSONSchemaDataProvider
         return defaultData;
     }
 }
+
+export default MLTrainTestSplitDataManager;

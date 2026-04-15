@@ -23,7 +23,7 @@ export type HubbardExternalContext = JinjaExternalContext & MaterialExternalCont
 type Base = typeof JSONSchemaDataProvider<Schema, HubbardExternalContext> &
     Constructor<MaterialContextMixin>;
 
-export default abstract class HubbardContextProvider<
+abstract class HubbardContextProvider<
     S extends Schema,
     EC extends HubbardExternalContext = HubbardExternalContext,
 > extends (JSONSchemaDataProvider as Base) {
@@ -81,3 +81,5 @@ export default abstract class HubbardContextProvider<
 }
 
 materialContextMixin(HubbardContextProvider.prototype);
+
+export default HubbardContextProvider;

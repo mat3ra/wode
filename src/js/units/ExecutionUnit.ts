@@ -24,6 +24,7 @@ import BaseUnit from "./BaseUnit";
 import ExecutionUnitInput from "./ExecutionUnitInput";
 
 type Schema = ExecutionUnitSchema;
+
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
 type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutableProps;

@@ -17,11 +17,11 @@ export type RuntimeItemsUILogic = {
     get postProcessorNames(): string[];
     get preProcessorNames(): string[];
 };
-type Base = InMemoryEntity & RuntimeItems & {
+interface RuntimeItemsUILogicMixinBase extends InMemoryEntity, RuntimeItems {
     defaultResults: NameResultSchema[];
     defaultMonitors: NameResultSchema[];
     defaultPreProcessors: NameResultSchema[];
     defaultPostProcessors: NameResultSchema[];
-};
-export declare function runtimeItemsUILogicMixin<T extends Base>(item: T): void;
+}
+export declare function runtimeItemsUILogicMixin<T extends RuntimeItemsUILogicMixinBase>(item: T): void;
 export {};

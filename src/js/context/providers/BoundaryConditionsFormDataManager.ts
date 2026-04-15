@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type { BoundaryConditionsContextItemSchema } from "@mat3ra/esse/dist/js/types";
@@ -13,12 +12,12 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 type Schema = BoundaryConditionsContextItemSchema;
 type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface BoundaryConditionsFormDataManager extends MaterialContextMixin {}
 
 const jsonSchemaId = "context-providers-directory/boundary-conditions-data-provider";
 
-export default class BoundaryConditionsFormDataManager extends (JSONSchemaDataProvider as Base) {
+class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "boundaryConditions" as const;
 
     readonly domain = "important" as const;
@@ -80,3 +79,5 @@ export default class BoundaryConditionsFormDataManager extends (JSONSchemaDataPr
 }
 
 materialContextMixin(BoundaryConditionsFormDataManager.prototype);
+
+export default BoundaryConditionsFormDataManager;

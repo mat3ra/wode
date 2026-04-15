@@ -1,5 +1,4 @@
 import { PERIODIC_TABLE } from "@exabyte-io/periodic-table.js";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     BaseMethod,
@@ -49,13 +48,12 @@ type ExternalContext = JinjaExternalContext &
     JobExternalContext &
     MethodDataExternalContext &
     MaterialsExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin> &
-    Constructor<MaterialsContextMixin>;
+
+interface QEPWXInputDataManager extends MaterialContextMixin, MaterialsContextMixin {}
 
 const jsonSchemaId = "context-providers-directory/by-application/qe-pwx-context-provider";
 
-export default class QEPWXInputDataManager extends (JSONSchemaDataProvider as Base) {
+class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "input" as const;
 
     readonly domain = "executable" as const;
@@ -176,3 +174,5 @@ materialsContextMixin(QEPWXInputDataManager.prototype);
 // methodDataContextMixin(QEPWXInputDataManager.prototype);
 // workflowContextMixin(QEPWXInputDataManager.prototype);
 // jobContextMixin(QEPWXInputDataManager.prototype);
+
+export default QEPWXInputDataManager;

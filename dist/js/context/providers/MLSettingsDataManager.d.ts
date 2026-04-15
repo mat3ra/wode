@@ -4,9 +4,7 @@ import { type UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
 type Schema = MlSettingsContextItemSchema;
 type ExternalContext = JinjaExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext>;
-declare const MLSettingsDataManager_base: Base;
-export default class MLSettingsDataManager extends MLSettingsDataManager_base {
+declare class MLSettingsDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name: "mlSettings";
     readonly domain: "important";
     readonly entityName: "unit";
@@ -23,4 +21,4 @@ export default class MLSettingsDataManager extends MLSettingsDataManager_base {
         problem_category: "regression";
     };
 }
-export {};
+export default MLSettingsDataManager;

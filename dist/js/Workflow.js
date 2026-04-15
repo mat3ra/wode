@@ -3,11 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Workflow = void 0;
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
+const TaggableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/TaggableMixin");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const compute_1 = require("@mat3ra/ide/dist/js/compute");
 const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
 const enums_1 = require("./enums");
@@ -249,8 +250,10 @@ class Workflow extends entity_1.InMemoryEntity {
         });
     }
 }
-exports.Workflow = Workflow;
 Workflow.defaultConfig = default_1.default;
 (0, NamedEntityMixin_1.namedEntityMixin)(Workflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Workflow);
 (0, WorkflowSchemaMixin_1.workflowSchemaMixin)(Workflow.prototype);
+(0, TaggableMixin_1.taggableMixin)(Workflow.prototype);
+(0, compute_1.computedEntityMixin)(Workflow.prototype);
+exports.default = Workflow;

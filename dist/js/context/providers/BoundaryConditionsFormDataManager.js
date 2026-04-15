@@ -56,5 +56,5 @@ class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider_1.default
         return jsonSchema;
     }
 }
-exports.default = BoundaryConditionsFormDataManager;
 (0, MaterialContextMixin_1.default)(BoundaryConditionsFormDataManager.prototype);
+exports.default = BoundaryConditionsFormDataManager;

@@ -63,5 +63,5 @@ const MapUnit_1 = require("./units/MapUnit");
 Object.defineProperty(exports, "defaultMapConfig", { enumerable: true, get: function () { return MapUnit_1.defaultMapConfig; } });
 const utils = __importStar(require("./utils"));
 exports.utils = utils;
-const Workflow_1 = require("./Workflow");
-Object.defineProperty(exports, "Workflow", { enumerable: true, get: function () { return Workflow_1.Workflow; } });
+const Workflow_1 = __importDefault(require("./Workflow"));
+exports.Workflow = Workflow_1.default;

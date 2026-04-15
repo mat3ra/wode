@@ -386,7 +386,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         nextStep.next = unitForConvergence.flowchartId;
     }
 }
-exports.default = Subworkflow;
 (0, NamedEntityMixin_1.namedEntityMixin)(Subworkflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Subworkflow);
 (0, SubworkflowSchemaMixin_1.subworkflowSchemaMixin)(Subworkflow.prototype);
+exports.default = Subworkflow;

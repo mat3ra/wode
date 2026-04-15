@@ -51,6 +51,6 @@ class VASPInputDataManager extends JSONSchemaDataProvider_1.default {
         };
     }
 }
-exports.default = VASPInputDataManager;
 (0, MaterialContextMixin_1.default)(VASPInputDataManager.prototype);
 (0, MaterialsContextMixin_1.default)(VASPInputDataManager.prototype);
+exports.default = VASPInputDataManager;

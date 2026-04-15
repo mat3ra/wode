@@ -24,16 +24,17 @@ type RuntimeItemsUILogicPrivate = {
     toggleRuntimeItem(key: ItemKey, data: NameResultSchema, isAdding: boolean): void;
 };
 
-type Base = InMemoryEntity &
-    RuntimeItems & {
-        defaultResults: NameResultSchema[];
-        defaultMonitors: NameResultSchema[];
-        defaultPreProcessors: NameResultSchema[];
-        defaultPostProcessors: NameResultSchema[];
-    };
+interface RuntimeItemsUILogicMixinBase extends InMemoryEntity, RuntimeItems {
+    defaultResults: NameResultSchema[];
+    defaultMonitors: NameResultSchema[];
+    defaultPreProcessors: NameResultSchema[];
+    defaultPostProcessors: NameResultSchema[];
+}
 
 // @ts-expect-error
-const propertiesMixin: Base & RuntimeItemsUILogic & RuntimeItemsUILogicPrivate = {
+const propertiesMixin: RuntimeItemsUILogicMixinBase &
+    RuntimeItemsUILogic &
+    RuntimeItemsUILogicPrivate = {
     setRuntimeItemsToDefaultValues() {
         this.results = this.defaultResults;
         this.monitors = this.defaultMonitors;
@@ -82,6 +83,6 @@ const propertiesMixin: Base & RuntimeItemsUILogic & RuntimeItemsUILogicPrivate =
     },
 };
 
-export function runtimeItemsUILogicMixin<T extends Base>(item: T) {
+export function runtimeItemsUILogicMixin<T extends RuntimeItemsUILogicMixinBase>(item: T) {
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(propertiesMixin));
 }

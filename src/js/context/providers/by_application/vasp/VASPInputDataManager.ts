@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { InputContextItemSchema, VASPContextProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { Material } from "@mat3ra/made";
@@ -20,13 +19,12 @@ import JSONSchemaDataProvider, {
 type Data = VASPContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
 type ExternalContext = JinjaExternalContext & MaterialExternalContext & MaterialsExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin> &
-    Constructor<MaterialsContextMixin>;
+
+interface VASPInputDataManager extends MaterialContextMixin, MaterialsContextMixin {}
 
 const jsonSchemaId = "context-providers-directory/by-application/vasp-context-provider";
 
-export default class VASPInputDataManager extends (JSONSchemaDataProvider as Base) {
+class VASPInputDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "input" as const;
 
     readonly domain = "executable" as const;
@@ -87,3 +85,5 @@ export default class VASPInputDataManager extends (JSONSchemaDataProvider as Bas
 
 materialContextMixin(VASPInputDataManager.prototype);
 materialsContextMixin(VASPInputDataManager.prototype);
+
+export default VASPInputDataManager;

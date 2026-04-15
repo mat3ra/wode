@@ -222,5 +222,5 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         return super.setData(data);
     }
 }
-exports.default = PointsGridFormDataProvider;
 (0, MaterialContextMixin_1.default)(PointsGridFormDataProvider.prototype);
+exports.default = PointsGridFormDataProvider;

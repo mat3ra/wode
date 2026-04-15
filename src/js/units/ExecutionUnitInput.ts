@@ -1,6 +1,5 @@
 import { Template } from "@mat3ra/ade";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { TemplateSchema } from "@mat3ra/esse/dist/js/types";
@@ -8,18 +7,20 @@ import { setupNunjucksEnvironment } from "@mat3ra/standata";
 import nunjucks from "nunjucks";
 
 import {
-    ExecutionUnitInputSchemaMixin,
+    type ExecutionUnitInputSchemaMixin,
     executionUnitInputSchemaMixin,
 } from "../generated/ExecutionUnitInputSchemaMixin";
 
 type Schema = ExecutionUnitInputSchemaMixin;
 type JSON = Schema & AnyObject;
-type Base = typeof InMemoryEntity & Constructor<ExecutionUnitInputSchemaMixin>;
 type ConstructorConfig = Schema | (Omit<Schema, "template"> & { template: Template });
 
 const env = setupNunjucksEnvironment(new nunjucks.Environment());
 
-export default class ExecutionUnitInput extends (InMemoryEntity as Base) implements Schema {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ExecutionUnitInput extends ExecutionUnitInputSchemaMixin {}
+
+class ExecutionUnitInput extends InMemoryEntity implements Schema {
     declare _json: JSON;
 
     declare toJSON: () => JSON;
@@ -66,3 +67,5 @@ export default class ExecutionUnitInput extends (InMemoryEntity as Base) impleme
 }
 
 executionUnitInputSchemaMixin(ExecutionUnitInput.prototype);
+
+export default ExecutionUnitInput;

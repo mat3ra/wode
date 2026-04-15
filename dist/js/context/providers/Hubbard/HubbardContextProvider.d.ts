@@ -6,7 +6,7 @@ type Schema = HubbardJContextItemSchema | HubbardUContextItemSchema | HubbardVCo
 export type HubbardExternalContext = JinjaExternalContext & MaterialExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema, HubbardExternalContext> & Constructor<MaterialContextMixin>;
 declare const HubbardContextProvider_base: Base;
-export default abstract class HubbardContextProvider<S extends Schema, EC extends HubbardExternalContext = HubbardExternalContext> extends HubbardContextProvider_base {
+declare abstract class HubbardContextProvider<S extends Schema, EC extends HubbardExternalContext = HubbardExternalContext> extends HubbardContextProvider_base {
     abstract readonly name: S["name"];
     abstract getDefaultData(): S["data"];
     readonly domain: "important";
@@ -17,4 +17,4 @@ export default abstract class HubbardContextProvider<S extends Schema, EC extend
     protected readonly orbitalList: string[];
     constructor(contextItem: Partial<S>, externalContext: EC);
 }
-export {};
+export default HubbardContextProvider;

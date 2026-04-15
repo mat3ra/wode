@@ -97,5 +97,5 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.default
         };
     }
 }
-exports.default = CollinearMagnetizationDataManager;
 (0, MaterialContextMixin_1.default)(CollinearMagnetizationDataManager.prototype);
+exports.default = CollinearMagnetizationDataManager;

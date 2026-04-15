@@ -7,7 +7,6 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSc
 
 type Schema = MlSettingsContextItemSchema;
 type ExternalContext = JinjaExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext>;
 
 const jsonSchemaId = "context-providers-directory/ml-settings-context-provider";
 
@@ -16,7 +15,7 @@ const defaultData = {
     problem_category: "regression" as const,
 };
 
-export default class MLSettingsDataManager extends (JSONSchemaDataProvider as Base) {
+class MLSettingsDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "mlSettings" as const;
 
     readonly domain = "important" as const;
@@ -58,3 +57,5 @@ export default class MLSettingsDataManager extends (JSONSchemaDataProvider as Ba
         return defaultData;
     }
 }
+
+export default MLSettingsDataManager;

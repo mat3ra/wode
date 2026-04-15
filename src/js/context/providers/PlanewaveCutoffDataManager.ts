@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { CutoffsContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
@@ -16,8 +15,9 @@ type ApplicationName = "vasp" | "espresso";
 
 type Schema = CutoffsContextItemSchema;
 type PlanewaveExternalContext = BaseExternalContext & ApplicationExternalContext;
-type Base = typeof ContextProvider<Schema, PlanewaveExternalContext> &
-    Constructor<ApplicationContextMixin>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface PlanewaveCutoffDataManager extends ApplicationContextMixin {}
 
 // Type guard to check if a string is a valid ApplicationName
 function isApplicationName(name: string): name is ApplicationName {
@@ -37,7 +37,7 @@ const defaultData = {
 
 const jsonSchemaId = "context-providers-directory/planewave-cutoffs-context-provider";
 
-export default class PlanewaveCutoffDataManager extends (ContextProvider as Base) {
+class PlanewaveCutoffDataManager extends ContextProvider<Schema, PlanewaveExternalContext> {
     readonly name = "cutoffs" as const;
 
     readonly domain = "important" as const;
@@ -106,3 +106,5 @@ export default class PlanewaveCutoffDataManager extends (ContextProvider as Base
 }
 
 applicationContextMixin(PlanewaveCutoffDataManager.prototype);
+
+export default PlanewaveCutoffDataManager;

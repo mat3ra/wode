@@ -30,18 +30,17 @@ import {
     runtimeItemsUILogicMixin,
 } from "./mixins/RuntimeItemsUILogicMixin";
 
+type Schema = WorkflowBaseUnitSchema;
+
 type Base = typeof InMemoryEntity &
     Constructor<NamedEntity> &
     Constructor<Defaultable> &
-    // Constructor<HasRepetition> &
     Constructor<Taggable> &
     Constructor<HashedEntity> &
     Constructor<RuntimeItems> &
     Constructor<RuntimeItemsUILogic> &
     Constructor<BaseUnitSchemaMixin> &
     Constructor<StatusSchemaMixin>;
-
-type Schema = WorkflowBaseUnitSchema;
 
 class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
