@@ -4,6 +4,7 @@ const ade_1 = require("@mat3ra/ade");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
+const compute_1 = require("@mat3ra/ide/dist/js/compute");
 const mode_1 = require("@mat3ra/mode");
 const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
@@ -123,7 +124,6 @@ class Subworkflow extends entity_1.InMemoryEntity {
         }
     }
     setUnits(units) {
-        // TODO: remove the setNextLinks and setUnitsHead and handle the logic via flowchart designer
         this.unitsInstances = (0, standata_1.setUnitLinks)(units);
         this.units = units.map((x) => x.toJSON());
         this.properties = units.map((x) => x.resultNames).flat();
@@ -388,5 +388,6 @@ class Subworkflow extends entity_1.InMemoryEntity {
 }
 (0, NamedEntityMixin_1.namedEntityMixin)(Subworkflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Subworkflow);
+(0, compute_1.computedEntityMixin)(Subworkflow.prototype);
 (0, SubworkflowSchemaMixin_1.subworkflowSchemaMixin)(Subworkflow.prototype);
 exports.default = Subworkflow;

@@ -8,6 +8,7 @@ import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/Defau
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory, PseudopotentialMethod } from "@mat3ra/mode";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -47,7 +48,8 @@ type ConvergenceConfig = {
 interface Subworkflow
     extends DefaultableInMemoryEntity,
         NamedInMemoryEntity,
-        SubworkflowSchemaMixin {}
+        SubworkflowSchemaMixin,
+        Omit<ComputedEntityMixin, "compute"> {}
 
 type SubworkflowExternalContext = MaterialExternalContext &
     MaterialsExternalContext &
@@ -181,7 +183,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     /**
      * TODO: reuse workflow function instead
      */
-    private addUnit(unit: AnySubworkflowUnit, index = -1) {
+    addUnit(unit: AnySubworkflowUnit, index = -1) {
         const { unitsInstances } = this;
 
         if (unitsInstances.length === 0) {
@@ -197,7 +199,6 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     }
 
     private setUnits(units: AnySubworkflowUnit[]) {
-        // TODO: remove the setNextLinks and setUnitsHead and handle the logic via flowchart designer
         this.unitsInstances = setUnitLinks(units);
         this.units = units.map((x) => x.toJSON());
         this.properties = units.map((x) => x.resultNames).flat();
@@ -520,6 +521,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
 namedEntityMixin(Subworkflow.prototype);
 defaultableEntityMixin(Subworkflow);
+computedEntityMixin(Subworkflow.prototype);
 subworkflowSchemaMixin(Subworkflow.prototype);
 
 export default Subworkflow;

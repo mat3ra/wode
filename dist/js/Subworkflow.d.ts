@@ -2,6 +2,7 @@ import { Application } from "@mat3ra/ade";
 import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { type ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory } from "@mat3ra/mode";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -24,7 +25,7 @@ type ConvergenceConfig = {
     maxOccurrences: number;
     externalContext: SubworkflowExternalContext;
 };
-interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin {
+interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin, Omit<ComputedEntityMixin, "compute"> {
 }
 type SubworkflowExternalContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & WorkflowExternalContext & JobExternalContext;
 declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
@@ -61,7 +62,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     /**
      * TODO: reuse workflow function instead
      */
-    private addUnit;
+    addUnit(unit: AnySubworkflowUnit, index?: number): void;
     private setUnits;
     removeUnit(flowchartId: string): void;
     getUnit(flowchartId: string): AnySubworkflowUnit | undefined;
