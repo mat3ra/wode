@@ -11,13 +11,14 @@ import BaseUnit from "./BaseUnit";
 
 type Schema = AssignmentUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssignmentUnitSchemaMixin>;
+export type AssignmentUnitConfig = Partial<Schema>;
 
 class AssignmentUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
 
-    constructor(config: Partial<Schema>) {
+    constructor(config: AssignmentUnitConfig) {
         super({
             name: UnitType.assignment,
             type: UnitType.assignment,

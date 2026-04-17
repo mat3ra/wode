@@ -27,7 +27,7 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutableProps;
+export type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutableProps;
 
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 

@@ -1,11 +1,11 @@
-import type { WorkflowSubworkflowUnitSchema, WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitType } from "../enums";
-import AssertionUnit from "./AssertionUnit";
-import AssignmentUnit from "./AssignmentUnit";
-import ConditionUnit from "./ConditionUnit";
-import ExecutionUnit from "./ExecutionUnit";
-import IOUnit from "./IOUnit";
+import AssertionUnit, { type AssertionUnitConfig } from "./AssertionUnit";
+import AssignmentUnit, { type AssignmentUnitConfig } from "./AssignmentUnit";
+import ConditionUnit, { type ConditionUnitConfig } from "./ConditionUnit";
+import ExecutionUnit, { type ExecutionUnitConfig } from "./ExecutionUnit";
+import IOUnit, { type IOUnitConfig } from "./IOUnit";
 import MapUnit from "./MapUnit";
 import ReduceUnit from "./ReduceUnit";
 import SubworkflowUnit from "./SubworkflowUnit";
@@ -33,7 +33,14 @@ export class UnitFactory {
         }
     }
 
-    static createInSubworkflow(config: WorkflowSubworkflowUnitSchema): AnySubworkflowUnit {
+    static createInSubworkflow(
+        config:
+            | ExecutionUnitConfig
+            | AssignmentUnitConfig
+            | ConditionUnitConfig
+            | IOUnitConfig
+            | AssertionUnitConfig,
+    ): AnySubworkflowUnit {
         switch (config.type) {
             case UnitType.execution:
                 return new ExecutionUnit(config);

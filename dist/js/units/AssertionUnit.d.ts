@@ -5,11 +5,12 @@ import { type AssertionUnitSchemaMixin } from "../generated/AssertionUnitSchemaM
 import BaseUnit from "./BaseUnit";
 type Schema = AssertionUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssertionUnitSchemaMixin>;
+export type AssertionUnitConfig = Partial<Schema>;
 declare const AssertionUnit_base: Base;
 declare class AssertionUnit extends AssertionUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config: Partial<Schema>);
+    constructor(config: AssertionUnitConfig);
     getHashObject(): {
         statement: string;
         errorMessage: string | undefined;

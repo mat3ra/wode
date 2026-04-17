@@ -5,11 +5,12 @@ import { type AssignmentUnitSchemaMixin } from "../generated/AssignmentUnitSchem
 import BaseUnit from "./BaseUnit";
 type Schema = AssignmentUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssignmentUnitSchemaMixin>;
+export type AssignmentUnitConfig = Partial<Schema>;
 declare const AssignmentUnit_base: Base;
 declare class AssignmentUnit extends AssignmentUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config: Partial<Schema>);
+    constructor(config: AssignmentUnitConfig);
     getHashObject(): object;
 }
 export default AssignmentUnit;

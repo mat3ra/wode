@@ -12,12 +12,14 @@ import BaseUnit from "./BaseUnit";
 type Schema = AssertionUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssertionUnitSchemaMixin>;
 
+export type AssertionUnitConfig = Partial<Schema>;
+
 class AssertionUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
 
-    constructor(config: Partial<Schema>) {
+    constructor(config: AssertionUnitConfig) {
         super({
             name: UnitType.assertion,
             type: UnitType.assertion,

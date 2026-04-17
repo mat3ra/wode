@@ -5,11 +5,12 @@ import { type ConditionUnitSchemaMixin } from "../generated/ConditionUnitSchemaM
 import BaseUnit from "./BaseUnit";
 type Schema = ConditionUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<ConditionUnitSchemaMixin>;
+export type ConditionUnitConfig = Partial<Schema>;
 declare const ConditionUnit_base: Base;
 declare class ConditionUnit extends ConditionUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config: Partial<Schema>);
+    constructor(config: ConditionUnitConfig);
     getHashObject(): object;
 }
 export default ConditionUnit;
