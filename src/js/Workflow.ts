@@ -221,7 +221,7 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         }
     }
 
-    private removeUnit(flowchartId: string) {
+    removeUnit(flowchartId: string) {
         if (this.units.length < 2) {
             return;
         }

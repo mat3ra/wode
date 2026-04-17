@@ -52,7 +52,7 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     getSystemName(): string;
     getDefaultDescription(): string;
     private addUnit;
-    private removeUnit;
+    removeUnit(flowchartId: string): void;
     addUnitType(type: UnitType, head?: boolean, index?: number): void;
     addMapUnit(mapUnit: MapUnit, mapWorkflow: Workflow): void;
     get allSubworkflows(): Subworkflow[];
