@@ -8,7 +8,18 @@ const ReduceUnitSchemaMixin_1 = require("../generated/ReduceUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class ReduceUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({ ...config, type: enums_1.UnitType.reduce });
+        const schema = {
+            name: enums_1.UnitType.reduce,
+            mapFlowchartId: "",
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: enums_1.UnitType.reduce,
+        };
+        super(schema);
     }
 }
 (0, ReduceUnitSchemaMixin_1.reduceUnitSchemaMixin)(ReduceUnit.prototype);

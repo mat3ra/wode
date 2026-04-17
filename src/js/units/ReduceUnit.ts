@@ -12,13 +12,27 @@ import BaseUnit from "./BaseUnit";
 type Schema = ReduceUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<ReduceUnitSchemaMixin>;
 
+export type ReduceUnitConfig = Partial<Omit<Schema, "type" | "flowchartId">> &
+    Pick<Schema, "flowchartId">;
+
 class ReduceUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
 
-    constructor(config: Omit<Schema, "type">) {
-        super({ ...config, type: UnitType.reduce });
+    constructor(config: ReduceUnitConfig) {
+        const schema: Schema = {
+            name: UnitType.reduce,
+            mapFlowchartId: "",
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: UnitType.reduce,
+        };
+        super(schema);
     }
 }
 

@@ -5,10 +5,11 @@ import { type ReduceUnitSchemaMixin } from "../generated/ReduceUnitSchemaMixin";
 import BaseUnit from "./BaseUnit";
 type Schema = ReduceUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<ReduceUnitSchemaMixin>;
+export type ReduceUnitConfig = Partial<Omit<Schema, "type" | "flowchartId">> & Pick<Schema, "flowchartId">;
 declare const ReduceUnit_base: Base;
 declare class ReduceUnit extends ReduceUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config: Omit<Schema, "type">);
+    constructor(config: ReduceUnitConfig);
 }
 export default ReduceUnit;

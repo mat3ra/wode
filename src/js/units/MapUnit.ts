@@ -9,8 +9,8 @@ import BaseUnit from "./BaseUnit";
 type Schema = MapUnitSchema;
 
 export const defaultMapConfig = {
-    name: UnitType.map as string,
-    type: UnitType.map as const,
+    name: UnitType.map,
+    type: UnitType.map,
     workflowId: "",
     input: {
         target: "MAP_DATA",
@@ -19,17 +19,29 @@ export const defaultMapConfig = {
         values: [],
         useValues: false,
     },
+    results: [],
+    monitors: [],
+    preProcessors: [],
+    postProcessors: [],
 };
 
 type Base = typeof BaseUnit<Schema> & Constructor<MapUnitSchemaMixin>;
+
+export type MapUnitConfig = Partial<Omit<Schema, "type">>;
 
 class MapUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
 
-    constructor(config?: Partial<Schema>) {
-        super({ ...defaultMapConfig, ...config });
+    constructor(config: MapUnitConfig) {
+        const schema: Schema = {
+            ...defaultMapConfig,
+            ...config,
+            flowchartId: config.flowchartId ?? "",
+            type: UnitType.map,
+        };
+        super(schema);
     }
 
     setWorkflowId(id: string) {

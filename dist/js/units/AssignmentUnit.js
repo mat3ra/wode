@@ -8,14 +8,21 @@ const AssignmentUnitSchemaMixin_1 = require("../generated/AssignmentUnitSchemaMi
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class AssignmentUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({
-            name: enums_1.UnitType.assignment,
-            type: enums_1.UnitType.assignment,
+        var _a, _b;
+        const schema = {
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             operand: "X",
             value: "1",
-            input: [],
             ...config,
-        });
+            name: (_a = config.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.assignment,
+            flowchartId: (_b = config.flowchartId) !== null && _b !== void 0 ? _b : "",
+            type: enums_1.UnitType.assignment,
+        };
+        super(schema);
     }
     getHashObject() {
         return { input: this.input, operand: this.operand, value: this.value };

@@ -8,7 +8,16 @@ const SubworkflowUnitSchemaMixin_1 = require("../generated/SubworkflowUnitSchema
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class SubworkflowUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({ name: "New Subworkflow", ...config, type: enums_1.UnitType.subworkflow });
+        const schema = {
+            name: "New Subworkflow",
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: enums_1.UnitType.subworkflow,
+        };
+        super(schema);
     }
 }
 (0, SubworkflowUnitSchemaMixin_1.subworkflowUnitSchemaMixin)(SubworkflowUnit.prototype);

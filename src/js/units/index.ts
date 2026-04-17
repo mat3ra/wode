@@ -9,6 +9,8 @@ import MapUnit from "./MapUnit";
 import ReduceUnit from "./ReduceUnit";
 import SubworkflowUnit from "./SubworkflowUnit";
 
+export type { ReduceUnitConfig } from "./ReduceUnit";
+export type { SubworkflowUnitConfig } from "./SubworkflowUnit";
 export {
     BaseUnit,
     AssertionUnit,

@@ -12,13 +12,25 @@ import BaseUnit from "./BaseUnit";
 type Schema = SubworkflowUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<SubworkflowUnitSchemaMixin>;
 
+export type SubworkflowUnitConfig = Partial<Omit<Schema, "flowchartId">> &
+    Pick<Schema, "flowchartId">;
+
 class SubworkflowUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
 
-    constructor(config: Partial<Schema>) {
-        super({ name: "New Subworkflow", ...config, type: UnitType.subworkflow });
+    constructor(config: SubworkflowUnitConfig) {
+        const schema: Schema = {
+            name: "New Subworkflow",
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: UnitType.subworkflow,
+        };
+        super(schema);
     }
 }
 

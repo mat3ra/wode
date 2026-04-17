@@ -13,6 +13,7 @@ const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
 class BaseUnit extends entity_1.InMemoryEntity {
     constructor(config) {
+        var _a;
         super({
             results: [],
             monitors: [],
@@ -21,7 +22,7 @@ class BaseUnit extends entity_1.InMemoryEntity {
             ...config,
             status: config.status || enums_1.UnitStatus.idle,
             statusTrack: config.statusTrack || [],
-            flowchartId: config.flowchartId || utils_1.Utils.uuid.getUUID(),
+            flowchartId: (_a = config.flowchartId) !== null && _a !== void 0 ? _a : utils_1.Utils.uuid.getUUID(),
             tags: config.tags || [],
         });
         this.defaultResults = [];

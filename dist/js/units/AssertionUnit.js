@@ -8,13 +8,18 @@ const AssertionUnitSchemaMixin_1 = require("../generated/AssertionUnitSchemaMixi
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class AssertionUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({
+        const schema = {
             name: enums_1.UnitType.assertion,
-            type: enums_1.UnitType.assertion,
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             statement: "true",
             errorMessage: "assertion failed",
             ...config,
-        });
+            type: enums_1.UnitType.assertion,
+        };
+        super(schema);
     }
     getHashObject() {
         return { statement: this.statement, errorMessage: this.errorMessage };

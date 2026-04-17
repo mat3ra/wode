@@ -16,6 +16,7 @@ import {
 } from "../context/providers";
 import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
+import { UnitType } from "../enums";
 import {
     type ExecutionUnitSchemaMixin,
     executionUnitSchemaMixin,
@@ -27,7 +28,12 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-export type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutableProps;
+export type ExecutionUnitConfig = Omit<
+    Partial<Schema>,
+    "executable" | "flavor" | "application" | "flowchartId"
+> &
+    SetApplicationProps &
+    Pick<Schema, "flowchartId">;
 
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 
@@ -45,13 +51,31 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: ExecutionUnitConfig) {
-        super(config);
+        const { executable, flavor } = globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
+                appName: config.application.name,
+                appVersion: config.application.version,
+            });
 
-        const { application, executable, flavor } = config;
+        const schema: Schema = {
+            name: UnitType.execution,
+            type: UnitType.execution,
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            executable,
+            flavor,
+            context: [],
+            ...config,
+        };
+        super(schema);
 
-        this.setApplication({ application, executable, flavor });
+        this.setApplication(config);
 
-        this.name = this.name || this.flavor?.name || "";
+        this.name = this.name || this.flavor.name || "";
     }
 
     setApplication({ application, executable, flavor }: SetApplicationProps) {

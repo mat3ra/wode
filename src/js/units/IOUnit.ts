@@ -9,7 +9,7 @@ import BaseUnit from "./BaseUnit";
 type Schema = DataIOUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<IOUnitSchemaMixin>;
 
-export type IOUnitConfig = Partial<Schema>;
+export type IOUnitConfig = Partial<Omit<Schema, "flowchartId">> & Pick<Schema, "flowchartId">;
 
 class IOUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
@@ -17,7 +17,19 @@ class IOUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: IOUnitConfig) {
-        super({ name: UnitType.io, subtype: "input", ...config, type: UnitType.io });
+        const schema: Schema = {
+            name: UnitType.io,
+            subtype: "input" as const,
+            source: "api" as const,
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: UnitType.io,
+        };
+        super(schema);
     }
 }
 

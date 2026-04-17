@@ -6,8 +6,8 @@ import { type MapUnitSchemaMixin } from "../generated/MapUnitSchemaMixin";
 import BaseUnit from "./BaseUnit";
 type Schema = MapUnitSchema;
 export declare const defaultMapConfig: {
-    name: string;
-    type: UnitType.map;
+    name: UnitType;
+    type: UnitType;
     workflowId: string;
     input: {
         target: string;
@@ -16,13 +16,18 @@ export declare const defaultMapConfig: {
         values: never[];
         useValues: boolean;
     };
+    results: never[];
+    monitors: never[];
+    preProcessors: never[];
+    postProcessors: never[];
 };
 type Base = typeof BaseUnit<Schema> & Constructor<MapUnitSchemaMixin>;
+export type MapUnitConfig = Partial<Omit<Schema, "type">>;
 declare const MapUnit_base: Base;
 declare class MapUnit extends MapUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config?: Partial<Schema>);
+    constructor(config: MapUnitConfig);
     setWorkflowId(id: string): void;
 }
 export default MapUnit;

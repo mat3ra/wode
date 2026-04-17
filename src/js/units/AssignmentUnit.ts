@@ -19,14 +19,20 @@ class AssignmentUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: AssignmentUnitConfig) {
-        super({
-            name: UnitType.assignment,
-            type: UnitType.assignment,
+        const schema: Schema = {
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             operand: "X",
             value: "1",
-            input: [],
             ...config,
-        });
+            name: config.name ?? UnitType.assignment,
+            flowchartId: config.flowchartId ?? "",
+            type: UnitType.assignment,
+        };
+        super(schema);
     }
 
     getHashObject(): object {

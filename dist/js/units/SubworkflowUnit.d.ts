@@ -5,10 +5,11 @@ import { type SubworkflowUnitSchemaMixin } from "../generated/SubworkflowUnitSch
 import BaseUnit from "./BaseUnit";
 type Schema = SubworkflowUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<SubworkflowUnitSchemaMixin>;
+export type SubworkflowUnitConfig = Partial<Omit<Schema, "flowchartId">> & Pick<Schema, "flowchartId">;
 declare const SubworkflowUnit_base: Base;
 declare class SubworkflowUnit extends SubworkflowUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
-    constructor(config: Partial<Schema>);
+    constructor(config: SubworkflowUnitConfig);
 }
 export default SubworkflowUnit;

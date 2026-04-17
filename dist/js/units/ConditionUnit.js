@@ -8,19 +8,23 @@ const ConditionUnitSchemaMixin_1 = require("../generated/ConditionUnitSchemaMixi
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class ConditionUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({
-            name: enums_1.UnitType.condition,
-            type: enums_1.UnitType.condition,
+        var _a, _b;
+        const schema = {
             input: [],
             results: [],
             preProcessors: [],
             postProcessors: [],
-            then: undefined,
-            else: undefined,
+            monitors: [],
+            then: "",
+            else: "",
             statement: "true",
             maxOccurrences: 100,
             ...config,
-        });
+            name: (_a = config.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.condition,
+            flowchartId: (_b = config.flowchartId) !== null && _b !== void 0 ? _b : "",
+            type: enums_1.UnitType.condition,
+        };
+        super(schema);
     }
     getHashObject() {
         return { statement: this.statement, maxOccurrences: this.maxOccurrences };

@@ -6,19 +6,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("@mat3ra/utils");
 const providers_1 = require("../context/providers");
 const settings_1 = require("../context/providers/settings");
+const enums_1 = require("../enums");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
 class ExecutionUnit extends BaseUnit_1.default {
     constructor(config) {
-        var _a;
-        super(config);
+        const { executable, flavor } = settings_1.globalSettings
+            .getApplicationsDriver()
+            .getExecutableAndFlavorByName({
+            appName: config.application.name,
+            appVersion: config.application.version,
+        });
+        const schema = {
+            name: enums_1.UnitType.execution,
+            type: enums_1.UnitType.execution,
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            executable,
+            flavor,
+            context: [],
+            ...config,
+        };
+        super(schema);
         this.inputInstances = [];
         this.renderingContext = {};
         this.contextProvidersInstances = [];
-        const { application, executable, flavor } = config;
-        this.setApplication({ application, executable, flavor });
-        this.name = this.name || ((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) || "";
+        this.setApplication(config);
+        this.name = this.name || this.flavor.name || "";
     }
     setApplication({ application, executable, flavor }) {
         this.setProp("application", application);

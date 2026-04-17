@@ -20,19 +20,22 @@ class ConditionUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: ConditionUnitConfig) {
-        super({
-            name: UnitType.condition,
-            type: UnitType.condition,
+        const schema: Schema = {
             input: [],
             results: [],
             preProcessors: [],
             postProcessors: [],
-            then: undefined,
-            else: undefined,
+            monitors: [],
+            then: "",
+            else: "",
             statement: "true",
             maxOccurrences: 100,
             ...config,
-        });
+            name: config.name ?? UnitType.condition,
+            flowchartId: config.flowchartId ?? "",
+            type: UnitType.condition,
+        };
+        super(schema);
     }
 
     getHashObject(): object {

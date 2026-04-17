@@ -18,10 +18,21 @@ exports.defaultMapConfig = {
         values: [],
         useValues: false,
     },
+    results: [],
+    monitors: [],
+    preProcessors: [],
+    postProcessors: [],
 };
 class MapUnit extends BaseUnit_1.default {
     constructor(config) {
-        super({ ...exports.defaultMapConfig, ...config });
+        var _a;
+        const schema = {
+            ...exports.defaultMapConfig,
+            ...config,
+            flowchartId: (_a = config.flowchartId) !== null && _a !== void 0 ? _a : "",
+            type: enums_1.UnitType.map,
+        };
+        super(schema);
     }
     setWorkflowId(id) {
         this.setProp("workflowId", id);

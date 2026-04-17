@@ -9,7 +9,7 @@ import BaseUnit from "./BaseUnit";
 import ExecutionUnitInput from "./ExecutionUnitInput";
 type Schema = ExecutionUnitSchema;
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
-export type ExecutionUnitConfig = Omit<Schema, "executable" | "flavor"> & SetExecutableProps;
+export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application" | "flowchartId"> & SetApplicationProps & Pick<Schema, "flowchartId">;
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 type SetExecutableProps = Partial<Pick<Schema, "executable" | "flavor">>;
 declare const ExecutionUnit_base: Base;

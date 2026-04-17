@@ -12,7 +12,8 @@ import BaseUnit from "./BaseUnit";
 type Schema = AssertionUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssertionUnitSchemaMixin>;
 
-export type AssertionUnitConfig = Partial<Schema>;
+export type AssertionUnitConfig = Partial<Omit<Schema, "flowchartId">> &
+    Pick<Schema, "flowchartId">;
 
 class AssertionUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
@@ -20,13 +21,18 @@ class AssertionUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: AssertionUnitConfig) {
-        super({
+        const schema: Schema = {
             name: UnitType.assertion,
-            type: UnitType.assertion,
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             statement: "true",
             errorMessage: "assertion failed",
             ...config,
-        });
+            type: UnitType.assertion,
+        };
+        super(schema);
     }
 
     getHashObject() {

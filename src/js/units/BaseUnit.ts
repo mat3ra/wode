@@ -64,7 +64,7 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
             ...config,
             status: config.status || UnitStatus.idle,
             statusTrack: config.statusTrack || [],
-            flowchartId: config.flowchartId || Utils.uuid.getUUID(),
+            flowchartId: config.flowchartId ?? Utils.uuid.getUUID(),
             tags: config.tags || [],
         });
 
