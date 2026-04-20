@@ -1,0 +1,231 @@
+import { Application, Template } from "@exabyte-io/ade.js";
+import { HashedInputArrayMixin } from "@exabyte-io/code.js/dist/entity";
+import { removeTimestampableKeysFromConfig } from "@exabyte-io/code.js/dist/utils";
+import { mix } from "mixwith";
+import _ from "underscore";
+
+import { BaseUnit } from "./base";
+import { ApplicationType, ExecutableType, ExecutionUnitConfig, FlavorType, TemplateType } from "./types";
+
+export class ExecutionUnit extends mix(BaseUnit<ExecutionUnitConfig>).with(HashedInputArrayMixin) {
+
+    public prop: <K extends keyof ExecutionUnitConfig>(key: K, defaultValue?: ExecutionUnitConfig[K]) => ExecutionUnitConfig[K]; // TODO: should be coming from mixins
+    public setProp: <K extends keyof ExecutionUnitConfig>(key: K, value: ExecutionUnitConfig[K]) => void; // TODO: should be coming from mixins
+    private _application: ApplicationType;
+    private _executable: ExecutableType;
+    private _flavor: FlavorType;
+    private _templates: TemplateType[];
+    private context: any; //TODO: should be coming from mixins
+    private setRuntimeItemsToDefaultValues: () => void; // TODO: should be coming from mixins
+    private getCombinedContext: () => any; // TODO: should be coming from mixins
+    private updateContext: (context: any) => void; // TODO: should be coming from mixins
+    private _renderingContext: any; // TODO: should be coming from mixins
+    private updatePersistentContext: (context: any) => void; // TODO: should be coming from mixins
+    private hashFromArrayInputContent: string; // TODO: should be coming from mixins
+    private clean: <T>(obj: T) => T; // TODO: should be coming from mixins
+
+    static Application = Application;
+    static Template = Template;
+    // keys to be omitted during toJSON
+    static omitKeys = [
+        "job",
+        "workflow",
+        "material",
+        "materials",
+        "model",
+        "methodData",
+        "hasRelaxation",
+    ];
+
+    _initApplication(config) {
+        this._application = ExecutionUnit.Application.create(config.application);
+        this._executable = this._application.getExecutableByConfig(config.executable);
+        this._flavor = this._executable.getFlavorByConfig(config.flavor);
+        this._templates = this._flavor ? this._flavor.inputAsTemplates : [];
+    }
+
+    _initRuntimeItems(keys, config) {
+        this._initApplication(config);
+        super._initRuntimeItems(keys);
+    }
+
+    get name() {
+        return this.prop("name", this.flavor.name);
+    }
+
+    get application() {
+        return this._application;
+    }
+
+    get executable() {
+        return this._executable;
+    }
+
+    get flavor() {
+        return this._flavor;
+    }
+
+    get templates() {
+        return this._templates;
+    }
+
+    get templatesFromInput() {
+        return this.input.map((i) => new ExecutionUnit.Template(i));
+    }
+
+    setApplication(application: Application, omitSettingExecutable = false): void {
+        this._application = application;
+        this.setProp("application", application.toJSON());
+        if (!omitSettingExecutable) {
+            this.setExecutable(this.application.defaultExecutable);
+        }
+    }
+
+    // TODO: use isolated Executable type
+    setExecutable(executable: ExecutableType): void {
+        this._executable = executable;
+        this.setProp("executable", executable.toJSON());
+        this.setFlavor(this.executable.defaultFlavor);
+    }
+
+    // TODO: use isolated Flavor type
+    setFlavor(flavor: FlavorType): void {
+        this._flavor = flavor;
+        this.setRuntimeItemsToDefaultValues();
+        this.setProp("flavor", flavor.toJSON());
+        this.setTemplates(this.flavor.inputAsTemplates);
+    }
+
+    setTemplates(templates: Template[]): void {
+        this._templates = templates;
+        this.render(this.context, true);
+    }
+
+    setInput(input: ExecutionUnitConfig["input"]): void {
+        this.setProp("input", input);
+    }
+
+    get defaultResults() {
+        return this.flavor.results;
+    }
+
+    get defaultMonitors() {
+        return this.flavor.monitors;
+    }
+
+    get defaultPostProcessors() {
+        return this.flavor.postProcessors;
+    }
+
+    get allowedResults() {
+        return this.executable.results;
+    }
+
+    get allowedMonitors() {
+        return this.executable.monitors;
+    }
+
+    get allowedPostProcessors() {
+        return this.executable.postProcessors;
+    }
+
+    get allContextProviders() {
+        const list: any = [];
+        // pass context below to keep UI changes
+        this.templates.forEach((i) =>
+            list.push(...i.getContextProvidersAsClassInstances(this.getCombinedContext())),
+        );
+        return list;
+    }
+
+    get contextProviders() {
+        return this.allContextProviders.filter((p) => p.isUnitContextProvider);
+    }
+
+    get input() {
+        return (
+            this.prop("input") ||
+            this.flavor.getInputAsRenderedTemplates(this.getCombinedContext()) ||
+            []
+        );
+    }
+
+    get renderingContext() {
+        return this._renderingContext || {};
+    }
+
+    set renderingContext(ctx) {
+        this._renderingContext = ctx;
+    }
+
+    // context to persist in toJSON
+    get storedContext() {
+        return _.omit(this.context, ...ExecutionUnit.omitKeys);
+    }
+
+    // context to show to users with some extra keys omitted
+    get visibleRenderingContext() {
+        return _.omit(this.renderingContext, ...ExecutionUnit.omitKeys);
+    }
+
+    static getSubworkflowContext(context) {
+        const { subworkflowContext } = context;
+        return subworkflowContext ? { subworkflowContext } : {};
+    }
+
+    /** Update rendering context and persistent context
+     * Note: this function is sometimes being called without passing a context!
+     * @param context
+     * @param fromTemplates
+     */
+    render(context, fromTemplates = false) {
+        const newInput: any = [];
+        const newPersistentContext = {};
+        const newRenderingContext = {};
+        const renderingContext = { ...this.context, ...context };
+        this.updateContext(renderingContext); // update in-memory context to properly render templates from input below
+        (fromTemplates ? this.templates : this.templatesFromInput).forEach((t) => {
+            newInput.push(t.getRenderedJSON(renderingContext));
+            Object.assign(
+                newRenderingContext,
+                t.getDataFromProvidersForRenderingContext(renderingContext),
+                ExecutionUnit.getSubworkflowContext(renderingContext),
+            );
+            Object.assign(
+                newPersistentContext,
+                t.getDataFromProvidersForPersistentContext(renderingContext),
+                ExecutionUnit.getSubworkflowContext(renderingContext),
+            );
+        });
+        this.setInput(newInput);
+        this.renderingContext = newRenderingContext;
+        this.updatePersistentContext(newPersistentContext);
+    }
+
+    /**
+     * @summary Calculates hash on unit-specific fields.
+     * The meaningful fields of processing unit are operation, flavor and input at the moment.
+     */
+    getHashObject(): Partial<ExecutionUnitConfig> {
+        return {
+            ...super.getHashObject(),
+            application: removeTimestampableKeysFromConfig(this.application.toJSON()),
+            executable: removeTimestampableKeysFromConfig(this.executable.toJSON()),
+            flavor: removeTimestampableKeysFromConfig(this.flavor.toJSON()),
+            input: this.hashFromArrayInputContent,
+        };
+    }
+
+    toJSON(): ExecutionUnitConfig {
+        return this.clean({
+            ...super.toJSON(),
+            executable: this.executable.toJSON(),
+            flavor: this.flavor.toJSON(),
+            input: this.input,
+            // keys below are not propagated to the parent class on initialization of a new unit unless explicitly given
+            name: this.name,
+            // TODO: figure out the problem with storing context below
+            // context: this.storedContext,
+        });
+    }
+}
