@@ -24,6 +24,11 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     setExecutable({ executable, flavor }: SetExecutableProps): void;
     setFlavor(flavor?: Flavor | FlavorSchema): void;
     /**
+     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
+     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
+     */
+    private static keepValidOrFallbackToDefaults;
+    /**
      * Persisted `input[].template` must match the current application/executable (and optional
      * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
      */

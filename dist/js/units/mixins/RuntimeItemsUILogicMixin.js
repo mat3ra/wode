@@ -3,12 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.runtimeItemsUILogicMixin = runtimeItemsUILogicMixin;
 // @ts-expect-error
 const propertiesMixin = {
-    setRuntimeItemsToDefaultValues() {
-        this.results = this.defaultResults;
-        this.monitors = this.defaultMonitors;
-        this.preProcessors = this.defaultPreProcessors;
-        this.postProcessors = this.defaultPostProcessors;
-    },
     _initRuntimeItems(config) {
         this.results = (config === null || config === void 0 ? void 0 : config.results) || this.defaultResults;
         this.monitors = (config === null || config === void 0 ? void 0 : config.monitors) || this.defaultMonitors;

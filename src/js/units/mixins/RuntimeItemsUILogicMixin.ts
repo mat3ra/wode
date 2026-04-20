@@ -6,7 +6,6 @@ import type { RuntimeItemsSchema } from "@mat3ra/esse/dist/js/types";
 type ItemKey = "results" | "monitors" | "preProcessors" | "postProcessors";
 
 export type RuntimeItemsUILogic = {
-    setRuntimeItemsToDefaultValues(): void;
     _initRuntimeItems(config?: Partial<RuntimeItemsSchema>): void;
     toggleRuntimeItem(key: ItemKey, data: NameResultSchema, isAdding: boolean): void;
     toggleResult(data: NameResultSchema, isAdding: boolean): void;
@@ -35,12 +34,6 @@ interface RuntimeItemsUILogicMixinBase extends InMemoryEntity, RuntimeItems {
 const propertiesMixin: RuntimeItemsUILogicMixinBase &
     RuntimeItemsUILogic &
     RuntimeItemsUILogicPrivate = {
-    setRuntimeItemsToDefaultValues() {
-        this.results = this.defaultResults;
-        this.monitors = this.defaultMonitors;
-        this.preProcessors = this.defaultPreProcessors;
-        this.postProcessors = this.defaultPostProcessors;
-    },
     _initRuntimeItems(config) {
         this.results = config?.results || this.defaultResults;
         this.monitors = config?.monitors || this.defaultMonitors;

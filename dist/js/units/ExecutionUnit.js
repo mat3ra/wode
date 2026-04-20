@@ -10,6 +10,7 @@ const enums_1 = require("../enums");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
+const RUNTIME_ITEM_KEYS = ["results", "monitors", "preProcessors", "postProcessors"];
 class ExecutionUnit extends BaseUnit_1.default {
     constructor(config) {
         const { executable, flavor } = settings_1.globalSettings
@@ -54,8 +55,14 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setFlavor(flavor);
     }
     setFlavor(flavor) {
+        const prior = {
+            results: this.results.slice(),
+            monitors: this.monitors.slice(),
+            preProcessors: this.preProcessors.slice(),
+            postProcessors: this.postProcessors.slice(),
+        };
         const { executable, application } = this;
-        const { flavor: defaultFlavor } = settings_1.globalSettings
+        const { executable: driverExecutable, flavor: defaultFlavor } = settings_1.globalSettings
             .getApplicationsDriver()
             .getExecutableAndFlavorByName({
             appName: application.name,
@@ -63,12 +70,24 @@ class ExecutionUnit extends BaseUnit_1.default {
             execName: executable.name,
         });
         const finalFlavor = flavor || defaultFlavor;
-        this.defaultMonitors = finalFlavor.monitors;
         this.defaultResults = finalFlavor.results;
+        this.defaultMonitors = finalFlavor.monitors;
+        this.defaultPreProcessors = finalFlavor.preProcessors;
         this.defaultPostProcessors = finalFlavor.postProcessors;
+        RUNTIME_ITEM_KEYS.forEach((key) => {
+            this[key] = ExecutionUnit.keepValidOrFallbackToDefaults(prior[key], finalFlavor[key], driverExecutable[key]);
+        });
         this.setProp("flavor", finalFlavor);
-        this.setRuntimeItemsToDefaultValues();
         this.setDefaultInput();
+    }
+    /**
+     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
+     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
+     */
+    static keepValidOrFallbackToDefaults(prior, defaults, allowed) {
+        const allowedNames = new Set(allowed.map((a) => a.name));
+        const kept = prior.filter((item) => allowedNames.has(item.name));
+        return kept.length ? kept : defaults.slice();
     }
     /**
      * Persisted `input[].template` must match the current application/executable (and optional

@@ -4,7 +4,6 @@ import type { NameResultSchema } from "@mat3ra/code/dist/js/utils/object";
 import type { RuntimeItemsSchema } from "@mat3ra/esse/dist/js/types";
 type ItemKey = "results" | "monitors" | "preProcessors" | "postProcessors";
 export type RuntimeItemsUILogic = {
-    setRuntimeItemsToDefaultValues(): void;
     _initRuntimeItems(config?: Partial<RuntimeItemsSchema>): void;
     toggleRuntimeItem(key: ItemKey, data: NameResultSchema, isAdding: boolean): void;
     toggleResult(data: NameResultSchema, isAdding: boolean): void;

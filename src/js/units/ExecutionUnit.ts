@@ -28,6 +28,9 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
+const RUNTIME_ITEM_KEYS = ["results", "monitors", "preProcessors", "postProcessors"] as const;
+type RuntimeItemKey = (typeof RUNTIME_ITEM_KEYS)[number];
+
 export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> &
     SetApplicationProps;
 
@@ -94,8 +97,15 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     setFlavor(flavor?: Flavor | FlavorSchema) {
+        const prior: Record<RuntimeItemKey, { name: string }[]> = {
+            results: this.results.slice(),
+            monitors: this.monitors.slice(),
+            preProcessors: this.preProcessors.slice(),
+            postProcessors: this.postProcessors.slice(),
+        };
+
         const { executable, application } = this;
-        const { flavor: defaultFlavor } = globalSettings
+        const { executable: driverExecutable, flavor: defaultFlavor } = globalSettings
             .getApplicationsDriver()
             .getExecutableAndFlavorByName({
                 appName: application.name,
@@ -105,13 +115,35 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
         const finalFlavor = flavor || defaultFlavor;
 
-        this.defaultMonitors = finalFlavor.monitors;
         this.defaultResults = finalFlavor.results;
+        this.defaultMonitors = finalFlavor.monitors;
+        this.defaultPreProcessors = finalFlavor.preProcessors;
         this.defaultPostProcessors = finalFlavor.postProcessors;
 
+        RUNTIME_ITEM_KEYS.forEach((key) => {
+            this[key] = ExecutionUnit.keepValidOrFallbackToDefaults(
+                prior[key],
+                finalFlavor[key],
+                driverExecutable[key],
+            );
+        });
+
         this.setProp("flavor", finalFlavor);
-        this.setRuntimeItemsToDefaultValues();
         this.setDefaultInput();
+    }
+
+    /**
+     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
+     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
+     */
+    private static keepValidOrFallbackToDefaults<T extends { name: string }>(
+        prior: T[],
+        defaults: T[],
+        allowed: ReadonlyArray<{ name: string }>,
+    ): T[] {
+        const allowedNames = new Set(allowed.map((a) => a.name));
+        const kept = prior.filter((item) => allowedNames.has(item.name));
+        return kept.length ? kept : defaults.slice();
     }
 
     /**
