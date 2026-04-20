@@ -14,7 +14,15 @@ type AssignmentConfig = AssignmentUnitConfig & Pick<AssignmentUnitSchema, "type"
 type ConditionConfig = ConditionUnitConfig & Pick<ConditionUnitSchema, "type">;
 type IOConfig = IOUnitConfig & Pick<DataIOUnitSchema, "type">;
 type AssertionConfig = AssertionUnitConfig & Pick<AssertionUnitSchema, "type">;
+/** Subworkflow unit kinds supported by {@link UnitFactory.createDefaultSubworkflowUnit}. */
+export type DefaultSubworkflowUnitType = "execution" | "assignment" | "condition" | "io" | "assertion";
 export declare class UnitFactory {
+    /**
+     * Create a new subworkflow unit with fresh `flowchartId` and constructor defaults.
+     * For execution units, pass the subworkflow (or parent) `application` JSON.
+     */
+    static createDefaultSubworkflowUnit(type: "execution", application: ExecutionUnitSchema["application"]): AnySubworkflowUnit;
+    static createDefaultSubworkflowUnit(type: "assignment" | "condition" | "io" | "assertion"): AnySubworkflowUnit;
     static createInWorkflow(config: WorkflowUnitSchema): AnyWorkflowUnit;
     static createInSubworkflow(config: ExcutionConfig | AssignmentConfig | ConditionConfig | IOConfig | AssertionConfig): AnySubworkflowUnit;
 }

@@ -12,8 +12,7 @@ import BaseUnit from "./BaseUnit";
 type Schema = AssertionUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<AssertionUnitSchemaMixin>;
 
-export type AssertionUnitConfig = Partial<Omit<Schema, "flowchartId">> &
-    Pick<Schema, "flowchartId">;
+export type AssertionUnitConfig = Partial<Schema>;
 
 class AssertionUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
@@ -21,7 +20,7 @@ class AssertionUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: AssertionUnitConfig) {
-        const schema: Schema = {
+        const schema = {
             name: UnitType.assertion,
             results: [],
             preProcessors: [],
@@ -30,7 +29,7 @@ class AssertionUnit extends (BaseUnit as Base) implements Schema {
             statement: "true",
             errorMessage: "assertion failed",
             ...config,
-            type: UnitType.assertion,
+            type: UnitType.assertion as Schema["type"],
         };
         super(schema);
     }

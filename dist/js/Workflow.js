@@ -85,6 +85,19 @@ class Workflow extends entity_1.InMemoryEntity {
     setUnits(arr) {
         this.unitInstances = (0, standata_1.setUnitLinks)(arr);
     }
+    /**
+     * A top-level subworkflow branch is represented twice: a {@link UnitType.subworkflow} unit in
+     * `unitInstances` (flowchart card) and a full {@link Subworkflow} in `subworkflowInstances`
+     * (linked by the same `id` as {@link Subworkflow.getAsUnit}). Their display names must match
+     * so `toJSON()` and editors stay consistent. Call this after mutating a subworkflow unit's
+     * `name` (and updating `unitInstances` via {@link setUnits}).
+     */
+    syncLinkedSubworkflowNameFromUnit(unit) {
+        if (unit.type !== enums_1.UnitType.subworkflow)
+            return;
+        const linked = this.subworkflowInstances.find((s) => s.id === unit.id);
+        linked === null || linked === void 0 ? void 0 : linked.setName(unit.name);
+    }
     render(context) {
         this.subworkflowInstances.forEach((sw) => {
             sw.render({

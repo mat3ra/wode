@@ -145,7 +145,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
     }
     replaceUnit(index, unit) {
         this.unitsInstances[index] = unit;
-        this.setUnits(this.unitsInstances);
+        this.setUnits([...this.unitsInstances]);
     }
     setIsDraft(bool) {
         this.isDraft = bool;

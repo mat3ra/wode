@@ -28,12 +28,8 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-export type ExecutionUnitConfig = Omit<
-    Partial<Schema>,
-    "executable" | "flavor" | "application" | "flowchartId"
-> &
-    SetApplicationProps &
-    Pick<Schema, "flowchartId">;
+export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> &
+    SetApplicationProps;
 
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 
@@ -58,9 +54,9 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
                 appVersion: config.application.version,
             });
 
-        const schema: Schema = {
+        const schema = {
             name: UnitType.execution,
-            type: UnitType.execution,
+            type: UnitType.execution as Schema["type"],
             input: [],
             results: [],
             preProcessors: [],

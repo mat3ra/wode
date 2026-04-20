@@ -55,6 +55,9 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     repetition = 0;
 
+    /**
+     * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
+     */
     constructor(config: Partial<S> & Pick<S, "name">) {
         super({
             results: [],

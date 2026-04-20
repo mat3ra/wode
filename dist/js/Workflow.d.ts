@@ -39,6 +39,14 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]): void;
     removeSubworkflow(id: string): void;
     setUnits(arr: AnyWorkflowUnit[]): void;
+    /**
+     * A top-level subworkflow branch is represented twice: a {@link UnitType.subworkflow} unit in
+     * `unitInstances` (flowchart card) and a full {@link Subworkflow} in `subworkflowInstances`
+     * (linked by the same `id` as {@link Subworkflow.getAsUnit}). Their display names must match
+     * so `toJSON()` and editors stay consistent. Call this after mutating a subworkflow unit's
+     * `name` (and updating `unitInstances` via {@link setUnits}).
+     */
+    syncLinkedSubworkflowNameFromUnit(unit: AnyWorkflowUnit): void;
     render(context: WorkflowRenderContext): void;
     get usedApplications(): ApplicationSchema[];
     get usedApplicationNames(): string[];

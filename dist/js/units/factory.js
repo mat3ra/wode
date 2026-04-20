@@ -14,6 +14,31 @@ const MapUnit_1 = __importDefault(require("./MapUnit"));
 const ReduceUnit_1 = __importDefault(require("./ReduceUnit"));
 const SubworkflowUnit_1 = __importDefault(require("./SubworkflowUnit"));
 class UnitFactory {
+    static createDefaultSubworkflowUnit(type, application) {
+        if (type === "execution") {
+            if (application === undefined) {
+                throw new Error("UnitFactory.createDefaultSubworkflowUnit: application is required when type is execution");
+            }
+            return new ExecutionUnit_1.default({
+                type: enums_1.UnitType.execution,
+                application,
+            });
+        }
+        switch (type) {
+            case "assignment":
+                return new AssignmentUnit_1.default({ type: enums_1.UnitType.assignment });
+            case "condition":
+                return new ConditionUnit_1.default({ type: enums_1.UnitType.condition });
+            case "io":
+                return new IOUnit_1.default({ type: enums_1.UnitType.io });
+            case "assertion":
+                return new AssertionUnit_1.default({ type: enums_1.UnitType.assertion });
+            default: {
+                const unreachable = type;
+                throw new Error(`Unexpected unit type: ${String(unreachable)}`);
+            }
+        }
+    }
     static createInWorkflow(config) {
         switch (config.type) {
             case enums_1.UnitType.map:

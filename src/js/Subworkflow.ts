@@ -226,7 +226,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
     replaceUnit(index: number, unit: AnySubworkflowUnit) {
         this.unitsInstances[index] = unit;
-        this.setUnits(this.unitsInstances);
+        this.setUnits([...this.unitsInstances]);
     }
 
     setIsDraft(bool: boolean) {

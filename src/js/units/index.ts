@@ -23,3 +23,5 @@ export {
     SubworkflowUnit,
     UnitFactory,
 };
+
+export type { DefaultSubworkflowUnitType } from "./factory";

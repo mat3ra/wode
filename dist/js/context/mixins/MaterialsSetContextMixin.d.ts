@@ -1,6 +1,6 @@
 import type ContextProvider from "../providers/base/ContextProvider";
 import type { OrderedMaterial } from "./MaterialContextMixin";
-type MaterialsSet = {
+export type MaterialsSet = {
     _id: string;
 };
 export type MaterialsSetExternalContext = {
@@ -12,4 +12,3 @@ export type MaterialsSetContextMixin = {
     sortMaterialsByIndexInSet(materials?: OrderedMaterial[]): OrderedMaterial[];
 };
 export default function materialsSetContextMixin(item: ContextProvider): void;
-export {};

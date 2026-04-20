@@ -21,6 +21,9 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     defaultPostProcessors: NameResultSchema[];
     defaultPreProcessors: NameResultSchema[];
     repetition: number;
+    /**
+     * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
+     */
     constructor(config: Partial<S> & Pick<S, "name">);
     get lastStatusUpdate(): {
         trackedAt: number;

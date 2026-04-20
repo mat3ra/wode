@@ -20,7 +20,7 @@ class ConditionUnit extends (BaseUnit as Base) implements Schema {
     declare _json: Schema & AnyObject;
 
     constructor(config: ConditionUnitConfig) {
-        const schema: Schema = {
+        const schema = {
             input: [],
             results: [],
             preProcessors: [],
@@ -32,8 +32,7 @@ class ConditionUnit extends (BaseUnit as Base) implements Schema {
             maxOccurrences: 100,
             ...config,
             name: config.name ?? UnitType.condition,
-            flowchartId: config.flowchartId ?? "",
-            type: UnitType.condition,
+            type: UnitType.condition as Schema["type"],
         };
         super(schema);
     }

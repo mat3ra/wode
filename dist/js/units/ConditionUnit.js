@@ -8,7 +8,7 @@ const ConditionUnitSchemaMixin_1 = require("../generated/ConditionUnitSchemaMixi
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 class ConditionUnit extends BaseUnit_1.default {
     constructor(config) {
-        var _a, _b;
+        var _a;
         const schema = {
             input: [],
             results: [],
@@ -21,7 +21,6 @@ class ConditionUnit extends BaseUnit_1.default {
             maxOccurrences: 100,
             ...config,
             name: (_a = config.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.condition,
-            flowchartId: (_b = config.flowchartId) !== null && _b !== void 0 ? _b : "",
             type: enums_1.UnitType.condition,
         };
         super(schema);

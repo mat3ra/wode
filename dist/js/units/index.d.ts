@@ -11,3 +11,4 @@ import SubworkflowUnit from "./SubworkflowUnit";
 export type { ReduceUnitConfig } from "./ReduceUnit";
 export type { SubworkflowUnitConfig } from "./SubworkflowUnit";
 export { BaseUnit, AssertionUnit, AssignmentUnit, ConditionUnit, ExecutionUnit, IOUnit, MapUnit, ReduceUnit, SubworkflowUnit, UnitFactory, };
+export type { DefaultSubworkflowUnitType } from "./factory";

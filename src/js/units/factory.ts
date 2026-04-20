@@ -32,7 +32,59 @@ type ConditionConfig = ConditionUnitConfig & Pick<ConditionUnitSchema, "type">;
 type IOConfig = IOUnitConfig & Pick<DataIOUnitSchema, "type">;
 type AssertionConfig = AssertionUnitConfig & Pick<AssertionUnitSchema, "type">;
 
+/** Subworkflow unit kinds supported by {@link UnitFactory.createDefaultSubworkflowUnit}. */
+export type DefaultSubworkflowUnitType =
+    | "execution"
+    | "assignment"
+    | "condition"
+    | "io"
+    | "assertion";
+
 export class UnitFactory {
+    /**
+     * Create a new subworkflow unit with fresh `flowchartId` and constructor defaults.
+     * For execution units, pass the subworkflow (or parent) `application` JSON.
+     */
+    static createDefaultSubworkflowUnit(
+        type: "execution",
+        application: ExecutionUnitSchema["application"],
+    ): AnySubworkflowUnit;
+
+    static createDefaultSubworkflowUnit(
+        type: "assignment" | "condition" | "io" | "assertion",
+    ): AnySubworkflowUnit;
+
+    static createDefaultSubworkflowUnit(
+        type: DefaultSubworkflowUnitType,
+        application?: ExecutionUnitSchema["application"],
+    ): AnySubworkflowUnit {
+        if (type === "execution") {
+            if (application === undefined) {
+                throw new Error(
+                    "UnitFactory.createDefaultSubworkflowUnit: application is required when type is execution",
+                );
+            }
+            return new ExecutionUnit({
+                type: UnitType.execution,
+                application,
+            });
+        }
+        switch (type) {
+            case "assignment":
+                return new AssignmentUnit({ type: UnitType.assignment });
+            case "condition":
+                return new ConditionUnit({ type: UnitType.condition });
+            case "io":
+                return new IOUnit({ type: UnitType.io });
+            case "assertion":
+                return new AssertionUnit({ type: UnitType.assertion });
+            default: {
+                const unreachable: never = type;
+                throw new Error(`Unexpected unit type: ${String(unreachable)}`);
+            }
+        }
+    }
+
     static createInWorkflow(config: WorkflowUnitSchema): AnyWorkflowUnit {
         switch (config.type) {
             case UnitType.map:

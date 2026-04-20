@@ -12,6 +12,9 @@ const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
 const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
 class BaseUnit extends entity_1.InMemoryEntity {
+    /**
+     * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
+     */
     constructor(config) {
         var _a;
         super({

@@ -3,7 +3,7 @@ import { compareEntitiesInOrderedSetForSorting } from "@mat3ra/code/dist/js/enti
 import type ContextProvider from "../providers/base/ContextProvider";
 import type { OrderedMaterial } from "./MaterialContextMixin";
 
-type MaterialsSet = {
+export type MaterialsSet = {
     _id: string;
 };
 
