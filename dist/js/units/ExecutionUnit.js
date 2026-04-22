@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const utils_1 = require("@mat3ra/utils");
 const providers_1 = require("../context/providers");
 const settings_1 = require("../context/providers/settings");
@@ -12,6 +13,9 @@ const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
 const RUNTIME_ITEM_KEYS = ["results", "monitors", "preProcessors", "postProcessors"];
 class ExecutionUnit extends BaseUnit_1.default {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/execution");
+    }
     constructor(config) {
         const { executable, flavor } = settings_1.globalSettings
             .getApplicationsDriver()
@@ -168,7 +172,7 @@ class ExecutionUnit extends BaseUnit_1.default {
         });
     }
     getHashObject() {
-        const { application, executable, flavor, input } = this.toJSON();
+        const { input, flavor, application, executable } = this.toJSON();
         return {
             ...super.getHashObject(),
             application,

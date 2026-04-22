@@ -19,6 +19,7 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     contextProvidersInstances: AnyContextProvider[];
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ExecutionUnitConfig);
     setApplication({ application, executable, flavor }: SetApplicationProps): void;
     setExecutable({ executable, flavor }: SetExecutableProps): void;

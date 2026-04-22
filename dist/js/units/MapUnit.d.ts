@@ -27,6 +27,7 @@ declare const MapUnit_base: Base;
 declare class MapUnit extends MapUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: MapUnitConfig);
     setWorkflowId(id: string): void;
 }

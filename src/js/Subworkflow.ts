@@ -6,6 +6,7 @@ import {
 } from "@mat3ra/code/dist/js/entity";
 import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
@@ -31,6 +32,7 @@ import {
 } from "./generated/SubworkflowSchemaMixin";
 import { AssignmentUnit, ConditionUnit, SubworkflowUnit, UnitFactory } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
+import { calculateHash as calculateSubworkflowContentHash } from "./utils/subworkflow";
 
 type ConvergenceConfig = {
     parameter: "N_k" | "N_k_nonuniform";
@@ -73,6 +75,10 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     declare static createDefault: () => Subworkflow;
 
     declare toJSON: () => SubworkflowSchema & AnyObject;
+
+    static get jsonSchema() {
+        return JSONSchemasInterface.getSchemaById("workflow/subworkflow");
+    }
 
     constructor(config: SubworkflowSchema, _ModelFactory = ModelFactory) {
         super(config);
@@ -240,31 +246,10 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     /**
      * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
     calculateHash() {
-        const config = this.toJSON();
-        const meaningfulFields = {
-            application: Utils.specific.removeTimestampableKeysFromConfig(config.application),
-            model: this.calculateModelHash(),
-            units: this.unitsInstances.map((u) => u.calculateHash()).join(),
-        };
-        return Utils.hash.calculateHashFromObject(meaningfulFields);
-    }
-
-    private calculateModelHash() {
-        const { model } = this.toJSON();
-
-        // ignore empty data object
-        if (this.modelInstance.Method.omitInHashCalculation) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { data: _data, ...method } = model.method;
-            return Utils.hash.calculateHashFromObject({
-                ...model,
-                method,
-            });
-        }
-
-        return Utils.hash.calculateHashFromObject(model);
+        return calculateSubworkflowContentHash(this);
     }
 
     findUnitById(id: string) {
@@ -381,6 +366,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             });
 
             this.modelInstance.setMethod(method);
+            this.model = this.modelInstance.toJSON();
         }
     }
 

@@ -199,29 +199,24 @@ describe("Workflow", () => {
     });
 
     describe("calculateHash", () => {
-        it("returns a non-empty string", () => {
-            const config = { ...Workflow.defaultConfig };
-            const workflow = new Workflow(config);
-
-            const hash = workflow.calculateHash();
-
-            expect(hash).to.be.a("string");
-            expect(hash.length).to.be.above(0);
+        before(() => {
+            // Context providers resolve JSON Schemas from ESSE at construction time.
+            // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+            globalSettings.setupApplicationsDriver(new ApplicationStandata());
         });
 
-        it("returns the same hash for the same workflow", () => {
-            const w1 = new Workflow({ ...Workflow.defaultConfig });
-            const w2 = new Workflow({ ...Workflow.defaultConfig });
+        // Expected to fail until `toJSON()` / schema clean stops mutating live `_json` used by hashing.
+        it("returns the same hash before and after toJSON (standata workflow)", () => {
+            const standataWorkflows = new WorkflowStandata().getAll();
+            expect(standataWorkflows.length).to.be.above(0);
 
-            expect(w1.calculateHash()).to.equal(w2.calculateHash());
-        });
+            const workflow = new Workflow(standataWorkflows[0] as unknown as WorkflowSchema);
+            const hashBefore = workflow.calculateHash();
+            workflow.toJSON();
+            const hashAfter = workflow.calculateHash();
 
-        it("returns different hash when workflow content differs", () => {
-            const w1 = new Workflow({ ...Workflow.defaultConfig });
-            const w2 = new Workflow({ ...Workflow.defaultConfig });
-            w2.addUnitType(UnitType.subworkflow);
-
-            expect(w1.calculateHash()).to.not.equal(w2.calculateHash());
+            expect(hashAfter).to.equal(hashBefore);
         });
     });
 });

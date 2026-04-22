@@ -10,6 +10,7 @@ declare const ReduceUnit_base: Base;
 declare class ReduceUnit extends ReduceUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ReduceUnitConfig);
 }
 export default ReduceUnit;

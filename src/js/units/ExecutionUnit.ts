@@ -1,5 +1,6 @@
 import { Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
     ContextItemSchema,
@@ -48,6 +49,10 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
+
+    static get jsonSchema() {
+        return JSONSchemasInterface.getSchemaById("workflow/unit/execution");
+    }
 
     constructor(config: ExecutionUnitConfig) {
         const { executable, flavor } = globalSettings
@@ -254,7 +259,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     getHashObject() {
-        const { application, executable, flavor, input } = this.toJSON();
+        const { input, flavor, application, executable } = this.toJSON();
 
         return {
             ...super.getHashObject(),

@@ -84,6 +84,7 @@ class Workflow extends entity_1.InMemoryEntity {
     }
     setUnits(arr) {
         this.unitInstances = (0, standata_1.setUnitLinks)(arr);
+        this.units = this.unitInstances.map((u) => u.toJSON());
     }
     /**
      * A top-level subworkflow branch is represented twice: a {@link UnitType.subworkflow} unit in
@@ -228,14 +229,10 @@ class Workflow extends entity_1.InMemoryEntity {
     /**
      * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
      * units and subworkflows must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
      */
     calculateHash() {
-        const meaningfulFields = {
-            units: this.unitInstances.map((u) => u.calculateHash()).join(),
-            subworkflows: this.subworkflowInstances.map((sw) => sw.calculateHash()).join(),
-            workflows: this.workflowInstances.map((w) => w.calculateHash()).join(),
-        };
-        return utils_1.Utils.hash.calculateHashFromObject(meaningfulFields);
+        return (0, workflow_1.calculateHash)(this.toJSON());
     }
     get hasRelaxation() {
         return Boolean(this.getRelaxationSubworkflow());

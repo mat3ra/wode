@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ade_1 = require("@mat3ra/ade");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const compute_1 = require("@mat3ra/ide/dist/js/compute");
 const mode_1 = require("@mat3ra/mode");
 const standata_1 = require("@mat3ra/standata");
@@ -12,7 +16,11 @@ const factory_1 = require("./convergence/factory");
 const enums_1 = require("./enums");
 const SubworkflowSchemaMixin_1 = require("./generated/SubworkflowSchemaMixin");
 const units_1 = require("./units");
+const subworkflow_1 = require("./utils/subworkflow");
 class Subworkflow extends entity_1.InMemoryEntity {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
+    }
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
         this.properties = [];
@@ -156,28 +164,10 @@ class Subworkflow extends entity_1.InMemoryEntity {
     /**
      * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
     calculateHash() {
-        const config = this.toJSON();
-        const meaningfulFields = {
-            application: utils_1.Utils.specific.removeTimestampableKeysFromConfig(config.application),
-            model: this.calculateModelHash(),
-            units: this.unitsInstances.map((u) => u.calculateHash()).join(),
-        };
-        return utils_1.Utils.hash.calculateHashFromObject(meaningfulFields);
-    }
-    calculateModelHash() {
-        const { model } = this.toJSON();
-        // ignore empty data object
-        if (this.modelInstance.Method.omitInHashCalculation) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { data: _data, ...method } = model.method;
-            return utils_1.Utils.hash.calculateHashFromObject({
-                ...model,
-                method,
-            });
-        }
-        return utils_1.Utils.hash.calculateHashFromObject(model);
+        return (0, subworkflow_1.calculateHash)(this);
     }
     findUnitById(id) {
         // TODO: come back and refactor after converting flowchartId to id
@@ -279,6 +269,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
                 ...filters,
             });
             this.modelInstance.setMethod(method);
+            this.model = this.modelInstance.toJSON();
         }
     }
     addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }) {

@@ -67,6 +67,7 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     /**
      * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
      * units and subworkflows must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
      */
     calculateHash(): string;
     get hasRelaxation(): boolean;

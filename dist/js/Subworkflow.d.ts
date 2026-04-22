@@ -37,6 +37,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     repetition: number;
     static createDefault: () => Subworkflow;
     toJSON: () => SubworkflowSchema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
     static get defaultConfig(): {
         _id: any;
@@ -76,9 +77,9 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     /**
      * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
     calculateHash(): string;
-    private calculateModelHash;
     findUnitById(id: string): {
         _id?: string;
         slug?: string;

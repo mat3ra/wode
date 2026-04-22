@@ -10,6 +10,7 @@ declare const IOUnit_base: Base;
 declare class IOUnit extends IOUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: IOUnitConfig);
 }
 export default IOUnit;

@@ -10,6 +10,7 @@ declare const AssertionUnit_base: Base;
 declare class AssertionUnit extends AssertionUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: AssertionUnitConfig);
     getHashObject(): {
         statement: string;

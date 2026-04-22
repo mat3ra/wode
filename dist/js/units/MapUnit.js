@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultMapConfig = void 0;
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const enums_1 = require("../enums");
 const MapUnitSchemaMixin_1 = require("../generated/MapUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
@@ -24,6 +25,9 @@ exports.defaultMapConfig = {
     postProcessors: [],
 };
 class MapUnit extends BaseUnit_1.default {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/flowchart");
+    }
     constructor(config) {
         var _a;
         const schema = {

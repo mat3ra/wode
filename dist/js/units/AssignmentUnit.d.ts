@@ -10,6 +10,7 @@ declare const AssignmentUnit_base: Base;
 declare class AssignmentUnit extends AssignmentUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
     _json: Schema & AnyObject;
+    static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: AssignmentUnitConfig);
     getHashObject(): object;
 }

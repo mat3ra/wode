@@ -1,4 +1,5 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { AssignmentUnitSchema } from "@mat3ra/esse/dist/js/types";
 
@@ -17,6 +18,10 @@ class AssignmentUnit extends (BaseUnit as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
 
     declare _json: Schema & AnyObject;
+
+    static get jsonSchema() {
+        return JSONSchemasInterface.getSchemaById("workflow/unit/assignment");
+    }
 
     constructor(config: AssignmentUnitConfig) {
         const schema = {

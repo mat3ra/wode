@@ -29,6 +29,7 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit, UnitFactory } from "./units/factory";
 import {
+    calculateHash as calculateWorkflowContentHash,
     getDefaultDescription,
     getHumanReadableProperties,
     getHumanReadableUsedModels,
@@ -141,6 +142,7 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
 
     setUnits(arr: AnyWorkflowUnit[]) {
         this.unitInstances = setUnitLinks(arr);
+        this.units = this.unitInstances.map((u) => u.toJSON());
     }
 
     /**
@@ -310,14 +312,10 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
     /**
      * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
      * units and subworkflows must be sorted topologically before hashing (already sorted).
+     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
      */
     calculateHash(): string {
-        const meaningfulFields = {
-            units: this.unitInstances.map((u) => u.calculateHash()).join(),
-            subworkflows: this.subworkflowInstances.map((sw) => sw.calculateHash()).join(),
-            workflows: this.workflowInstances.map((w) => w.calculateHash()).join(),
-        };
-        return Utils.hash.calculateHashFromObject(meaningfulFields);
+        return calculateWorkflowContentHash(this.toJSON());
     }
 
     get hasRelaxation() {
