@@ -170,7 +170,12 @@ class Subworkflow extends entity_1.InMemoryEntity {
         const { model } = this.toJSON();
         // ignore empty data object
         if (this.modelInstance.Method.omitInHashCalculation) {
-            delete model.method.data;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { data: _data, ...method } = model.method;
+            return utils_1.Utils.hash.calculateHashFromObject({
+                ...model,
+                method,
+            });
         }
         return utils_1.Utils.hash.calculateHashFromObject(model);
     }

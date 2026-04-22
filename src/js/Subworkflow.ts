@@ -256,7 +256,12 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
         // ignore empty data object
         if (this.modelInstance.Method.omitInHashCalculation) {
-            delete model.method.data;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { data: _data, ...method } = model.method;
+            return Utils.hash.calculateHashFromObject({
+                ...model,
+                method,
+            });
         }
 
         return Utils.hash.calculateHashFromObject(model);
