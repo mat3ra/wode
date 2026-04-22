@@ -3,7 +3,6 @@ import {
     type NamedInMemoryEntity,
     InMemoryEntity,
 } from "@mat3ra/code/dist/js/entity";
-import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
@@ -351,7 +350,6 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
 }
 
 namedEntityMixin(Workflow.prototype);
-defaultableEntityMixin(Workflow);
 workflowSchemaMixin(Workflow.prototype);
 taggableMixin(Workflow.prototype);
 computedEntityMixin(Workflow.prototype);
