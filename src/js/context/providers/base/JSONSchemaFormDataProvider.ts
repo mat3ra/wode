@@ -16,7 +16,8 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./JSONSchemaD
 abstract class JSONSchemaFormDataProvider<
     S extends ContextItemSchema = ContextItemSchema,
     EC extends JinjaExternalContext = JinjaExternalContext,
-> extends JSONSchemaDataProvider<S, EC> {
+    DataForRendering = S["data"],
+> extends JSONSchemaDataProvider<S, EC, DataForRendering> {
     fields: object = {};
 
     protected abstract uiSchema: UiSchema;

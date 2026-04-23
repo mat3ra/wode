@@ -15,6 +15,7 @@ import {
     type ExternalContext,
     createProvider,
 } from "../context/providers";
+import type { ContextItemForRendering } from "../context/providers/base/ContextProvider";
 import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { UnitType } from "../enums";
@@ -202,9 +203,12 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             externalContext,
             convergence,
         );
-        const fullContext = this.contextProvidersInstances.map((p) => p.getContextItemData());
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
+        const renderingItems = this.contextProvidersInstances.map((p) =>
+            p.getContextItemDataForRendering(),
+        );
 
-        this.saveContext(fullContext, externalContext);
+        this.saveContext(persistentItems, renderingItems, externalContext);
     }
 
     private getContextProvidersInstances(
@@ -244,12 +248,15 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             });
     }
 
-    private saveContext(fullContext: ContextItemSchema[], externalContext: ExternalContext) {
-        // persistent context
-        this.context = fullContext.filter((c) => c.isEdited);
+    private saveContext(
+        persistentItems: ContextItemSchema[],
+        renderingItems: ContextItemForRendering<ContextItemSchema, unknown>[],
+        externalContext: ExternalContext,
+    ) {
+        this.context = persistentItems.filter((c) => c.isEdited);
 
         this.renderingContext = {
-            ...Object.fromEntries(fullContext.map((context) => [context.name, context.data])),
+            ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...externalContext,
         };
 

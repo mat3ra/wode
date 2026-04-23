@@ -18,12 +18,29 @@ class ContextProvider {
     setData(data) {
         this.data = utils_1.Utils.clone.deepClone(data);
     }
+    /**
+     * Derive template-facing `data` from persisted `data`. Override when the template needs fields
+     * that must not be stored (e.g. coordinates from symmetry point names + lattice).
+     */
+    // eslint-disable-next-line class-methods-use-this
+    patchForRendering(data) {
+        return data;
+    }
+    getDataForRendering() {
+        return this.patchForRendering(this.getData());
+    }
     getContextItemData() {
         return {
             name: this.name,
             isEdited: this.isEdited,
             data: this.getData(),
             extraData: this.extraData,
+        };
+    }
+    getContextItemDataForRendering() {
+        return {
+            ...this.getContextItemData(),
+            data: this.getDataForRendering(),
         };
     }
     /**

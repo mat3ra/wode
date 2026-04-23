@@ -130,8 +130,9 @@ class ExecutionUnit extends BaseUnit_1.default {
     }
     render(externalContext, convergence) {
         this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
-        const fullContext = this.contextProvidersInstances.map((p) => p.getContextItemData());
-        this.saveContext(fullContext, externalContext);
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
+        const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
+        this.saveContext(persistentItems, renderingItems, externalContext);
     }
     getContextProvidersInstances(externalContext, convergence) {
         const uniqueContextProviderNames = [
@@ -160,11 +161,10 @@ class ExecutionUnit extends BaseUnit_1.default {
             return provider;
         });
     }
-    saveContext(fullContext, externalContext) {
-        // persistent context
-        this.context = fullContext.filter((c) => c.isEdited);
+    saveContext(persistentItems, renderingItems, externalContext) {
+        this.context = persistentItems.filter((c) => c.isEdited);
         this.renderingContext = {
-            ...Object.fromEntries(fullContext.map((context) => [context.name, context.data])),
+            ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...externalContext,
         };
         this.input = this.inputInstances.map((input) => {

@@ -37,7 +37,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         this.useExplicitPath = this.application.name === "vasp";
     }
     getDefaultData() {
-        return this.addCoordinates(this.reciprocalLattice.defaultKpointPath);
+        return this.reciprocalLattice.defaultKpointPath;
     }
     updateMaterialHash() {
         var _a;
@@ -65,8 +65,8 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         }
         return jsonSchema;
     }
-    setData(path) {
-        super.setData(this.addCoordinates(path));
+    patchForRendering(data) {
+        return this.addCoordinates(data);
     }
     addCoordinates(path) {
         const rawData = path.map((pathItem) => {
@@ -79,7 +79,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
             return { ...pathItem, coordinates: point.coordinates };
         });
         const processedData = this.useExplicitPath ? this.convertToExplicitPath(rawData) : rawData;
-        const newData = processedData.map((p) => {
+        const mapped = processedData.map((p) => {
             const coordinates = this.is2PIBA
                 ? this.reciprocalLattice.getCartesianCoordinates(p.coordinates)
                 : p.coordinates;
@@ -88,7 +88,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
                 coordinates: coordinates.map((c) => Number(c.toFixed(9))),
             };
         });
-        return newData;
+        return mapped;
     }
     // Initially, path contains symmetry points with steps counts.
     // This function explicitly calculates each point between symmetry points by step counts.

@@ -457,11 +457,9 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             data: [{
                 point: string;
                 steps: number;
-                coordinates: number[];
             }, ...{
                 point: string;
                 steps: number;
-                coordinates: number[];
             }[]];
             extraData: {
                 materialHash: string;

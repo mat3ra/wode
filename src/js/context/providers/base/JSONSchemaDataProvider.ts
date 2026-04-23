@@ -13,8 +13,9 @@ export interface JinjaExternalContext {
 abstract class JSONSchemaDataProvider<
     S extends ContextItemSchema = ContextItemSchema,
     EC extends JinjaExternalContext = JinjaExternalContext,
+    DataForRendering = S["data"],
     // eslint-disable-next-line prettier/prettier
-> extends ContextProvider<S, EC> {
+> extends ContextProvider<S, EC, DataForRendering> {
     abstract readonly jsonSchema: JSONSchema;
 
     readonly entityName = "unit" as const;

@@ -4,6 +4,7 @@ import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface
 import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type {
     PathContextItemSchema,
+    PointsPathDataProviderRenderingSchema,
     PointsPathDataProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
 import { type ReciprocalLattice, Made } from "@mat3ra/made";
@@ -21,19 +22,21 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "../base/JSONS
 const defaultPoint = "Г" as const;
 const defaultSteps = 10 as const;
 
-export type PointsPathFormDataProviderData = PointsPathDataProviderSchema; // same as KPointCoordinates
+export type PointsPathFormDataProviderData = PointsPathDataProviderSchema;
+export type PointsPathFormDataProviderRenderingData = PointsPathDataProviderRenderingSchema;
 export type PointsPathFormDataProviderExternalContext = JinjaExternalContext &
     MaterialExternalContext &
     ApplicationExternalContext;
 
 type Data = PointsPathFormDataProviderData;
-type DataItem = Data[0];
+type RenderingData = PointsPathFormDataProviderRenderingData;
+type RenderingDataItem = RenderingData[0];
 type Schema = PathContextItemSchema;
 type ExternalContext = PointsPathFormDataProviderExternalContext;
 
 const jsonSchemaId = "context-providers-directory/points-path-data-provider";
 
-type Base = typeof JSONSchemaDataProvider<Schema> &
+type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext, RenderingData> &
     Constructor<MaterialContextMixin> &
     Constructor<ApplicationContextMixin>;
 
@@ -68,7 +71,7 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
     }
 
     getDefaultData(): Data {
-        return this.addCoordinates(this.reciprocalLattice.defaultKpointPath);
+        return this.reciprocalLattice.defaultKpointPath as Data;
     }
 
     updateMaterialHash() {
@@ -109,12 +112,12 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
         },
     };
 
-    setData(path: Omit<DataItem, "coordinates">[]) {
-        super.setData(this.addCoordinates(path));
+    protected patchForRendering(data: Data): RenderingData {
+        return this.addCoordinates(data);
     }
 
-    private addCoordinates(path: Omit<DataItem, "coordinates">[]) {
-        const rawData: DataItem[] = path.map((pathItem) => {
+    private addCoordinates(path: Data): RenderingData {
+        const rawData: RenderingDataItem[] = path.map((pathItem) => {
             const point = this.reciprocalLattice.symmetryPoints.find((sp) => {
                 return sp.point === pathItem.point;
             });
@@ -126,7 +129,7 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
 
         const processedData = this.useExplicitPath ? this.convertToExplicitPath(rawData) : rawData;
 
-        const newData = processedData.map((p) => {
+        const mapped = processedData.map((p) => {
             const coordinates = this.is2PIBA
                 ? this.reciprocalLattice.getCartesianCoordinates(p.coordinates)
                 : p.coordinates;
@@ -137,14 +140,14 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
             };
         });
 
-        return newData as Data;
+        return mapped as RenderingData;
     }
 
     // Initially, path contains symmetry points with steps counts.
     // This function explicitly calculates each point between symmetry points by step counts.
     // eslint-disable-next-line class-methods-use-this
-    private convertToExplicitPath(path: DataItem[]): DataItem[] {
-        return path.reduce<DataItem[]>((acc, startPoint, index) => {
+    private convertToExplicitPath(path: RenderingDataItem[]): RenderingDataItem[] {
+        return path.reduce<RenderingDataItem[]>((acc, startPoint, index) => {
             const nextPoint = path[index + 1];
 
             if (!nextPoint) {
