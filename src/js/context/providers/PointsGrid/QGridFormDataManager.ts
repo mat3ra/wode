@@ -11,12 +11,10 @@ type Schema = GridContextItemSchema;
 export default class QGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name = "qgrid" as const;
 
-    readonly divisor = 5 as const;
-
     readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
-        super(contextItem, externalContext);
+        super(contextItem, externalContext, 5);
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
             this.jsonSchemaId,

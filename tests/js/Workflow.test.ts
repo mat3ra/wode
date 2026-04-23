@@ -33,7 +33,7 @@ orderedEntityInSetMixin(OrderedMaterial.prototype);
 describe("Workflow", () => {
     describe("construction", () => {
         it("creates workflow from default config with name, subworkflows, units, and _id", () => {
-            const config = { ...Workflow.defaultConfig };
+            const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
 
             expect(workflow.name).to.equal(Workflow.defaultConfig.name);
@@ -48,8 +48,8 @@ describe("Workflow", () => {
 
     describe("ID generation", () => {
         it("assigns different _id to two workflows from default config", () => {
-            const w1 = new Workflow({ ...Workflow.defaultConfig });
-            const w2 = new Workflow({ ...Workflow.defaultConfig });
+            const w1 = new Workflow(structuredClone(Workflow.defaultConfig));
+            const w2 = new Workflow(structuredClone(Workflow.defaultConfig));
 
             expect(w1._id).to.not.equal(w2._id);
         });
@@ -57,7 +57,7 @@ describe("Workflow", () => {
 
     describe("fromSubworkflow", () => {
         it("creates workflow with one subworkflow and one unit matching subworkflow name", () => {
-            const subworkflowConfig = Workflow.defaultConfig.subworkflows[0];
+            const subworkflowConfig = structuredClone(Workflow.defaultConfig.subworkflows[0]);
             const subworkflow = new Subworkflow(subworkflowConfig);
             const workflow = Workflow.fromSubworkflow(subworkflow);
 
@@ -69,7 +69,7 @@ describe("Workflow", () => {
 
     describe("toJSON", () => {
         it("returns object with name, units, subworkflows, and workflows", () => {
-            const config = { ...Workflow.defaultConfig };
+            const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
             const json = workflow.toJSON();
 
@@ -82,7 +82,7 @@ describe("Workflow", () => {
 
     describe("getters", () => {
         it("exposes usedApplications, usedApplicationNames, properties, systemName, defaultDescription", () => {
-            const config = { ...Workflow.defaultConfig };
+            const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
 
             expect(workflow.usedApplications).to.be.an("array");
@@ -97,24 +97,22 @@ describe("Workflow", () => {
 
     describe("addSubworkflow / removeSubworkflow", () => {
         it("adds subworkflows then removes one and updates counts", () => {
-            const defaultSub = Workflow.defaultConfig.subworkflows[0];
-            const defaultUnit = Workflow.defaultConfig.units[0];
-            const config = {
-                ...Workflow.defaultConfig,
-                subworkflows: [
-                    defaultSub,
-                    { ...defaultSub, _id: "second-sw-id", name: "Second Subworkflow" },
-                ],
-                units: [
-                    defaultUnit,
-                    {
-                        ...defaultUnit,
-                        _id: "second-sw-id",
-                        flowchartId: "second-fc-id",
-                        name: "Second Subworkflow",
-                    },
-                ],
-            };
+            const config = structuredClone(Workflow.defaultConfig);
+            const defaultSub = config.subworkflows[0];
+            const defaultUnit = config.units[0];
+            config.subworkflows = [
+                defaultSub,
+                { ...defaultSub, _id: "second-sw-id", name: "Second Subworkflow" },
+            ];
+            config.units = [
+                defaultUnit,
+                {
+                    ...defaultUnit,
+                    _id: "second-sw-id",
+                    flowchartId: "second-fc-id",
+                    name: "Second Subworkflow",
+                },
+            ];
             const workflow = new Workflow(config);
             const secondSubworkflow = new Subworkflow(config.subworkflows[1]);
             const thirdSubworkflow = new Subworkflow({
@@ -136,7 +134,7 @@ describe("Workflow", () => {
 
     describe("addUnitType", () => {
         it("adds a subworkflow unit when called with UnitType.subworkflow", () => {
-            const config = { ...Workflow.defaultConfig };
+            const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
             const initialSubworkflows = workflow.toJSON().subworkflows.length;
             const initialUnits = workflow.toJSON().units.length;
@@ -170,6 +168,7 @@ describe("Workflow", () => {
             ).to.be.above(0);
 
             const material = OrderedMaterial.createDefault();
+            material.hash = material.calculateHash();
             const context: WorkflowRenderContext = {
                 material,
                 materials: [material, material, material],

@@ -7,9 +7,8 @@ const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/ess
 const PointsGridFormDataProvider_1 = __importDefault(require("./PointsGridFormDataProvider"));
 class KGridFormDataManager extends PointsGridFormDataProvider_1.default {
     constructor(contextItem, externalContext) {
-        super(contextItem, externalContext);
+        super(contextItem, externalContext, 1);
         this.name = "kgrid";
-        this.divisor = 1;
         const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
         if (!jsonSchema) {
             throw new Error("Failed to get patched JSON schema");
@@ -21,11 +20,9 @@ class KGridFormDataManager extends PointsGridFormDataProvider_1.default {
         return new KGridFormDataManager(contextItem, externalContext);
     }
     applyConvergenceParameter(parameter) {
-        const unitContext = parameter.unitContext.data;
-        const data = this.getData();
         this.setData({
-            ...data,
-            ...unitContext,
+            ...this.getData(),
+            ...parameter.unitContext.data,
         });
         this.setIsEdited(true);
     }

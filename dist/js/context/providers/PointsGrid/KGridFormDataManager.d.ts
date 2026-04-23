@@ -7,7 +7,6 @@ type Name = "kgrid";
 type Schema = GridContextItemSchema;
 export default class KGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name: "kgrid";
-    readonly divisor: 1;
     readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): KGridFormDataManager;

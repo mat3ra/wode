@@ -7,9 +7,8 @@ const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/ess
 const PointsGridFormDataProvider_1 = __importDefault(require("./PointsGridFormDataProvider"));
 class IGridFormDataManager extends PointsGridFormDataProvider_1.default {
     constructor(contextItem, externalContext) {
-        super(contextItem, externalContext);
+        super(contextItem, externalContext, 0.2);
         this.name = "igrid";
-        this.divisor = 0.2;
         const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
         if (!jsonSchema) {
             throw new Error("Failed to get patched JSON schema");

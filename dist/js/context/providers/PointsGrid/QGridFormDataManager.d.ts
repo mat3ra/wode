@@ -6,7 +6,6 @@ type Name = "qgrid";
 type Schema = GridContextItemSchema;
 export default class QGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name: "qgrid";
-    readonly divisor: 5;
     readonly jsonSchema: JSONSchema7;
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext): QGridFormDataManager;

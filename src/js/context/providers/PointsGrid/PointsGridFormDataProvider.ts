@@ -74,17 +74,18 @@ abstract class PointsGridFormDataProvider<
 
     private reciprocalVectorRatios!: Vector3DSchema;
 
-    abstract readonly divisor: number;
+    readonly divisor: number;
 
-    private defaultMetric!: {
+    protected defaultMetric!: {
         type: GridMetricType;
         value: number;
     };
 
     abstract readonly jsonSchema: JSONSchema7;
 
-    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number) {
         super(contextItem, externalContext);
+        this.divisor = divisor;
         this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
     }
@@ -114,6 +115,9 @@ abstract class PointsGridFormDataProvider<
     private getDefaultGridMetricValue(metric: GridMetricType) {
         switch (metric) {
             case "KPPRA":
+                if (!globalSettings.defaultKPPRA) {
+                    throw new Error("globalSettings.defaultKPPRA is not set");
+                }
                 return Math.floor(globalSettings.defaultKPPRA / this.divisor);
             case "spacing":
                 return 0.3;

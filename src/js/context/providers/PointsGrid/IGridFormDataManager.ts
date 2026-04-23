@@ -11,12 +11,10 @@ type Schema = GridContextItemSchema;
 export default class IGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name = "igrid" as const;
 
-    readonly divisor = 0.2 as const;
-
     readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
-        super(contextItem, externalContext);
+        super(contextItem, externalContext, 0.2);
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
             this.jsonSchemaId,

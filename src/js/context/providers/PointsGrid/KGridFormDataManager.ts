@@ -12,12 +12,10 @@ type Schema = GridContextItemSchema;
 export default class KGridFormDataManager extends PointsGridFormDataProvider<Name> {
     readonly name = "kgrid" as const;
 
-    readonly divisor = 1 as const;
-
     readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
-        super(contextItem, externalContext);
+        super(contextItem, externalContext, 1);
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
             this.jsonSchemaId,
@@ -38,12 +36,9 @@ export default class KGridFormDataManager extends PointsGridFormDataProvider<Nam
     }
 
     applyConvergenceParameter(parameter: ConvergenceParameter) {
-        const unitContext = parameter.unitContext.data;
-        const data = this.getData();
-
         this.setData({
-            ...data,
-            ...unitContext,
+            ...this.getData(),
+            ...parameter.unitContext.data,
         });
 
         this.setIsEdited(true);

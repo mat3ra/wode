@@ -25,11 +25,12 @@ const vector = (defaultValue, isStringType = false) => {
 const defaultShift = 0;
 const defaultShifts = [defaultShift, defaultShift, defaultShift];
 class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
-    constructor(contextItem, externalContext) {
+    constructor(contextItem, externalContext, divisor) {
         super(contextItem, externalContext);
         this.domain = "important";
         this.entityName = "unit";
         this.jsonSchemaId = "context-providers-directory/points-grid-data-provider";
+        this.divisor = divisor;
         this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
     }
@@ -51,6 +52,9 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
     getDefaultGridMetricValue(metric) {
         switch (metric) {
             case "KPPRA":
+                if (!settings_1.globalSettings.defaultKPPRA) {
+                    throw new Error("globalSettings.defaultKPPRA is not set");
+                }
                 return Math.floor(settings_1.globalSettings.defaultKPPRA / this.divisor);
             case "spacing":
                 return 0.3;

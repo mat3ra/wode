@@ -8,6 +8,7 @@ type Schema = GridContextItemSchema;
 type Data = PointsGridDataProviderSchema;
 export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
+type GridMetricType = Data["gridMetricType"];
 declare const PointsGridFormDataProvider_base: Base;
 declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends PointsGridFormDataProvider_base {
     abstract readonly name: N;
@@ -22,10 +23,13 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     private preferGridMetric;
     private defaultDimensions;
     private reciprocalVectorRatios;
-    abstract readonly divisor: number;
-    private defaultMetric;
+    readonly divisor: number;
+    protected defaultMetric: {
+        type: GridMetricType;
+        value: number;
+    };
     abstract readonly jsonSchema: JSONSchema7;
-    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number);
     private initInstanceFields;
     private getDefaultGridMetricValue;
     getDefaultData(): PointsGridDataProviderSchema;

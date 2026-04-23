@@ -98,7 +98,9 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             _id: Utils.uuid.getUUID(),
             name: defaultName,
             application: Application.defaultConfig,
-            model: Model.defaultConfig,
+            // TODO: confirm if `functional` is required field. If not, update ESSE schema
+            // `Model.defaultConfig` from @mat3ra/mode may omit `functional`; ESSE subworkflow schema requires it once schemas are registered.
+            model: { ...Model.defaultConfig, functional: "pbe" },
             properties: [],
             units: [],
         };

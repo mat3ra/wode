@@ -44,6 +44,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         name: string;
         application: import("node_modules/@mat3ra/ade/dist/js/applicationMixin").DefaultApplicationConfig;
         model: {
+            functional: string;
             method: {
                 readonly type: "pseudopotential";
                 readonly subtype: "us";
