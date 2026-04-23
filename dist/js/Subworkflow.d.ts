@@ -455,11 +455,11 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         } | {
             name: "qpath" | "ipath" | "kpath" | "explicitKPath" | "explicitKPath2PIBA";
             data: [{
-                point?: string;
+                point: string;
                 steps: number;
                 coordinates: number[];
             }, ...{
-                point?: string;
+                point: string;
                 steps: number;
                 coordinates: number[];
             }[]];

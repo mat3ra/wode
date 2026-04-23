@@ -37,7 +37,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         this.useExplicitPath = this.application.name === "vasp";
     }
     getDefaultData() {
-        return this.reciprocalLattice.defaultKpointPath;
+        return this.addCoordinates(this.reciprocalLattice.defaultKpointPath);
     }
     updateMaterialHash() {
         var _a;
@@ -66,6 +66,9 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
         return jsonSchema;
     }
     setData(path) {
+        super.setData(this.addCoordinates(path));
+    }
+    addCoordinates(path) {
         const rawData = path.map((pathItem) => {
             const point = this.reciprocalLattice.symmetryPoints.find((sp) => {
                 return sp.point === pathItem.point;
@@ -85,7 +88,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
                 coordinates: coordinates.map((c) => Number(c.toFixed(9))),
             };
         });
-        super.setData(newData);
+        return newData;
     }
     // Initially, path contains symmetry points with steps counts.
     // This function explicitly calculates each point between symmetry points by step counts.
@@ -105,8 +108,7 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
             }, ...middlePoints.map((coordinates) => ({
                 steps,
                 coordinates,
-                // TODO: make point optional
-                // point: startPoint.point,
+                point: startPoint.point,
             })));
             // nextPoint is the last point in the path
             if (path.length - 2 === index) {

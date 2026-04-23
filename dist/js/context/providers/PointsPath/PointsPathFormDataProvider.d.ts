@@ -7,6 +7,7 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "../base/JSONS
 export type PointsPathFormDataProviderData = PointsPathDataProviderSchema;
 export type PointsPathFormDataProviderExternalContext = JinjaExternalContext & MaterialExternalContext & ApplicationExternalContext;
 type Data = PointsPathFormDataProviderData;
+type DataItem = Data[0];
 type Schema = PathContextItemSchema;
 type ExternalContext = PointsPathFormDataProviderExternalContext;
 type Base = typeof JSONSchemaDataProvider<Schema> & Constructor<MaterialContextMixin> & Constructor<ApplicationContextMixin>;
@@ -31,7 +32,8 @@ declare abstract class PointsPathFormDataProvider<N extends Schema["name"]> exte
             steps: {};
         };
     };
-    setData(path: Data): void;
+    setData(path: Omit<DataItem, "coordinates">[]): void;
+    private addCoordinates;
     private convertToExplicitPath;
 }
 export default PointsPathFormDataProvider;

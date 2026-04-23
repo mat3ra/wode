@@ -67,8 +67,8 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
         this.useExplicitPath = this.application.name === "vasp";
     }
 
-    getDefaultData() {
-        return this.reciprocalLattice.defaultKpointPath as Data;
+    getDefaultData(): Data {
+        return this.addCoordinates(this.reciprocalLattice.defaultKpointPath);
     }
 
     updateMaterialHash() {
@@ -109,7 +109,11 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
         },
     };
 
-    setData(path: Data) {
+    setData(path: Omit<DataItem, "coordinates">[]) {
+        super.setData(this.addCoordinates(path));
+    }
+
+    private addCoordinates(path: Omit<DataItem, "coordinates">[]) {
         const rawData: DataItem[] = path.map((pathItem) => {
             const point = this.reciprocalLattice.symmetryPoints.find((sp) => {
                 return sp.point === pathItem.point;
@@ -131,9 +135,9 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
                 ...p,
                 coordinates: coordinates.map((c) => Number(c.toFixed(9))),
             };
-        }) as Data;
+        });
 
-        super.setData(newData);
+        return newData as Data;
     }
 
     // Initially, path contains symmetry points with steps counts.
@@ -164,8 +168,7 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
                 ...middlePoints.map((coordinates) => ({
                     steps,
                     coordinates,
-                    // TODO: make point optional
-                    // point: startPoint.point,
+                    point: startPoint.point,
                 })),
             );
 
