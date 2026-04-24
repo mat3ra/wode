@@ -76,6 +76,8 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
     declare toJSON: () => SubworkflowSchema & AnyObject;
 
+    declare _json: SubworkflowSchema & AnyObject;
+
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/subworkflow");
     }
