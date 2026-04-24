@@ -196,6 +196,8 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
 
             return ExecutionUnitInput.createFromTemplate(driverTemplate);
         });
+
+        this.input = this.inputInstances.map((input) => input.toJSON());
     }
 
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter) {

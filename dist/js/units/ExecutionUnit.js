@@ -127,6 +127,7 @@ class ExecutionUnit extends BaseUnit_1.default {
             }
             return ExecutionUnitInput_1.default.createFromTemplate(driverTemplate);
         });
+        this.input = this.inputInstances.map((input) => input.toJSON());
     }
     render(externalContext, convergence) {
         this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
