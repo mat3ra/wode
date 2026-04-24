@@ -132,6 +132,11 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
         const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
         const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
+        console.log({
+            persistentItems,
+            renderingItems,
+            externalContext,
+        });
         this.saveContext(persistentItems, renderingItems, externalContext);
     }
     getContextProvidersInstances(externalContext, convergence) {
