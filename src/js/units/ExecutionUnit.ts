@@ -212,6 +212,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             persistentItems,
             renderingItems,
             externalContext,
+            contextProviders: this.input.map((input) => input.template.contextProviders),
         });
 
         this.saveContext(persistentItems, renderingItems, externalContext);
