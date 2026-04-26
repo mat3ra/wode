@@ -32,7 +32,7 @@ class ContextProvider {
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
         if (contextItem.data) {
-            this.setData(contextItem.data);
+            this.data = utils_1.Utils.clone.deepClone(contextItem.data);
         }
     }
     setIsEdited(isEdited) {

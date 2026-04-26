@@ -3,7 +3,6 @@ import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
-    ContextItemSchema,
     ExecutionUnitInputItemSchema,
     ExecutionUnitSchema,
     FlavorSchema,
@@ -15,7 +14,6 @@ import {
     type ExternalContext,
     createProvider,
 } from "../context/providers";
-import type { ContextItemForRendering } from "../context/providers/base/ContextProvider";
 import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { UnitType } from "../enums";
@@ -205,12 +203,8 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             externalContext,
             convergence,
         );
-        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
-        const renderingItems = this.contextProvidersInstances.map((p) =>
-            p.getContextItemDataForRendering(),
-        );
 
-        this.saveContext(persistentItems, renderingItems, externalContext);
+        this.saveContext(externalContext);
     }
 
     private getContextProvidersInstances(
@@ -250,21 +244,27 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             });
     }
 
-    private saveContext(
-        persistentItems: ContextItemSchema[],
-        renderingItems: ContextItemForRendering<ContextItemSchema, unknown>[],
-        externalContext: ExternalContext,
-    ) {
+    savePersistentContext() {
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
         this.context = persistentItems.filter((c) => c.isEdited);
+    }
 
+    saveRenderingContext(externalContext: ExternalContext) {
+        const renderingItems = this.contextProvidersInstances.map((p) =>
+            p.getContextItemDataForRendering(),
+        );
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...externalContext,
         };
-
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
+    }
+
+    saveContext(externalContext: ExternalContext) {
+        this.savePersistentContext();
+        this.saveRenderingContext(externalContext);
     }
 
     getHashObject() {

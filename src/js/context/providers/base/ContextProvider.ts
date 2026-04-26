@@ -81,7 +81,7 @@ abstract class ContextProvider<
         this.isEdited = contextItem.isEdited || false;
 
         if (contextItem.data) {
-            this.setData(contextItem.data);
+            this.data = Utils.clone.deepClone(contextItem.data);
         }
     }
 

@@ -131,9 +131,7 @@ class ExecutionUnit extends BaseUnit_1.default {
     }
     render(externalContext, convergence) {
         this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
-        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
-        const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
-        this.saveContext(persistentItems, renderingItems, externalContext);
+        this.saveContext(externalContext);
     }
     getContextProvidersInstances(externalContext, convergence) {
         const uniqueContextProviderNames = [
@@ -162,8 +160,12 @@ class ExecutionUnit extends BaseUnit_1.default {
             return provider;
         });
     }
-    saveContext(persistentItems, renderingItems, externalContext) {
+    savePersistentContext() {
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
         this.context = persistentItems.filter((c) => c.isEdited);
+    }
+    saveRenderingContext(externalContext) {
+        const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...externalContext,
@@ -171,6 +173,10 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
+    }
+    saveContext(externalContext) {
+        this.savePersistentContext();
+        this.saveRenderingContext(externalContext);
     }
     getHashObject() {
         const { input, flavor, application, executable } = this.toJSON();

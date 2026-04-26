@@ -44,7 +44,9 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     setDefaultInput(): void;
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;
     private getContextProvidersInstances;
-    private saveContext;
+    savePersistentContext(): void;
+    saveRenderingContext(externalContext: ExternalContext): void;
+    saveContext(externalContext: ExternalContext): void;
     getHashObject(): {
         application: {
             _id?: string;
