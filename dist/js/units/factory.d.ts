@@ -1,4 +1,4 @@
-import type { AssertionUnitSchema, AssignmentUnitSchema, ConditionUnitSchema, DataIOUnitSchema, ExecutionUnitSchema, WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { AssertionUnitSchema, AssignmentUnitSchema, ConditionUnitSchema, DataIOUnitSchema, ExecutionUnitSchema, MapUnitSchema, ReduceUnitSchema, SubworkflowUnitSchema, WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
 import AssertionUnit, { type AssertionUnitConfig } from "./AssertionUnit";
 import AssignmentUnit, { type AssignmentUnitConfig } from "./AssignmentUnit";
 import ConditionUnit, { type ConditionUnitConfig } from "./ConditionUnit";
@@ -8,7 +8,9 @@ import MapUnit from "./MapUnit";
 import ReduceUnit from "./ReduceUnit";
 import SubworkflowUnit from "./SubworkflowUnit";
 export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit;
+export type AnyWorkflowUnitShema = MapUnitSchema | SubworkflowUnitSchema | ReduceUnitSchema;
 export type AnySubworkflowUnit = ExecutionUnit | AssignmentUnit | ConditionUnit | IOUnit | AssertionUnit;
+export type AnySubworkflowUnitShema = ExecutionUnitSchema | AssertionUnitSchema | AssignmentUnitSchema | ConditionUnitSchema | DataIOUnitSchema;
 type ExcutionConfig = ExecutionUnitConfig & Pick<ExecutionUnitSchema, "type">;
 type AssignmentConfig = AssignmentUnitConfig & Pick<AssignmentUnitSchema, "type">;
 type ConditionConfig = ConditionUnitConfig & Pick<ConditionUnitSchema, "type">;
