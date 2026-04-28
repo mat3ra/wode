@@ -22,7 +22,7 @@ import SubworkflowUnit from "./SubworkflowUnit";
 
 export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit;
 
-export type AnyWorkflowUnitShema = MapUnitSchema | SubworkflowUnitSchema | ReduceUnitSchema;
+export type AnyWorkflowUnitSchema = MapUnitSchema | SubworkflowUnitSchema | ReduceUnitSchema;
 
 export type AnySubworkflowUnit =
     | ExecutionUnit
@@ -31,7 +31,7 @@ export type AnySubworkflowUnit =
     | IOUnit
     | AssertionUnit;
 
-export type AnySubworkflowUnitShema =
+export type AnySubworkflowUnitSchema =
     | ExecutionUnitSchema
     | AssertionUnitSchema
     | AssignmentUnitSchema
