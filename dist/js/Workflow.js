@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const TaggableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/TaggableMixin");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
@@ -264,4 +265,5 @@ Workflow.defaultConfig = default_1.default;
 (0, WorkflowSchemaMixin_1.workflowSchemaMixin)(Workflow.prototype);
 (0, TaggableMixin_1.taggableMixin)(Workflow.prototype);
 (0, compute_1.computedEntityMixin)(Workflow.prototype);
+(0, DefaultableMixin_1.defaultableEntityMixin)(Workflow);
 exports.default = Workflow;

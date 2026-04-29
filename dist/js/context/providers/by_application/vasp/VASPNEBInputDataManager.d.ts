@@ -21,9 +21,9 @@ declare class VASPNEBInputDataManager extends JSONSchemaDataProvider<Schema, Ext
     readonly jsonSchema: JSONSchema7;
     constructor(config: Partial<Schema>, externalContext: ExternalContext);
     getDefaultData(): {
-        FIRST_IMAGE: string;
-        LAST_IMAGE: string;
-        INTERMEDIATE_IMAGES: string[];
+        FIRST_IMAGE: any;
+        LAST_IMAGE: any;
+        INTERMEDIATE_IMAGES: any[];
         contextProviderName: "vasp-neb";
     };
 }

@@ -1,8 +1,8 @@
+import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
-    type DefaultableInMemoryEntity,
-    type NamedInMemoryEntity,
-    InMemoryEntity,
-} from "@mat3ra/code/dist/js/entity";
+    type Defaultable,
+    defaultableEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
@@ -40,7 +40,7 @@ import {
 import defaultWorkflowConfig from "./workflows/default";
 
 interface Workflow
-    extends DefaultableInMemoryEntity,
+    extends Defaultable,
         NamedInMemoryEntity,
         WorkflowSchemaMixin,
         Taggable,
@@ -53,6 +53,8 @@ export type WorkflowRenderContext = MaterialExternalContext &
     JobExternalContext;
 
 class Workflow extends InMemoryEntity implements WorkflowSchema {
+    declare createDefault: () => Workflow;
+
     static readonly defaultConfig = defaultWorkflowConfig;
 
     declare _json: WorkflowSchema & AnyObject;
@@ -353,5 +355,6 @@ namedEntityMixin(Workflow.prototype);
 workflowSchemaMixin(Workflow.prototype);
 taggableMixin(Workflow.prototype);
 computedEntityMixin(Workflow.prototype);
+defaultableEntityMixin(Workflow);
 
 export default Workflow;

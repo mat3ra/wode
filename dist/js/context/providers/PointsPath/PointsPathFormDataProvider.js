@@ -42,11 +42,11 @@ class PointsPathFormDataProvider extends MixinsContextProvider {
     updateMaterialHash() {
         var _a;
         super.updateMaterialHash();
-        // Workaround: Material.createDefault() used to initiate workflow reducer and hence here too
-        //  does not have an id. Here we catch when such material is used and avoid resetting isEdited
-        const isMaterialCreatedDefault = !this.material.id;
+        // Reset path only when the material actually changed (hash). Do not clear `isEdited` just
+        // because the material has no id (common default material in designers): that ran every
+        // render, wiped isEdited, and savePersistentContext dropped k-path/Q-path from `unit.context`.
         const isMaterialUpdated = ((_a = this.extraData) === null || _a === void 0 ? void 0 : _a.materialHash) !== this.material.hash;
-        if (isMaterialUpdated || isMaterialCreatedDefault) {
+        if (isMaterialUpdated) {
             this.isEdited = false;
         }
     }

@@ -80,7 +80,7 @@ abstract class ContextProvider<
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
 
-        if (contextItem.data) {
+        if (contextItem.data !== undefined) {
             this.data = Utils.clone.deepClone(contextItem.data);
         }
     }
@@ -90,7 +90,10 @@ abstract class ContextProvider<
     }
 
     getData() {
-        return this.isEdited && this.data ? this.data : this.getDefaultData();
+        if (this.data !== undefined) {
+            return Utils.clone.deepClone(this.data);
+        }
+        return this.getDefaultData();
     }
 
     setData(data: S["data"]) {

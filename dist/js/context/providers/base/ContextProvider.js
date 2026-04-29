@@ -31,7 +31,7 @@ class ContextProvider {
     constructor(contextItem, externalContext) {
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
-        if (contextItem.data) {
+        if (contextItem.data !== undefined) {
             this.data = utils_1.Utils.clone.deepClone(contextItem.data);
         }
     }
@@ -39,7 +39,10 @@ class ContextProvider {
         this.isEdited = isEdited;
     }
     getData() {
-        return this.isEdited && this.data ? this.data : this.getDefaultData();
+        if (this.data !== undefined) {
+            return utils_1.Utils.clone.deepClone(this.data);
+        }
+        return this.getDefaultData();
     }
     setData(data) {
         this.data = utils_1.Utils.clone.deepClone(data);

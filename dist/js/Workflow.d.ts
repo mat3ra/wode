@@ -1,4 +1,5 @@
-import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
@@ -14,11 +15,12 @@ import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
-interface Workflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, ComputedEntityMixin {
+interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, ComputedEntityMixin {
 }
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
 declare class Workflow extends InMemoryEntity implements WorkflowSchema {
+    createDefault: () => Workflow;
     static readonly defaultConfig: WorkflowSchema;
     _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
