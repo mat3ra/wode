@@ -101,7 +101,10 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.defaultPreProcessors = flavor.preProcessors;
         this.defaultPostProcessors = flavor.postProcessors;
 
-        if (this.flavor?.name !== flavor.name) {
+        // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
+        const previousFlavor = this.prop<Schema["flavor"]>("flavor");
+
+        if (previousFlavor?.name !== flavor.name) {
             this.results = flavor.results;
             this.monitors = flavor.monitors;
             this.preProcessors = flavor.preProcessors;

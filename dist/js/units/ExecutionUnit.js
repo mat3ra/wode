@@ -51,7 +51,6 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setFlavor(flavorName);
     }
     setFlavor(flavorName) {
-        var _a;
         const flavor = new standata_1.ApplicationRegistry()
             .getFlavorsByApplicationExecutable(this.application, this.executable)
             .find((flavor) => (flavorName ? flavor.name === flavorName : flavor.isDefault));
@@ -62,7 +61,9 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.defaultMonitors = flavor.monitors;
         this.defaultPreProcessors = flavor.preProcessors;
         this.defaultPostProcessors = flavor.postProcessors;
-        if (((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) !== flavor.name) {
+        // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
+        const previousFlavor = this.prop("flavor");
+        if ((previousFlavor === null || previousFlavor === void 0 ? void 0 : previousFlavor.name) !== flavor.name) {
             this.results = flavor.results;
             this.monitors = flavor.monitors;
             this.preProcessors = flavor.preProcessors;
