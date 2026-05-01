@@ -89,14 +89,14 @@ class ExecutionUnit extends BaseUnit_1.default {
         return true;
     }
     /**
-     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(this.flavor)`),
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(application, flavor)`),
      * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
      * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
      * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
      * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
     setDefaultInput() {
-        const driverTemplates = new standata_1.ApplicationRegistry().getInput(this.flavor);
+        const driverTemplates = new standata_1.ApplicationRegistry().getInput(this.application, this.flavor);
         const persisted = Array.isArray(this.input) ? this.input : [];
         this.inputInstances = driverTemplates.map((driverTemplate, index) => {
             var _a;

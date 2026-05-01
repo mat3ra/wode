@@ -33,7 +33,7 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
      */
     private isPersistedInputItemCompatible;
     /**
-     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(this.flavor)`),
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(application, flavor)`),
      * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
      * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
      * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
