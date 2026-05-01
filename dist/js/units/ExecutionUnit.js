@@ -4,25 +4,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
 const providers_1 = require("../context/providers");
-const settings_1 = require("../context/providers/settings");
 const enums_1 = require("../enums");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
-const RUNTIME_ITEM_KEYS = ["results", "monitors", "preProcessors", "postProcessors"];
 class ExecutionUnit extends BaseUnit_1.default {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/execution");
     }
     constructor(config) {
-        const { executable, flavor } = settings_1.globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-            appName: config.application.name,
-            appVersion: config.application.version,
-        });
         const schema = {
             name: enums_1.UnitType.execution,
             type: enums_1.UnitType.execution,
@@ -31,8 +24,6 @@ class ExecutionUnit extends BaseUnit_1.default {
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            executable,
-            flavor,
             context: [],
             ...config,
         };
@@ -43,81 +34,69 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setApplication(config);
         this.name = this.name || this.flavor.name || "";
     }
-    setApplication({ application, executable, flavor }) {
+    setApplication({ application, executableName, flavorName }) {
         this.setProp("application", application);
-        this.setExecutable({ executable, flavor });
+        this.setExecutable({ executableName, flavorName });
     }
-    setExecutable({ executable, flavor }) {
-        const { executable: executablePlain } = settings_1.globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-            appName: this.application.name,
-            appVersion: this.application.version,
+    setExecutable({ executableName, flavorName }) {
+        const executable = new standata_1.ApplicationRegistry()
+            .getExecutablesByApplication(this.application)
+            .find((executable) => {
+            return executableName ? executable.name === executableName : executable.isDefault;
         });
-        const finalExecutable = executable || executablePlain;
-        this.setProp("executable", finalExecutable);
-        this.setFlavor(flavor);
+        if (!executable) {
+            throw new Error(`Executable ${executableName} not found`);
+        }
+        this.setProp("executable", executable);
+        this.setFlavor(flavorName);
     }
-    setFlavor(flavor) {
-        const prior = {
-            results: this.results.slice(),
-            monitors: this.monitors.slice(),
-            preProcessors: this.preProcessors.slice(),
-            postProcessors: this.postProcessors.slice(),
-        };
-        const { executable, application } = this;
-        const { executable: driverExecutable, flavor: defaultFlavor } = settings_1.globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-            appName: application.name,
-            appVersion: application.version,
-            execName: executable.name,
-        });
-        const finalFlavor = flavor || defaultFlavor;
-        this.defaultResults = finalFlavor.results;
-        this.defaultMonitors = finalFlavor.monitors;
-        this.defaultPreProcessors = finalFlavor.preProcessors;
-        this.defaultPostProcessors = finalFlavor.postProcessors;
-        RUNTIME_ITEM_KEYS.forEach((key) => {
-            this[key] = ExecutionUnit.keepValidOrFallbackToDefaults(prior[key], finalFlavor[key], driverExecutable[key]);
-        });
-        this.setProp("flavor", finalFlavor);
+    setFlavor(flavorName) {
+        var _a;
+        const flavor = new standata_1.ApplicationRegistry()
+            .getFlavorsByApplicationExecutable(this.application, this.executable)
+            .find((flavor) => (flavorName ? flavor.name === flavorName : flavor.isDefault));
+        if (!flavor) {
+            throw new Error(`Flavor ${flavorName} not found`);
+        }
+        this.defaultResults = flavor.results;
+        this.defaultMonitors = flavor.monitors;
+        this.defaultPreProcessors = flavor.preProcessors;
+        this.defaultPostProcessors = flavor.postProcessors;
+        if (((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) !== flavor.name) {
+            this.results = flavor.results;
+            this.monitors = flavor.monitors;
+            this.preProcessors = flavor.preProcessors;
+            this.postProcessors = flavor.postProcessors;
+        }
+        this.setProp("flavor", flavor);
         this.setDefaultInput();
     }
     /**
-     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
-     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
-     */
-    static keepValidOrFallbackToDefaults(prior, defaults, allowed) {
-        const allowedNames = new Set(allowed.map((a) => a.name));
-        const kept = prior.filter((item) => allowedNames.has(item.name));
-        return kept.length ? kept : defaults.slice();
-    }
-    /**
      * Persisted `input[].template` must match the current application/executable (and optional
-     * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from
+     * ApplicationRegistry.
      */
     isPersistedInputItemCompatible(item) {
+        var _a;
         const { template } = item;
         if (template.applicationName !== this.application.name ||
             template.executableName !== this.executable.name) {
             return false;
         }
-        const { applicationVersion } = template;
-        if (applicationVersion && applicationVersion !== this.application.version) {
+        if (!(0, standata_1.applicationVersionSatisfiesSupportedRange)(this.application.version, (_a = template.applicationVersion) !== null && _a !== void 0 ? _a : "")) {
             return false;
         }
         return true;
     }
     /**
-     * Build `inputInstances` from the current flavor’s defaults (`getInput(this.flavor)`), merged with
-     * persisted `this.input` from saved workflow JSON. For each driver slot we prefer a compatible
-     * persisted row matched by `template.name`, else by index; incompatible or missing rows use the
-     * driver template. `render()` then serializes from these instances into `this.input`, so UI and
-     * saved JSON stay aligned when Subworkflow re-serializes units after render.
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(this.flavor)`),
+     * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
+     * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
+     * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
+     * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
     setDefaultInput() {
-        const driverTemplates = settings_1.globalSettings.getApplicationsDriver().getInput(this.flavor);
+        const driverTemplates = new standata_1.ApplicationRegistry().getInput(this.flavor);
         const persisted = Array.isArray(this.input) ? this.input : [];
         this.inputInstances = driverTemplates.map((driverTemplate, index) => {
             var _a;

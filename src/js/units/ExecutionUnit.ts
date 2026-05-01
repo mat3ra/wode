@@ -1,12 +1,8 @@
-import { Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ExecutionUnitInputItemSchema,
-    ExecutionUnitSchema,
-    FlavorSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { ExecutionUnitInputItemSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import { ApplicationRegistry, applicationVersionSatisfiesSupportedRange } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
 import {
@@ -14,7 +10,6 @@ import {
     type ExternalContext,
     createProvider,
 } from "../context/providers";
-import { globalSettings } from "../context/providers/settings";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { UnitType } from "../enums";
 import {
@@ -28,15 +23,15 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-const RUNTIME_ITEM_KEYS = ["results", "monitors", "preProcessors", "postProcessors"] as const;
-type RuntimeItemKey = (typeof RUNTIME_ITEM_KEYS)[number];
-
 export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> &
     SetApplicationProps;
 
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
 
-type SetExecutableProps = Partial<Pick<Schema, "executable" | "flavor">>;
+type SetExecutableProps = {
+    executableName?: string;
+    flavorName?: string;
+};
 
 class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
@@ -54,13 +49,6 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     constructor(config: ExecutionUnitConfig) {
-        const { executable, flavor } = globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-                appName: config.application.name,
-                appVersion: config.application.version,
-            });
-
         const schema = {
             name: UnitType.execution,
             type: UnitType.execution as Schema["type"],
@@ -69,8 +57,6 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            executable,
-            flavor,
             context: [],
             ...config,
         };
@@ -81,78 +67,55 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.name = this.name || this.flavor.name || "";
     }
 
-    setApplication({ application, executable, flavor }: SetApplicationProps) {
+    setApplication({ application, executableName, flavorName }: SetApplicationProps) {
         this.setProp("application", application);
-        this.setExecutable({ executable, flavor });
+        this.setExecutable({ executableName, flavorName });
     }
 
-    setExecutable({ executable, flavor }: SetExecutableProps) {
-        const { executable: executablePlain } = globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-                appName: this.application.name,
-                appVersion: this.application.version,
+    setExecutable({ executableName, flavorName }: SetExecutableProps) {
+        const executable = new ApplicationRegistry()
+            .getExecutablesByApplication(this.application)
+            .find((executable) => {
+                return executableName ? executable.name === executableName : executable.isDefault;
             });
 
-        const finalExecutable = executable || executablePlain;
+        if (!executable) {
+            throw new Error(`Executable ${executableName} not found`);
+        }
 
-        this.setProp("executable", finalExecutable);
-        this.setFlavor(flavor);
+        this.setProp("executable", executable);
+        this.setFlavor(flavorName);
     }
 
-    setFlavor(flavor?: Flavor | FlavorSchema) {
-        const prior: Record<RuntimeItemKey, { name: string }[]> = {
-            results: this.results.slice(),
-            monitors: this.monitors.slice(),
-            preProcessors: this.preProcessors.slice(),
-            postProcessors: this.postProcessors.slice(),
-        };
+    setFlavor(flavorName?: string) {
+        const flavor = new ApplicationRegistry()
+            .getFlavorsByApplicationExecutable(this.application, this.executable)
+            .find((flavor) => (flavorName ? flavor.name === flavorName : flavor.isDefault));
 
-        const { executable, application } = this;
-        const { executable: driverExecutable, flavor: defaultFlavor } = globalSettings
-            .getApplicationsDriver()
-            .getExecutableAndFlavorByName({
-                appName: application.name,
-                appVersion: application.version,
-                execName: executable.name,
-            });
+        if (!flavor) {
+            throw new Error(`Flavor ${flavorName} not found`);
+        }
 
-        const finalFlavor = flavor || defaultFlavor;
+        this.defaultResults = flavor.results;
+        this.defaultMonitors = flavor.monitors;
+        this.defaultPreProcessors = flavor.preProcessors;
+        this.defaultPostProcessors = flavor.postProcessors;
 
-        this.defaultResults = finalFlavor.results;
-        this.defaultMonitors = finalFlavor.monitors;
-        this.defaultPreProcessors = finalFlavor.preProcessors;
-        this.defaultPostProcessors = finalFlavor.postProcessors;
+        if (this.flavor?.name !== flavor.name) {
+            this.results = flavor.results;
+            this.monitors = flavor.monitors;
+            this.preProcessors = flavor.preProcessors;
+            this.postProcessors = flavor.postProcessors;
+        }
 
-        RUNTIME_ITEM_KEYS.forEach((key) => {
-            this[key] = ExecutionUnit.keepValidOrFallbackToDefaults(
-                prior[key],
-                finalFlavor[key],
-                driverExecutable[key],
-            );
-        });
-
-        this.setProp("flavor", finalFlavor);
+        this.setProp("flavor", flavor);
         this.setDefaultInput();
     }
 
     /**
-     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
-     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
-     */
-    private static keepValidOrFallbackToDefaults<T extends { name: string }>(
-        prior: T[],
-        defaults: T[],
-        allowed: ReadonlyArray<{ name: string }>,
-    ): T[] {
-        const allowedNames = new Set(allowed.map((a) => a.name));
-        const kept = prior.filter((item) => allowedNames.has(item.name));
-        return kept.length ? kept : defaults.slice();
-    }
-
-    /**
      * Persisted `input[].template` must match the current application/executable (and optional
-     * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from
+     * ApplicationRegistry.
      */
     private isPersistedInputItemCompatible(item: ExecutionUnitInputItemSchema): boolean {
         const { template } = item;
@@ -164,8 +127,12 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             return false;
         }
 
-        const { applicationVersion } = template;
-        if (applicationVersion && applicationVersion !== this.application.version) {
+        if (
+            !applicationVersionSatisfiesSupportedRange(
+                this.application.version,
+                template.applicationVersion ?? "",
+            )
+        ) {
             return false;
         }
 
@@ -173,14 +140,14 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     /**
-     * Build `inputInstances` from the current flavor’s defaults (`getInput(this.flavor)`), merged with
-     * persisted `this.input` from saved workflow JSON. For each driver slot we prefer a compatible
-     * persisted row matched by `template.name`, else by index; incompatible or missing rows use the
-     * driver template. `render()` then serializes from these instances into `this.input`, so UI and
-     * saved JSON stay aligned when Subworkflow re-serializes units after render.
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(this.flavor)`),
+     * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
+     * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
+     * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
+     * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
     setDefaultInput() {
-        const driverTemplates = globalSettings.getApplicationsDriver().getInput(this.flavor);
+        const driverTemplates = new ApplicationRegistry().getInput(this.flavor);
         const persisted = Array.isArray(this.input) ? this.input : [];
 
         this.inputInstances = driverTemplates.map((driverTemplate, index) => {

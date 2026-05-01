@@ -35,13 +35,6 @@ class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider_1.default
             targetFermiEnergy: 0,
         };
     }
-    // yieldDataForRendering() {
-    //     const data = Utils.clone.deepClone(this.getContextItem());
-    //     data.boundaryConditions.offset *= Made.coefficients.ANGSTROM_TO_BOHR;
-    //     data.boundaryConditions.targetFermiEnergy *= Made.coefficients.EV_TO_RY;
-    //     data.boundaryConditions.electricField *= Made.coefficients.EV_A_TO_RY_BOHR;
-    //     return data;
-    // }
     get jsonSchema() {
         const defaults = this.getDefaultData();
         const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {

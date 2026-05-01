@@ -74,11 +74,11 @@
         "typescript": "^5.6.6"
     },
     "peerDependencies": {
-        "@mat3ra/ade": "*",
-        "@mat3ra/code": "*",
+        "@mat3ra/ade": "file:../ade.js/mat3ra-ade-0.0.0.tgz",
+        "@mat3ra/code": "file:../code/mat3ra-code-0.0.0.tgz",
         "@mat3ra/esse": "file:../esse/mat3ra-esse-0.0.0.tgz",
         "@mat3ra/ide": "*",
-        "@mat3ra/made": "*",
+        "@mat3ra/made": "file:../made/mat3ra-made-0.0.0.tgz",
         "@mat3ra/mode": "*",
         "@mat3ra/standata": "file:../../../standata/mat3ra-standata-0.0.0.tgz",
         "@mat3ra/utils": "*"

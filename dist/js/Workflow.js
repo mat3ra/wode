@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
+const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const TaggableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/TaggableMixin");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
@@ -226,14 +227,6 @@ class Workflow extends entity_1.InMemoryEntity {
         });
         return subworkflowsList;
     }
-    /**
-     * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
-     * units and subworkflows must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
-     */
-    calculateHash() {
-        return (0, workflow_1.calculateHash)(this.toJSON());
-    }
     get hasRelaxation() {
         return Boolean(this.getRelaxationSubworkflow());
     }
@@ -248,6 +241,13 @@ class Workflow extends entity_1.InMemoryEntity {
                 this.addSubworkflow(new Subworkflow_1.default(vcRelax), true);
             }
         }
+    }
+    getHashObject() {
+        return {
+            units: this.unitInstances.map((u) => u.calculateHash()).join(),
+            subworkflows: this.subworkflowInstances.map((sw) => sw.calculateHash()).join(),
+            workflows: this.workflowInstances.map((w) => w.calculateHash()).join(),
+        };
     }
     getStandataRelaxationSubworkflow() {
         // TODO: fix standata type
@@ -266,4 +266,5 @@ Workflow.defaultConfig = default_1.default;
 (0, TaggableMixin_1.taggableMixin)(Workflow.prototype);
 (0, compute_1.computedEntityMixin)(Workflow.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(Workflow);
+(0, HashedEntityMixin_1.hashedEntityMixin)(Workflow.prototype);
 exports.default = Workflow;

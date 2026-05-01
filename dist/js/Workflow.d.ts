@@ -1,5 +1,6 @@
 import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
@@ -15,7 +16,7 @@ import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
-interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, ComputedEntityMixin {
+interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin {
 }
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
@@ -66,14 +67,13 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     addUnitType(type: UnitType, head?: boolean, index?: number): void;
     addMapUnit(mapUnit: MapUnit, mapWorkflow: Workflow): void;
     get allSubworkflows(): Subworkflow[];
-    /**
-     * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
-     * units and subworkflows must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
-     */
-    calculateHash(): string;
     get hasRelaxation(): boolean;
     toggleRelaxation(): void;
+    getHashObject(): {
+        units: string;
+        subworkflows: string;
+        workflows: string;
+    };
     private getStandataRelaxationSubworkflow;
     private getRelaxationSubworkflow;
 }

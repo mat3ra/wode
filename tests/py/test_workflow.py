@@ -1,9 +1,14 @@
+import json
+import os
+
 import pytest
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.subworkflows import SubworkflowStandata
 from mat3ra.standata.workflows import WorkflowStandata
 
 from mat3ra.wode import Subworkflow, Unit, Workflow
+
+WORKFLOW_HASHES_PATH = os.path.join(os.path.dirname(__file__), "../fixtures/workflow_hashes.json")
 
 WORKFLOW_STANDATA = WorkflowStandata()
 SUBWORKFLOW_STANDATA = SubworkflowStandata()
@@ -177,3 +182,15 @@ def test_set_unit(method):
     assert "another_key" in updated_unit.context
     assert updated_unit.context["test_key"] == "test_value"
     assert updated_unit.context["another_key"] == 42
+
+
+@pytest.mark.parametrize("workflow, app", [("band_gap", "espresso")])
+def test_calculate_hash(workflow, app):
+    fixture = WorkflowStandata.get_by_name_and_categories(workflow, app)
+
+    with open(WORKFLOW_HASHES_PATH, "r") as f:
+        expected_hashes = json.load(f)
+    expected_hash = expected_hashes.get(app, {}).get(workflow)
+
+    wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
+    assert wf.hash == expected_hash

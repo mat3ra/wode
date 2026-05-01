@@ -5,6 +5,10 @@ import {
     InMemoryEntity,
 } from "@mat3ra/code/dist/js/entity";
 import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import {
+    type HashedEntity,
+    hashedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
@@ -13,7 +17,7 @@ import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/
 import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory, PseudopotentialMethod } from "@mat3ra/mode";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
-import { setUnitLinks } from "@mat3ra/standata";
+import { ApplicationRegistry, setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
 import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
@@ -32,7 +36,6 @@ import {
 } from "./generated/SubworkflowSchemaMixin";
 import { AssignmentUnit, ConditionUnit, SubworkflowUnit, UnitFactory } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
-import { calculateHash as calculateSubworkflowContentHash } from "./utils/subworkflow";
 
 type ConvergenceConfig = {
     parameter: "N_k" | "N_k_nonuniform";
@@ -51,6 +54,7 @@ interface Subworkflow
     extends DefaultableInMemoryEntity,
         NamedInMemoryEntity,
         SubworkflowSchemaMixin,
+        HashedEntity,
         Omit<ComputedEntityMixin, "compute"> {}
 
 type SubworkflowExternalContext = MaterialExternalContext &
@@ -99,7 +103,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         return {
             _id: Utils.uuid.getUUID(),
             name: defaultName,
-            application: Application.defaultConfig,
+            application: new ApplicationRegistry().getDefaultApplication(),
             // TODO: confirm if `functional` is required field. If not, update ESSE schema
             // `Model.defaultConfig` from @mat3ra/mode may omit `functional`; ESSE subworkflow schema requires it once schemas are registered.
             model: { ...Model.defaultConfig, functional: "pbe" },
@@ -248,12 +252,18 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     }
 
     /**
-     * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
-    calculateHash() {
-        return calculateSubworkflowContentHash(this);
+    getHashObject() {
+        const config = this.toJSON();
+        const meaningfulFields = {
+            application: new Application(config.application).calculateHash(),
+            model: new Model(config.model).calculateHash(),
+            units: this.unitsInstances.map((u) => u.calculateHash()).join(),
+        };
+        return meaningfulFields;
     }
 
     findUnitById(id: string) {
@@ -518,5 +528,6 @@ namedEntityMixin(Subworkflow.prototype);
 defaultableEntityMixin(Subworkflow);
 computedEntityMixin(Subworkflow.prototype);
 subworkflowSchemaMixin(Subworkflow.prototype);
+hashedEntityMixin(Subworkflow.prototype);
 
 export default Subworkflow;

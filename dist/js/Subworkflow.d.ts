@@ -1,5 +1,6 @@
 import { Application } from "@mat3ra/ade";
 import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { type ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
@@ -25,7 +26,7 @@ type ConvergenceConfig = {
     maxOccurrences: number;
     externalContext: SubworkflowExternalContext;
 };
-interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin, Omit<ComputedEntityMixin, "compute"> {
+interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin, HashedEntity, Omit<ComputedEntityMixin, "compute"> {
 }
 type SubworkflowExternalContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & WorkflowExternalContext & JobExternalContext;
 declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
@@ -43,7 +44,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     static get defaultConfig(): {
         _id: any;
         name: string;
-        application: import("node_modules/@mat3ra/ade/dist/js/Application").DefaultApplicationConfig;
+        application: import("@mat3ra/esse/dist/js/types").ApplicationSchema | undefined;
         model: {
             functional: string;
             method: {
@@ -77,11 +78,15 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         searchText?: string;
     } | undefined;
     /**
-     * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
-    calculateHash(): string;
+    getHashObject(): {
+        application: string;
+        model: string;
+        units: string;
+    };
     findUnitById(id: string): {
         _id?: string;
         slug?: string;

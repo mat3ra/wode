@@ -1,29 +1,28 @@
 import {
-    type InMemoryEntityInSetConstructor,
+    type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/InMemoryEntityInSetMixin";
 import {
     type OrderedInMemoryEntityInSet,
-    type OrderedInMemoryEntityInSetConstructor,
     orderedEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
-import { ApplicationStandata, WorkflowStandata } from "@mat3ra/standata";
+import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
+import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { globalSettings, Subworkflow, Workflow } from "../../src/js";
+import { Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
+import workflowHashes from "../fixtures/workflow_hashes.json";
 
-type Base = typeof Material &
-    InMemoryEntityInSetConstructor &
-    OrderedInMemoryEntityInSetConstructor;
+interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends (Material as Base) implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends Material implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 
@@ -154,7 +153,7 @@ describe("Workflow", () => {
         });
 
         it("invokes each subworkflow render with spread context and workflowHasRelaxation", () => {
-            globalSettings.setupApplicationsDriver(new ApplicationStandata());
+            ApplicationRegistry.setDriver(new StandataDriver());
             const standataWorkflows = new WorkflowStandata().getAll();
             expect(standataWorkflows.length).to.be.above(0);
 
@@ -199,10 +198,8 @@ describe("Workflow", () => {
 
     describe("calculateHash", () => {
         before(() => {
-            // Context providers resolve JSON Schemas from ESSE at construction time.
-            // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
             JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-            globalSettings.setupApplicationsDriver(new ApplicationStandata());
+            ApplicationRegistry.setDriver(new StandataDriver());
         });
 
         // Expected to fail until `toJSON()` / schema clean stops mutating live `_json` used by hashing.
@@ -216,6 +213,28 @@ describe("Workflow", () => {
             const hashAfter = workflow.calculateHash();
 
             expect(hashAfter).to.equal(hashBefore);
+        });
+    });
+
+    describe("Workflow hashing", () => {
+        const fixtureFiles = ["band_gap"] as const;
+
+        fixtureFiles.forEach((fixtureFile) => {
+            it(`calculateHash matches stored hash for ${fixtureFile}`, function () {
+                const standata = new WorkflowStandata();
+                const [workflow] = standata.findEntitiesByTags(
+                    "espresso",
+                    fixtureFile,
+                ) as unknown as [WorkflowSchema];
+                const wf = new Workflow(workflow);
+                const expectedHash = workflowHashes.espresso[fixtureFile];
+                if (!expectedHash) {
+                    // eslint-disable-next-line no-console
+                    console.log(`Hash for espresso/${fixtureFile}: ${wf.calculateHash()}`);
+                    this.skip();
+                }
+                expect(wf.calculateHash()).to.equal(expectedHash);
+            });
         });
     });
 });

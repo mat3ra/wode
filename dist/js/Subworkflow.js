@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ade_1 = require("@mat3ra/ade");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
+const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
 const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const compute_1 = require("@mat3ra/ide/dist/js/compute");
@@ -16,7 +17,6 @@ const factory_1 = require("./convergence/factory");
 const enums_1 = require("./enums");
 const SubworkflowSchemaMixin_1 = require("./generated/SubworkflowSchemaMixin");
 const units_1 = require("./units");
-const subworkflow_1 = require("./utils/subworkflow");
 class Subworkflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
@@ -38,7 +38,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         return {
             _id: utils_1.Utils.uuid.getUUID(),
             name: defaultName,
-            application: ade_1.Application.defaultConfig,
+            application: new standata_1.ApplicationRegistry().getDefaultApplication(),
             // TODO: confirm if `functional` is required field. If not, update ESSE schema
             // `Model.defaultConfig` from @mat3ra/mode may omit `functional`; ESSE subworkflow schema requires it once schemas are registered.
             model: { ...mode_1.Model.defaultConfig, functional: "pbe" },
@@ -164,12 +164,18 @@ class Subworkflow extends entity_1.InMemoryEntity {
         return this.modelInstance.Method.data;
     }
     /**
-     * @summary Calculates hash of the subworkflow. Meaningful fields are units, app and model.
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units, app and model.
      * units must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/subworkflow` for the same logic on raw JSON.
      */
-    calculateHash() {
-        return (0, subworkflow_1.calculateHash)(this);
+    getHashObject() {
+        const config = this.toJSON();
+        const meaningfulFields = {
+            application: new ade_1.Application(config.application).calculateHash(),
+            model: new mode_1.Model(config.model).calculateHash(),
+            units: this.unitsInstances.map((u) => u.calculateHash()).join(),
+        };
+        return meaningfulFields;
     }
     findUnitById(id) {
         // TODO: come back and refactor after converting flowchartId to id
@@ -388,4 +394,5 @@ class Subworkflow extends entity_1.InMemoryEntity {
 (0, DefaultableMixin_1.defaultableEntityMixin)(Subworkflow);
 (0, compute_1.computedEntityMixin)(Subworkflow.prototype);
 (0, SubworkflowSchemaMixin_1.subworkflowSchemaMixin)(Subworkflow.prototype);
+(0, HashedEntityMixin_1.hashedEntityMixin)(Subworkflow.prototype);
 exports.default = Subworkflow;

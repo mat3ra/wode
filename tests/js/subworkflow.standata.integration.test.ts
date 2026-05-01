@@ -1,30 +1,28 @@
 import {
-    type InMemoryEntityInSetConstructor,
+    type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/InMemoryEntityInSetMixin";
 import {
     type OrderedInMemoryEntityInSet,
-    type OrderedInMemoryEntityInSetConstructor,
     orderedEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
-import { ApplicationStandata, WorkflowStandata } from "@mat3ra/standata";
+import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
+import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
-import { globalSettings, Workflow } from "../../src/js";
+import { Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import { AssignmentUnit, ConditionUnit } from "../../src/js/units";
 import type { WorkflowRenderContext } from "../../src/js/Workflow";
 
-type Base = typeof Material &
-    InMemoryEntityInSetConstructor &
-    OrderedInMemoryEntityInSetConstructor;
+interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends (Material as Base) implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends Material implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 
@@ -38,7 +36,7 @@ describe("Subworkflow", () => {
     });
 
     beforeEach(() => {
-        globalSettings.setupApplicationsDriver(new ApplicationStandata());
+        ApplicationRegistry.setDriver(new StandataDriver());
     });
 
     it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", () => {

@@ -1,7 +1,6 @@
-import { Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ExecutionUnitSchema, FlavorSchema } from "@mat3ra/esse/dist/js/types";
+import type { ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { type AnyContextProvider, type ExternalContext } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { type ExecutionUnitSchemaMixin } from "../generated/ExecutionUnitSchemaMixin";
@@ -11,7 +10,10 @@ type Schema = ExecutionUnitSchema;
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> & SetApplicationProps;
 type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
-type SetExecutableProps = Partial<Pick<Schema, "executable" | "flavor">>;
+type SetExecutableProps = {
+    executableName?: string;
+    flavorName?: string;
+};
 declare const ExecutionUnit_base: Base;
 declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     inputInstances: ExecutionUnitInput[];
@@ -21,25 +23,21 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     _json: Schema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ExecutionUnitConfig);
-    setApplication({ application, executable, flavor }: SetApplicationProps): void;
-    setExecutable({ executable, flavor }: SetExecutableProps): void;
-    setFlavor(flavor?: Flavor | FlavorSchema): void;
-    /**
-     * Keep prior runtime items whose `name` still appears on the executable; otherwise fall back to
-     * flavor defaults. `defaults` is cloned so later `toggle*` mutations never touch flavor arrays.
-     */
-    private static keepValidOrFallbackToDefaults;
+    setApplication({ application, executableName, flavorName }: SetApplicationProps): void;
+    setExecutable({ executableName, flavorName }: SetExecutableProps): void;
+    setFlavor(flavorName?: string): void;
     /**
      * Persisted `input[].template` must match the current application/executable (and optional
-     * applicationVersion). Otherwise the stored template is stale, and we take the default from the driver.
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from
+     * ApplicationRegistry.
      */
     private isPersistedInputItemCompatible;
     /**
-     * Build `inputInstances` from the current flavor’s defaults (`getInput(this.flavor)`), merged with
-     * persisted `this.input` from saved workflow JSON. For each driver slot we prefer a compatible
-     * persisted row matched by `template.name`, else by index; incompatible or missing rows use the
-     * driver template. `render()` then serializes from these instances into `this.input`, so UI and
-     * saved JSON stay aligned when Subworkflow re-serializes units after render.
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(this.flavor)`),
+     * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
+     * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
+     * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
+     * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
     setDefaultInput(): void;
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;

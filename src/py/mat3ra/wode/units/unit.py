@@ -1,12 +1,13 @@
 from typing import Any, Dict, List
 
 from mat3ra.code.entity import InMemoryEntitySnakeCase
+from mat3ra.code.mixins import HashedEntityMixin
 from mat3ra.esse.models.workflow.unit.base import WorkflowBaseUnitSchema
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field
 
 
-class Unit(WorkflowBaseUnitSchema, InMemoryEntitySnakeCase):
+class Unit(WorkflowBaseUnitSchema, HashedEntityMixin, InMemoryEntitySnakeCase):
     """
     Unit class representing a unit of computational work in a workflow.
 
@@ -28,6 +29,14 @@ class Unit(WorkflowBaseUnitSchema, InMemoryEntitySnakeCase):
     results: List[Any] = Field(default_factory=list)
     context: Dict[str, Any] = Field(default_factory=dict)
 
+
+    def get_hash_object(self) -> Dict[str, Any]:
+        return {
+            "results": self.results or [],
+            "preProcessors": self.preProcessors or [],
+            "postProcessors": self.postProcessors or [],
+            "type": self.type,
+        }
 
     def is_in_status(self, status: str) -> bool:
         return self.status == status

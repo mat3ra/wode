@@ -1,29 +1,27 @@
 import {
-    type InMemoryEntityInSetConstructor,
+    type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/InMemoryEntityInSetMixin";
 import {
     type OrderedInMemoryEntityInSet,
-    type OrderedInMemoryEntityInSetConstructor,
     orderedEntityInSetMixin,
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
-import { ApplicationStandata, WorkflowStandata } from "@mat3ra/standata";
+import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
+import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { ExecutionUnit, globalSettings, Workflow } from "../../src/js";
+import { ExecutionUnit, Workflow } from "../../src/js";
 import KGridFormDataManager from "../../src/js/context/providers/PointsGrid/KGridFormDataManager";
 
-type Base = typeof Material &
-    InMemoryEntityInSetConstructor &
-    OrderedInMemoryEntityInSetConstructor;
+interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends (Material as Base) implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends Material implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 
@@ -38,9 +36,8 @@ orderedEntityInSetMixin(OrderedMaterial.prototype);
  */
 describe("ExecutionUnit contextProvidersInstances + render()", () => {
     before(() => {
-        // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-        globalSettings.setupApplicationsDriver(new ApplicationStandata());
+        ApplicationRegistry.setDriver(new StandataDriver());
     });
 
     it("persists in-memory provider edits when render() runs again (Important settings path)", () => {
@@ -49,9 +46,11 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
 
         const material = OrderedMaterial.createDefault();
         material.hash = material.calculateHash();
+        // Enough entries for `input.perMaterial[MATERIAL_INDEX]` on multi-material standata
+        // workflows (e.g. Valence Band Offset uses indices "0", "1", "2").
         const context: WorkflowRenderContext = {
             material,
-            materials: [material],
+            materials: [material, material, material],
             jobHasParent: false,
         };
 

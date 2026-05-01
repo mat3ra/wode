@@ -11,7 +11,7 @@ function executionUnitInputSchemaMixin(item) {
             this.setProp("template", value);
         },
         get rendered() {
-            return this.requiredProp("rendered");
+            return this.prop("rendered");
         },
         set rendered(value) {
             this.setProp("rendered", value);

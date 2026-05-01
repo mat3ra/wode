@@ -3,6 +3,10 @@ import {
     type Defaultable,
     defaultableEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import {
+    type HashedEntity,
+    hashedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
@@ -28,7 +32,6 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit, UnitFactory } from "./units/factory";
 import {
-    calculateHash as calculateWorkflowContentHash,
     getDefaultDescription,
     getHumanReadableProperties,
     getHumanReadableUsedModels,
@@ -44,6 +47,7 @@ interface Workflow
         NamedInMemoryEntity,
         WorkflowSchemaMixin,
         Taggable,
+        HashedEntity,
         ComputedEntityMixin {}
 
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
@@ -310,15 +314,6 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         return subworkflowsList;
     }
 
-    /**
-     * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
-     * units and subworkflows must be sorted topologically before hashing (already sorted).
-     * @see `calculateHash` in `./utils/workflow` for the same logic on raw JSON.
-     */
-    calculateHash(): string {
-        return calculateWorkflowContentHash(this.toJSON());
-    }
-
     get hasRelaxation() {
         return Boolean(this.getRelaxationSubworkflow());
     }
@@ -333,6 +328,14 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
                 this.addSubworkflow(new Subworkflow(vcRelax), true);
             }
         }
+    }
+
+    getHashObject() {
+        return {
+            units: this.unitInstances.map((u) => u.calculateHash()).join(),
+            subworkflows: this.subworkflowInstances.map((sw) => sw.calculateHash()).join(),
+            workflows: this.workflowInstances.map((w) => w.calculateHash()).join(),
+        };
     }
 
     private getStandataRelaxationSubworkflow() {
@@ -356,5 +359,6 @@ workflowSchemaMixin(Workflow.prototype);
 taggableMixin(Workflow.prototype);
 computedEntityMixin(Workflow.prototype);
 defaultableEntityMixin(Workflow);
+hashedEntityMixin(Workflow.prototype);
 
 export default Workflow;
