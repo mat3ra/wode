@@ -43,7 +43,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     static get defaultConfig(): {
         _id: any;
         name: string;
-        application: import("node_modules/@mat3ra/ade/dist/js/applicationMixin").DefaultApplicationConfig;
+        application: import("node_modules/@mat3ra/ade/dist/js/Application").DefaultApplicationConfig;
         model: {
             functional: string;
             method: {
@@ -254,8 +254,10 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             summary: string;
             version: string;
             build: string;
+            isDefaultVersion?: boolean;
             hasAdvancedComputeOptions?: boolean;
             isLicensed?: boolean;
+            isUsingMaterial?: boolean;
         };
         executable: {
             _id?: string;
@@ -265,6 +267,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             name: string;
             isDefault?: boolean;
             applicationName: string;
+            applicationVersion: string;
             hasAdvancedComputeOptions?: boolean;
         };
         flavor: {
@@ -286,14 +289,14 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             results: {
                 name: string;
             }[];
-            executableName?: string;
-            applicationName?: string;
+            executableName: string;
+            applicationName: string;
+            applicationVersion: string;
             input: {
                 templateId?: string;
                 templateName?: string;
-                name?: string;
+                name: string;
             }[];
-            supportedApplicationVersions?: string[];
         };
         input: {
             template: {
@@ -302,15 +305,15 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 systemName?: string;
                 schemaVersion?: string;
                 name: string;
-                applicationName: string;
-                applicationVersion?: string;
                 executableName: string;
+                applicationName: string;
+                applicationVersion: string;
                 contextProviders: {
                     name: import("@mat3ra/esse/dist/js/types").ContextProviderNameEnum;
                 }[];
                 content: string;
             };
-            rendered: string;
+            rendered?: string;
             isManuallyChanged: boolean;
         }[];
         context: ({

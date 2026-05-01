@@ -59,8 +59,10 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             summary: string;
             version: string;
             build: string;
+            isDefaultVersion?: boolean;
             hasAdvancedComputeOptions?: boolean;
             isLicensed?: boolean;
+            isUsingMaterial?: boolean;
         };
         executable: {
             _id?: string;
@@ -70,6 +72,7 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             name: string;
             isDefault?: boolean;
             applicationName: string;
+            applicationVersion: string;
             hasAdvancedComputeOptions?: boolean;
         };
         flavor: {
@@ -91,14 +94,14 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             results: {
                 name: string;
             }[];
-            executableName?: string;
-            applicationName?: string;
+            executableName: string;
+            applicationName: string;
+            applicationVersion: string;
             input: {
                 templateId?: string;
                 templateName?: string;
-                name?: string;
+                name: string;
             }[];
-            supportedApplicationVersions?: string[];
         };
         input: string;
     };
