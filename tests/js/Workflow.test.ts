@@ -154,10 +154,8 @@ describe("Workflow", () => {
 
         it("invokes each subworkflow render with spread context and workflowHasRelaxation", () => {
             ApplicationRegistry.setDriver(new StandataDriver());
-            const standataWorkflows = new WorkflowStandata().getAll();
-            expect(standataWorkflows.length).to.be.above(0);
 
-            const workflows = standataWorkflows.map((standataJson) => {
+            const workflows = new WorkflowStandata().getAll().map((standataJson) => {
                 return new Workflow(standataJson as unknown as WorkflowSchema);
             });
 

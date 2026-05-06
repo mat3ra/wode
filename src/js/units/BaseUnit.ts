@@ -101,6 +101,11 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
     setRepetition(repetition: number) {
         this.repetition = repetition;
     }
+
+    resetStatus() {
+        this.status = UnitStatus.idle;
+        this.statusTrack = [];
+    }
 }
 
 taggableMixin(BaseUnit.prototype);

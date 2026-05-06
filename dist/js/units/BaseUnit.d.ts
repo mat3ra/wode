@@ -34,5 +34,6 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     isInStatus(status: StatusSchema["status"]): boolean;
     clone(extraContext: object): this;
     setRepetition(repetition: number): void;
+    resetStatus(): void;
 }
 export default BaseUnit;

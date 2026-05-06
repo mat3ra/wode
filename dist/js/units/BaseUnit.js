@@ -58,6 +58,10 @@ class BaseUnit extends entity_1.InMemoryEntity {
     setRepetition(repetition) {
         this.repetition = repetition;
     }
+    resetStatus() {
+        this.status = enums_1.UnitStatus.idle;
+        this.statusTrack = [];
+    }
 }
 (0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);
 (0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnit.prototype);
