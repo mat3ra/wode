@@ -25,6 +25,7 @@ import { Utils } from "@mat3ra/utils";
 import { UnitStatus } from "../enums";
 import { type BaseUnitSchemaMixin, baseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
 import { type StatusSchemaMixin, statusSchemaMixin } from "../generated/StatusSchemaMixin";
+import { resetStatus } from "../utils/baseUnits";
 import {
     type RuntimeItemsUILogic,
     runtimeItemsUILogicMixin,
@@ -44,6 +45,8 @@ type Base = typeof InMemoryEntity &
 
 class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) implements Schema {
     declare toJSON: () => Schema & AnyObject;
+
+    declare _json: Schema & AnyObject;
 
     defaultResults: NameResultSchema[] = [];
 
@@ -103,8 +106,7 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
     }
 
     resetStatus() {
-        this.status = UnitStatus.idle;
-        this.statusTrack = [];
+        this.setProps(resetStatus(this._json));
     }
 }
 

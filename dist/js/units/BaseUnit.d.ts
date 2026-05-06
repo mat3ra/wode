@@ -16,6 +16,7 @@ type Base = typeof InMemoryEntity & Constructor<NamedEntity> & Constructor<Defau
 declare const BaseUnit_base: Base;
 declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implements Schema {
     toJSON: () => Schema & AnyObject;
+    _json: Schema & AnyObject;
     defaultResults: NameResultSchema[];
     defaultMonitors: NameResultSchema[];
     defaultPostProcessors: NameResultSchema[];
