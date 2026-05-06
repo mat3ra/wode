@@ -6,3 +6,4 @@ export declare function getDefaultDescription(workflow: WorkflowSchema): string;
 export declare function getProperties(workflow: WorkflowSchema): string[];
 export declare function getHumanReadableProperties(workflow: WorkflowSchema): string[];
 export declare function getHumanReadableUsedModels(workflow: WorkflowSchema): string[];
+export declare function resetUnitsStatuses(workflow: WorkflowSchema): WorkflowSchema;

@@ -10,7 +10,6 @@ const utils_1 = require("@mat3ra/utils");
 const enums_1 = require("../enums");
 const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
 const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
-const baseUnits_1 = require("../utils/baseUnits");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
 class BaseUnit extends entity_1.InMemoryEntity {
     /**
@@ -58,9 +57,6 @@ class BaseUnit extends entity_1.InMemoryEntity {
     }
     setRepetition(repetition) {
         this.repetition = repetition;
-    }
-    resetStatus() {
-        this.setProps((0, baseUnits_1.resetStatus)(this._json));
     }
 }
 (0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);

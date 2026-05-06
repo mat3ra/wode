@@ -10,8 +10,10 @@ exports.getDefaultDescription = getDefaultDescription;
 exports.getProperties = getProperties;
 exports.getHumanReadableProperties = getHumanReadableProperties;
 exports.getHumanReadableUsedModels = getHumanReadableUsedModels;
+exports.resetUnitsStatuses = resetUnitsStatuses;
 const tree_1 = require("@mat3ra/mode/dist/js/tree");
 const underscore_string_1 = __importDefault(require("underscore.string"));
+const baseUnits_1 = require("./baseUnits");
 function getUsedApplications(workflow) {
     const swApplications = workflow.subworkflows.map((sw) => sw.application);
     const nestedWorkflows = workflow.workflows;
@@ -49,4 +51,17 @@ function getHumanReadableUsedModels(workflow) {
     return getUsedModels(workflow)
         .filter((m) => m !== "unknown")
         .map((m) => tree_1.MODEL_NAMES[m]);
+}
+function resetUnitsStatuses(workflow) {
+    var _a;
+    return {
+        ...workflow,
+        subworkflows: workflow.subworkflows.map((subworkflow) => {
+            return {
+                ...subworkflow,
+                units: subworkflow.units.map(baseUnits_1.resetStatus),
+            };
+        }),
+        workflows: (_a = workflow.workflows) === null || _a === void 0 ? void 0 : _a.map((wf) => resetUnitsStatuses(wf)),
+    };
 }

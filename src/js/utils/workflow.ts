@@ -2,6 +2,8 @@ import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/typ
 import { MODEL_NAMES } from "@mat3ra/mode/dist/js/tree";
 import s from "underscore.string";
 
+import { resetStatus } from "./baseUnits";
+
 export function getUsedApplications(workflow: WorkflowSchema): ApplicationSchema[] {
     const swApplications = workflow.subworkflows.map((sw) => sw.application);
     const nestedWorkflows = workflow.workflows as WorkflowSchema[];
@@ -49,4 +51,19 @@ export function getHumanReadableUsedModels(workflow: WorkflowSchema) {
     return getUsedModels(workflow)
         .filter((m) => m !== "unknown")
         .map((m) => MODEL_NAMES[m]);
+}
+
+export function resetUnitsStatuses(workflow: WorkflowSchema): WorkflowSchema {
+    return {
+        ...workflow,
+        subworkflows: workflow.subworkflows.map((subworkflow) => {
+            return {
+                ...subworkflow,
+                units: subworkflow.units.map(resetStatus),
+            };
+        }),
+        workflows: workflow.workflows?.map((wf) =>
+            resetUnitsStatuses(wf as WorkflowSchema),
+        ) as WorkflowSchema[],
+    };
 }

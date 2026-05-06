@@ -25,7 +25,6 @@ import { Utils } from "@mat3ra/utils";
 import { UnitStatus } from "../enums";
 import { type BaseUnitSchemaMixin, baseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
 import { type StatusSchemaMixin, statusSchemaMixin } from "../generated/StatusSchemaMixin";
-import { resetStatus } from "../utils/baseUnits";
 import {
     type RuntimeItemsUILogic,
     runtimeItemsUILogicMixin,
@@ -103,10 +102,6 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     setRepetition(repetition: number) {
         this.repetition = repetition;
-    }
-
-    resetStatus() {
-        this.setProps(resetStatus(this._json));
     }
 }
 
