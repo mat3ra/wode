@@ -83,3 +83,45 @@ describe("UnitFactory.createDefaultSubworkflowUnit", () => {
         expect(unit.type).to.equal(UnitType.assertion);
     });
 });
+
+describe("UnitFactory.createInSubworkflow", () => {
+    before(() => {
+        JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+    });
+
+    beforeEach(() => {
+        ApplicationRegistry.setDriver(new StandataDriver());
+    });
+
+    it("preserves serialized execution unit executable and flavor when reconstructing", () => {
+        const registry = new ApplicationRegistry();
+        const application = registry.findApplication({ name: "espresso" });
+        const executable = registry
+            .getExecutablesByApplication(application)
+            .find((item) => item.name === "neb.x");
+
+        if (!executable) {
+            throw new Error("Expected espresso neb.x executable in standata");
+        }
+
+        const flavor = registry.getDefaultFlavor(application, executable);
+
+        if (!flavor) {
+            throw new Error("Expected default flavor for espresso neb.x executable in standata");
+        }
+
+        const unit = UnitFactory.createInSubworkflow({
+            type: UnitType.execution,
+            application,
+            executable,
+            flavor,
+        });
+
+        expect(unit).to.be.instanceOf(ExecutionUnit);
+        if (!(unit instanceof ExecutionUnit)) {
+            throw new Error("expected ExecutionUnit");
+        }
+        expect(unit.executable.name).to.equal("neb.x");
+        expect(unit.flavor.name).to.equal(flavor.name);
+    });
+});

@@ -34,9 +34,15 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setApplication(config);
         this.name = this.name || this.flavor.name || "";
     }
-    setApplication({ application, executableName, flavorName }) {
+    setApplication({ application, executable, flavor, executableName, flavorName, }) {
+        var _a, _b;
+        const currentExecutable = this.prop("executable");
+        const currentFlavor = this.prop("flavor");
         this.setProp("application", application);
-        this.setExecutable({ executableName, flavorName });
+        this.setExecutable({
+            executableName: (_a = executableName !== null && executableName !== void 0 ? executableName : executable === null || executable === void 0 ? void 0 : executable.name) !== null && _a !== void 0 ? _a : currentExecutable === null || currentExecutable === void 0 ? void 0 : currentExecutable.name,
+            flavorName: (_b = flavorName !== null && flavorName !== void 0 ? flavorName : flavor === null || flavor === void 0 ? void 0 : flavor.name) !== null && _b !== void 0 ? _b : currentFlavor === null || currentFlavor === void 0 ? void 0 : currentFlavor.name,
+        });
     }
     setExecutable({ executableName, flavorName }) {
         const executable = new standata_1.ApplicationRegistry()

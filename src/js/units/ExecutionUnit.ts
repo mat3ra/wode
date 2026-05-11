@@ -23,10 +23,11 @@ type Schema = ExecutionUnitSchema;
 
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> &
-    SetApplicationProps;
+export type ExecutionUnitConfig = Omit<Partial<Schema>, "application"> & SetApplicationProps;
 
-type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
+type SetApplicationProps = Pick<Schema, "application"> &
+    Pick<Partial<Schema>, "executable" | "flavor"> &
+    SetExecutableProps;
 
 type SetExecutableProps = {
     executableName?: string;
@@ -67,9 +68,21 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.name = this.name || this.flavor.name || "";
     }
 
-    setApplication({ application, executableName, flavorName }: SetApplicationProps) {
+    setApplication({
+        application,
+        executable,
+        flavor,
+        executableName,
+        flavorName,
+    }: SetApplicationProps) {
+        const currentExecutable = this.prop<Schema["executable"]>("executable");
+        const currentFlavor = this.prop<Schema["flavor"]>("flavor");
+
         this.setProp("application", application);
-        this.setExecutable({ executableName, flavorName });
+        this.setExecutable({
+            executableName: executableName ?? executable?.name ?? currentExecutable?.name,
+            flavorName: flavorName ?? flavor?.name ?? currentFlavor?.name,
+        });
     }
 
     setExecutable({ executableName, flavorName }: SetExecutableProps) {

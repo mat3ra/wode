@@ -8,8 +8,8 @@ import BaseUnit from "./BaseUnit";
 import ExecutionUnitInput from "./ExecutionUnitInput";
 type Schema = ExecutionUnitSchema;
 type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
-export type ExecutionUnitConfig = Omit<Partial<Schema>, "executable" | "flavor" | "application"> & SetApplicationProps;
-type SetApplicationProps = Pick<Schema, "application"> & SetExecutableProps;
+export type ExecutionUnitConfig = Omit<Partial<Schema>, "application"> & SetApplicationProps;
+type SetApplicationProps = Pick<Schema, "application"> & Pick<Partial<Schema>, "executable" | "flavor"> & SetExecutableProps;
 type SetExecutableProps = {
     executableName?: string;
     flavorName?: string;
@@ -23,7 +23,7 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     _json: Schema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ExecutionUnitConfig);
-    setApplication({ application, executableName, flavorName }: SetApplicationProps): void;
+    setApplication({ application, executable, flavor, executableName, flavorName, }: SetApplicationProps): void;
     setExecutable({ executableName, flavorName }: SetExecutableProps): void;
     setFlavor(flavorName?: string): void;
     /**
