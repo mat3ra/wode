@@ -340,9 +340,23 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
 
     private getStandataRelaxationSubworkflow() {
         // TODO: fix standata type
-        return new SubworkflowStandata().getRelaxationSubworkflowByApplication(
+        const subworkflow = new SubworkflowStandata().getRelaxationSubworkflowByApplication(
             this.subworkflowInstances[0].application.name,
-        ) as unknown as SubworkflowSchema;
+        ) as unknown as SubworkflowSchema | undefined;
+
+        if (!subworkflow) {
+            return undefined;
+        }
+
+        const executionUnit = subworkflow.units.find((unit) => unit.type === UnitType.execution);
+        if (!executionUnit) {
+            throw new Error("Relaxation subworkflow is missing an execution unit");
+        }
+
+        return {
+            ...subworkflow,
+            application: executionUnit.application,
+        };
     }
 
     private getRelaxationSubworkflow() {

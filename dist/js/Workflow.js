@@ -251,7 +251,18 @@ class Workflow extends entity_1.InMemoryEntity {
     }
     getStandataRelaxationSubworkflow() {
         // TODO: fix standata type
-        return new standata_1.SubworkflowStandata().getRelaxationSubworkflowByApplication(this.subworkflowInstances[0].application.name);
+        const subworkflow = new standata_1.SubworkflowStandata().getRelaxationSubworkflowByApplication(this.subworkflowInstances[0].application.name);
+        if (!subworkflow) {
+            return undefined;
+        }
+        const executionUnit = subworkflow.units.find((unit) => unit.type === enums_1.UnitType.execution);
+        if (!executionUnit) {
+            throw new Error("Relaxation subworkflow is missing an execution unit");
+        }
+        return {
+            ...subworkflow,
+            application: executionUnit.application,
+        };
     }
     getRelaxationSubworkflow() {
         const standataSubworkflow = this.getStandataRelaxationSubworkflow();

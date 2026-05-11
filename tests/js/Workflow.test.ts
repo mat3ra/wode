@@ -145,6 +145,37 @@ describe("Workflow", () => {
         });
     });
 
+    describe("toggleRelaxation", () => {
+        before(() => {
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+            ApplicationRegistry.setDriver(new StandataDriver());
+        });
+
+        it("adds the standata relaxation subworkflow with a schema-complete application", () => {
+            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
+
+            expect(() => workflow.toggleRelaxation()).not.to.throw();
+
+            const relaxation = workflow
+                .toJSON()
+                .subworkflows.find(
+                    (subworkflow) => subworkflow.systemName === "espresso-variable-cell-relaxation",
+                );
+
+            if (!relaxation) {
+                throw new Error("Expected relaxation subworkflow to be added");
+            }
+
+            expect(relaxation.application).to.include({
+                build: "GNU",
+                name: "espresso",
+                shortName: "qe",
+                summary: "Quantum ESPRESSO",
+                version: "6.3",
+            });
+        });
+    });
+
     describe("render", () => {
         before(() => {
             // Context providers resolve JSON Schemas from ESSE at construction time.
