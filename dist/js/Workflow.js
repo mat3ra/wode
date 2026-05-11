@@ -266,7 +266,7 @@ class Workflow extends entity_1.InMemoryEntity {
     }
     getRelaxationSubworkflow() {
         const standataSubworkflow = this.getStandataRelaxationSubworkflow();
-        return this.subworkflows.find((sw) => {
+        return this.subworkflowInstances.find((sw) => {
             return standataSubworkflow && standataSubworkflow.systemName === sw.systemName;
         });
     }

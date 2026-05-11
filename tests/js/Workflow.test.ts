@@ -174,6 +174,24 @@ describe("Workflow", () => {
                 version: "6.3",
             });
         });
+
+        it("removes the added relaxation subworkflow on the next toggle", () => {
+            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
+            const initialSubworkflowCount = workflow.subworkflowInstances.length;
+            const initialUnitCount = workflow.unitInstances.length;
+
+            workflow.toggleRelaxation();
+
+            expect(workflow.hasRelaxation).to.equal(true);
+            expect(workflow.subworkflowInstances).to.have.lengthOf(initialSubworkflowCount + 1);
+            expect(workflow.unitInstances).to.have.lengthOf(initialUnitCount + 1);
+
+            workflow.toggleRelaxation();
+
+            expect(workflow.hasRelaxation).to.equal(false);
+            expect(workflow.subworkflowInstances).to.have.lengthOf(initialSubworkflowCount);
+            expect(workflow.unitInstances).to.have.lengthOf(initialUnitCount);
+        });
     });
 
     describe("render", () => {
