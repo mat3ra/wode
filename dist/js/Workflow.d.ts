@@ -1,5 +1,6 @@
 import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import { type HasDescription } from "@mat3ra/code/dist/js/entity/mixins/HasDescriptionMixin";
 import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
@@ -16,7 +17,7 @@ import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
-interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin {
+interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
 }
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;

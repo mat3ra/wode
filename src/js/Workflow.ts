@@ -4,6 +4,10 @@ import {
     defaultableEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import {
+    type HasDescription,
+    hasDescriptionMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HasDescriptionMixin";
+import {
     type HashedEntity,
     hashedEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
@@ -48,7 +52,8 @@ interface Workflow
         WorkflowSchemaMixin,
         Taggable,
         HashedEntity,
-        ComputedEntityMixin {}
+        ComputedEntityMixin,
+        HasDescription {}
 
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext &
@@ -374,5 +379,6 @@ taggableMixin(Workflow.prototype);
 computedEntityMixin(Workflow.prototype);
 defaultableEntityMixin(Workflow);
 hashedEntityMixin(Workflow.prototype);
+hasDescriptionMixin(Workflow.prototype);
 
 export default Workflow;
