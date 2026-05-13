@@ -18,6 +18,7 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
 interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
+    compute: WorkflowSchema["compute"];
 }
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
