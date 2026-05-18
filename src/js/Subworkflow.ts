@@ -370,6 +370,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 });
 
                 this.modelInstance.setMethod(method);
+                this.model = this.modelInstance.toJSON();
             });
 
         // TODO: Try if/else instead of running both

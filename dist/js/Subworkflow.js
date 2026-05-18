@@ -269,6 +269,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
                 ...filters,
             });
             this.modelInstance.setMethod(method);
+            this.model = this.modelInstance.toJSON();
         });
         // TODO: Try if/else instead of running both
         if (materials.length > 1) {
