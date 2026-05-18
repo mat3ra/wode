@@ -15,7 +15,7 @@ import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
-import { Model, ModelFactory, PseudopotentialMethod } from "@mat3ra/mode";
+import { type PseudopotentialMethod, Model, ModelFactory } from "@mat3ra/mode";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
 import { ApplicationRegistry, setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
@@ -327,7 +327,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     }
 
     updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]) {
-        const method = this.modelInstance.Method;
+        const method = this.modelInstance.Method as PseudopotentialMethod;
         const { model } = this;
         const uniqueElements = [...new Set(materials.map((m) => m.uniqueElements).flat())];
         const appName = this.application.name;
@@ -342,7 +342,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             })
             .map((metaProperty) => metaProperty.property);
 
-        if (!(method instanceof PseudopotentialMethod) || !methodDataItems.length) {
+        if (method.type !== "pseudopotential" || !methodDataItems.length) {
             return;
         }
 

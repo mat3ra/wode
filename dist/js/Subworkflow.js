@@ -244,7 +244,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
                 metaProperty.data.apps.includes(appName));
         })
             .map((metaProperty) => metaProperty.property);
-        if (!(method instanceof mode_1.PseudopotentialMethod) || !methodDataItems.length) {
+        if (method.type !== "pseudopotential" || !methodDataItems.length) {
             return;
         }
         const filters = {
