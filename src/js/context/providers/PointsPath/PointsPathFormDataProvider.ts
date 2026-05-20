@@ -75,14 +75,14 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
     }
 
     updateMaterialHash() {
+        const previousMaterialHash = this.extraData?.materialHash;
+
         super.updateMaterialHash();
 
         // Reset path only when the material actually changed (hash). Do not clear `isEdited` just
         // because the material has no id (common default material in designers): that ran every
         // render, wiped isEdited, and savePersistentContext dropped k-path/Q-path from `unit.context`.
-        const isMaterialUpdated = this.extraData?.materialHash !== this.material.hash;
-
-        if (isMaterialUpdated) {
+        if (previousMaterialHash && previousMaterialHash !== this.material.hash) {
             this.isEdited = false;
         }
     }

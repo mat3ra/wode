@@ -34,6 +34,9 @@ class ContextProvider {
         if (contextItem.data !== undefined) {
             this.data = utils_1.Utils.clone.deepClone(contextItem.data);
         }
+        if (contextItem.extraData !== undefined) {
+            this.extraData = utils_1.Utils.clone.deepClone(contextItem.extraData);
+        }
     }
     setIsEdited(isEdited) {
         this.isEdited = isEdited;

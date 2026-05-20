@@ -50,7 +50,8 @@ DataForRendering = S["data"]> {
     abstract readonly entityName: EntityName;
     protected abstract getDefaultData(): S["data"];
     protected data?: S["data"];
-    abstract extraData: S["extraData"];
+    /** Seeded from persisted context; material providers refresh via `updateMaterialHash()`. */
+    extraData?: S["extraData"];
     readonly externalContext: EC;
     isEdited: boolean;
     constructor(contextItem: Partial<S>, externalContext: EC);

@@ -70,7 +70,8 @@ abstract class ContextProvider<
 
     protected data?: S["data"];
 
-    abstract extraData: S["extraData"];
+    /** Seeded from persisted context; material providers refresh via `updateMaterialHash()`. */
+    extraData?: S["extraData"];
 
     readonly externalContext: EC;
 
@@ -82,6 +83,10 @@ abstract class ContextProvider<
 
         if (contextItem.data !== undefined) {
             this.data = Utils.clone.deepClone(contextItem.data);
+        }
+
+        if (contextItem.extraData !== undefined) {
+            this.extraData = Utils.clone.deepClone(contextItem.extraData);
         }
     }
 
