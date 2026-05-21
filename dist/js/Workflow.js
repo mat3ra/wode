@@ -108,6 +108,9 @@ class Workflow extends entity_1.InMemoryEntity {
                 workflowHasRelaxation: this.hasRelaxation,
             });
         });
+        this.workflowInstances.forEach((wf) => {
+            wf.render(context);
+        });
     }
     get usedApplications() {
         return (0, workflow_1.getUsedApplications)(this);
