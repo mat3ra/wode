@@ -32,6 +32,8 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number);
     private initInstanceFields;
     private getDefaultGridMetricValue;
+    private resolveGridMetricValue;
+    getData(): Data;
     getDefaultData(): PointsGridDataProviderSchema;
     protected get jsonSchemaPatchConfig(): {
         dimensions: {
@@ -71,7 +73,7 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
         required: string[];
         dependencies: {
             gridMetricType: {
-                oneOf: {
+                oneOf: ({
                     properties: {
                         gridMetricType: {
                             enum: string[];
@@ -81,6 +83,7 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
                             minimum: number;
                             title: string;
                             default: number;
+                            exclusiveMinimum?: undefined;
                         };
                         preferGridMetric: {
                             type: string;
@@ -88,10 +91,30 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
                             default: boolean;
                         };
                     };
-                }[];
+                } | {
+                    properties: {
+                        gridMetricType: {
+                            enum: string[];
+                        };
+                        gridMetricValue: {
+                            type: string;
+                            exclusiveMinimum: number;
+                            title: string;
+                            default: number;
+                            minimum?: undefined;
+                        };
+                        preferGridMetric: {
+                            type: string;
+                            title: string;
+                            default: boolean;
+                        };
+                    };
+                })[];
             };
         };
     };
+    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    private get preferGridMetricForUi();
     get uiSchema(): {
         dimensions: {
             readonly "ui:options": {

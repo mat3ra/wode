@@ -56,7 +56,7 @@ DataForRendering = S["data"]> {
     isEdited: boolean;
     constructor(contextItem: Partial<S>, externalContext: EC);
     setIsEdited(isEdited: boolean): void;
-    getData(): any;
+    getData(): S["data"];
     setData(data: S["data"]): void;
     /**
      * Derive template-facing `data` from persisted `data`. Override when the template needs fields

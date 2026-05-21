@@ -139,4 +139,34 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
             );
         }).to.not.throw();
     });
+
+    it("enables spacing value input in uiSchema when preferGridMetric is set via setData", () => {
+        const material = OrderedMaterial.createDefault();
+        material.hash = material.calculateHash();
+        const externalContext: WorkflowRenderContext = {
+            material,
+            materials: [material],
+            jobHasParent: false,
+        };
+
+        const provider = new KGridFormDataManager({}, externalContext);
+
+        expect(provider.uiSchema.gridMetricValue?.["ui:disabled"]).to.equal(true);
+
+        provider.setData({
+            ...provider.getData(),
+            gridMetricType: "spacing",
+            preferGridMetric: true,
+            gridMetricValue: 0.3,
+        });
+
+        expect(provider.uiSchema.gridMetricValue?.["ui:disabled"]).to.equal(false);
+
+        provider.setData({
+            ...provider.getData(),
+            gridMetricValue: 0.15,
+        });
+
+        expect(provider.getData().gridMetricValue).to.equal(0.15);
+    });
 });

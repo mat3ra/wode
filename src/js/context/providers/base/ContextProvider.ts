@@ -94,7 +94,7 @@ abstract class ContextProvider<
         this.isEdited = isEdited;
     }
 
-    getData() {
+    getData(): S["data"] {
         if (this.data !== undefined) {
             return Utils.clone.deepClone(this.data);
         }

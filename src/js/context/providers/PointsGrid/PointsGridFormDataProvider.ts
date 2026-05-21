@@ -127,6 +127,29 @@ abstract class PointsGridFormDataProvider<
         }
     }
 
+    private resolveGridMetricValue(gridMetricType: GridMetricType, gridMetricValue: number) {
+        const isValid = gridMetricType === "KPPRA" ? gridMetricValue >= 1 : gridMetricValue > 0;
+
+        return isValid ? gridMetricValue : this.getDefaultGridMetricValue(gridMetricType);
+    }
+
+    getData(): Data {
+        const data = super.getData();
+        const { preferGridMetric, gridMetricType, gridMetricValue } = data;
+
+        if (!preferGridMetric || !gridMetricType) {
+            return data;
+        }
+
+        const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
+
+        return {
+            ...data,
+            gridMetricValue: effectiveValue,
+            dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
+        };
+    }
+
     getDefaultData() {
         const defaultData: Data = {
             dimensions: this.defaultDimensions,
@@ -194,7 +217,7 @@ abstract class PointsGridFormDataProvider<
                                 gridMetricType: { enum: ["spacing"] },
                                 gridMetricValue: {
                                     type: "number",
-                                    minimum: 0,
+                                    exclusiveMinimum: 0,
                                     title: "Value [1/Å]",
                                     default: this.gridMetricValue,
                                 },
@@ -211,7 +234,15 @@ abstract class PointsGridFormDataProvider<
         };
     }
 
+    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    private get preferGridMetricForUi() {
+        return this.data?.preferGridMetric ?? this.preferGridMetric;
+    }
+
     get uiSchema() {
+        const preferGridMetric = this.preferGridMetricForUi;
+        const gridMetricValueForUi = this.data?.gridMetricValue ?? this.gridMetricValue;
+
         const arraySubStyle = (emptyValue = 0) => {
             return {
                 "ui:options": {
@@ -220,7 +251,7 @@ abstract class PointsGridFormDataProvider<
                     removable: false,
                 },
                 items: {
-                    "ui:disabled": this.preferGridMetric,
+                    "ui:disabled": preferGridMetric,
                     // TODO: extract the actual current values from context
                     "ui:placeholder": "1",
                     "ui:emptyValue": emptyValue,
@@ -236,9 +267,9 @@ abstract class PointsGridFormDataProvider<
                 "ui:title": "Grid Metric",
             },
             gridMetricValue: {
-                "ui:disabled": !this.preferGridMetric,
-                "ui:emptyValue": this.gridMetricValue,
-                "ui:placeholder": this.gridMetricValue.toString(), // make string to prevent prop type error
+                "ui:disabled": !preferGridMetric,
+                "ui:emptyValue": gridMetricValueForUi,
+                "ui:placeholder": gridMetricValueForUi.toString(), // make string to prevent prop type error
             },
             preferGridMetric: {
                 "ui:emptyValue": true,
@@ -278,11 +309,7 @@ abstract class PointsGridFormDataProvider<
         }
     }
 
-    private calculateGridMetric(
-        gridMetricType: GridMetricType,
-        dimensions: Vector3DSchema,
-        // units = Units.angstrom,
-    ) {
+    private calculateGridMetric(gridMetricType: GridMetricType, dimensions: Vector3DSchema) {
         switch (gridMetricType) {
             case "KPPRA": {
                 const nAtoms = this.material ? this.material.Basis.nAtoms : 1;
@@ -302,18 +329,36 @@ abstract class PointsGridFormDataProvider<
     setData(data: Data) {
         const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
 
-        if (preferGridMetric && gridMetricType && gridMetricValue) {
+        if (preferGridMetric !== undefined) {
+            this.preferGridMetric = preferGridMetric;
+        }
+        if (gridMetricType !== undefined) {
+            this.gridMetricType = gridMetricType;
+        }
+
+        if (preferGridMetric && gridMetricType) {
+            const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
+            this.gridMetricValue = effectiveValue;
+
             return super.setData({
                 ...data,
-                dimensions: this.calculateDimensions(gridMetricType, gridMetricValue),
+                gridMetricValue: effectiveValue,
+                dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
             });
         }
 
         if (!preferGridMetric && dimensions.every((d) => typeof d === "number")) {
-            super.setData({
+            const derivedMetric = this.calculateGridMetric(gridMetricType, dimensions);
+            this.gridMetricValue = derivedMetric;
+
+            return super.setData({
                 ...data,
-                gridMetricValue: this.calculateGridMetric(gridMetricType, dimensions),
+                gridMetricValue: derivedMetric,
             });
+        }
+
+        if (gridMetricValue !== undefined) {
+            this.gridMetricValue = gridMetricValue;
         }
 
         return super.setData(data);
