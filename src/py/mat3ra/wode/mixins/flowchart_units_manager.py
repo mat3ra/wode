@@ -101,8 +101,6 @@ class FlowchartUnitsManager:
 
             if unit_next is None:
                 units[i].next = units[i + 1].flowchartId
-                if i > 0:
-                    units[i - 1].next = units[i].flowchartId
             elif unit_next not in flowchart_ids:
                 units[i].next = units[i + 1].flowchartId
 
