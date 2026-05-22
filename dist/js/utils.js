@@ -22,7 +22,6 @@ function setUnitsHead(units) {
   return units;
 }
 
-// TODO: fix setNextLinks on unit removal and convergence logic.
 /**
  * @summary Re-establishes the linked `next => flowchartId` logic in an array of units
  * @params units {Unit[]}
@@ -31,12 +30,8 @@ function setUnitsHead(units) {
 function setNextLinks(units) {
   const flowchartIds = units.map(u => u.flowchartId);
   for (let i = 0; i < units.length - 1; i++) {
-    if (!units[i].next) {
-      // newly added units don't have next set yet => set it
-      units[i].next = units[i + 1].flowchartId;
-      if (i > 0) units[i - 1].next = units[i].flowchartId;
-    } else if (!flowchartIds.includes(units[i].next)) {
-      // newly removed units may create broken next links => fix it
+    if (!units[i].next || !flowchartIds.includes(units[i].next)) {
+      // newly added units don't have next set yet, or removed units created broken links => fix it
       units[i].next = units[i + 1].flowchartId;
     }
   }
