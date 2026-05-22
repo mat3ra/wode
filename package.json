@@ -47,7 +47,7 @@
         "v20": "^0.1.0"
     },
     "devDependencies": {
-        "@mat3ra/ade": "2026.3.4-0",
+"@mat3ra/ade": "git+https://github.com/Exabyte-io/ade.git#bfcf230d786bb31ade0fe735f1bf208d929837ab",
         "@exabyte-io/eslint-config": "2025.5.13-0",
         "@mat3ra/ide": "2025.11.19-0",
         "@mat3ra/mode": "2026.3.4-0",
