@@ -99,9 +99,7 @@ class FlowchartUnitsManager:
         for i in range(len(units) - 1):
             unit_next = getattr(units[i], "next", None)
 
-            if unit_next is None:
-                units[i].next = units[i + 1].flowchartId
-            elif unit_next not in flowchart_ids:
+            if unit_next is None or unit_next not in flowchart_ids:
                 units[i].next = units[i + 1].flowchartId
 
         return units
