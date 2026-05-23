@@ -7,8 +7,8 @@ import { builders, createWorkflows, Subworkflow, UnitFactory, Workflow } from ".
 import { createWorkflow } from "../../src/js/workflows/create";
 
 // Expected predefined IDs constants - update these after running test to see actual values
-const EXPECTED_WORKFLOW_ID = "cd826954-8c96-59f7-b2de-f36ce2d86105";
-const EXPECTED_SUBWORKFLOW_ID = "233bb8cf-3b4a-5378-84d9-a6a95a2ab43d";
+const EXPECTED_WORKFLOW_ID = "7e865869-82fb-5769-84f0-ac9f9df354db";
+const EXPECTED_SUBWORKFLOW_ID = "7f2f8a38-c3bd-5aa9-b3b0-2c367287dd60";
 const EXPECTED_UNIT_ID = "9fc7a088-5533-5f70-bb33-f676ec65f565";
 
 describe("workflows", () => {
@@ -187,16 +187,16 @@ describe("Workflow hashing", () => {
     const fixtureFiles = ["band_gap"];
 
     fixtureFiles.forEach((fixtureFile) => {
-        it(`calculateHash matches stored hash for ${fixtureFile}`, function () {
+        it(`calculateHash matches stored hash for ${fixtureFile}`, () => {
             const standata = new WorkflowStandata();
-            const [fixture] = standata.findEntitiesByTags("espresso", fixtureFile);
+            const allWorkflows = standata.findEntitiesByTags("espresso", fixtureFile);
+
+            const expectedData = expectedHashes?.espresso?.[fixtureFile];
+            const workflowName = expectedData?.name;
+            const expectedHash = expectedData?.hash;
+
+            const fixture = allWorkflows.find((w) => w.name === workflowName);
             const wf = new Workflow(fixture);
-            const expectedHash = expectedHashes?.espresso?.[fixtureFile];
-            if (!expectedHash) {
-                // eslint-disable-next-line no-console
-                console.log(`Hash for espresso/${fixtureFile}: ${wf.calculateHash()}`);
-                this.skip();
-            }
             expect(wf.calculateHash()).to.equal(expectedHash);
         });
     });

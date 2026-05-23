@@ -28,6 +28,7 @@ class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
 
     def get_hash_object(self) -> Dict[str, Any]:
         app = self.application.to_dict() if self.application else {}
+        app.pop("isUsingMaterial", None)  # Exclude from hash to match JavaScript
         exe = self.executable.to_dict() if self.executable else {}
         flv = self.flavor.to_dict() if self.flavor else {}
         input_items = self.input if isinstance(self.input, list) else []

@@ -3,13 +3,19 @@ from mat3ra.ade.application import Application
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
 from mat3ra.standata.applications import ApplicationStandata
-from mat3ra.wode import Subworkflow, Unit
+from mat3ra.standata.workflows import WorkflowStandata
+
+from mat3ra.wode import Subworkflow, Unit, Workflow
+from mat3ra.wode.context.providers import PointsGridDataProvider
 
 SUBWORKFLOW_NAME = "Total Energy"
 SUBWORKFLOW_APPLICATION = Application(**ApplicationStandata.get_by_name_first_match("espresso"))
 SUBWORKFLOW_METHOD = Method(type="pseudopotential", subtype="us")
 SUBWORKFLOW_MODEL = Model(type="dft", subtype="gga", method=SUBWORKFLOW_METHOD)
 SUBWORKFLOW_PROPERTIES = ["total_energy", "pressure"]
+WORKFLOW_STANDATA = WorkflowStandata()
+APPLICATION_ESPRESSO = ApplicationStandata.get_by_name_first_match("espresso")["name"]
+DEFAULT_WF_NAME = WORKFLOW_STANDATA.get_default()["name"]
 
 UNIT_CONFIG = {
     "type": "execution",
@@ -60,6 +66,7 @@ def test_id_generation():
     sw2 = Subworkflow(name=SUBWORKFLOW_NAME)
     assert sw1.id != sw2.id
 
+
 def test_get_as_unit():
     sw = Subworkflow(name=SUBWORKFLOW_NAME)
     unit = sw.get_as_unit()
@@ -67,3 +74,42 @@ def test_get_as_unit():
     assert unit.id == sw.id
     assert unit.to_dict().get("_id") == sw.id
     assert unit.name == sw.name
+
+
+@pytest.mark.parametrize("method", ["only_new_unit", "with_unit_instance", "with_flowchart_id"])
+def test_set_unit_keeps_rendered_input_for_context_only_update(method):
+    workflows = WORKFLOW_STANDATA.get_by_categories(APPLICATION_ESPRESSO, DEFAULT_WF_NAME)
+    if not workflows:
+        pytest.skip(f"No {DEFAULT_WF_NAME} workflow found for {APPLICATION_ESPRESSO}")
+
+    workflow_config = workflows[0]
+    wf = Workflow(**workflow_config)
+    wf.add_relaxation()
+
+    relaxation_subworkflow = wf.subworkflows[0]
+    unit_to_modify = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
+    assert unit_to_modify is not None
+
+    original_rendered = unit_to_modify.input[0]["rendered"]
+
+    unit_to_modify.add_context({"test_key": "test_value", "another_key": 42})
+    unit_to_modify.add_context(
+        PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True).yield_data()
+    )
+
+    if method == "only_new_unit":
+        success = relaxation_subworkflow.set_unit(unit_to_modify)
+    elif method == "with_unit_instance":
+        original_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
+        success = relaxation_subworkflow.set_unit(unit_to_modify, unit=original_unit)
+    elif method == "with_flowchart_id":
+        flowchart_id = unit_to_modify.flowchartId
+        success = relaxation_subworkflow.set_unit(unit_to_modify, unit_flowchart_id=flowchart_id)
+
+    assert success is True
+
+    updated_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
+    assert updated_unit.context["test_key"] == "test_value"
+    assert updated_unit.context["another_key"] == 42
+    assert updated_unit.context["kgrid"]["dimensions"] == [2, 2, 1]
+    assert updated_unit.input[0]["rendered"] == original_rendered

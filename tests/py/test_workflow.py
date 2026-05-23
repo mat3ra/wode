@@ -186,11 +186,14 @@ def test_set_unit(method):
 
 @pytest.mark.parametrize("workflow, app", [("band_gap", "espresso")])
 def test_calculate_hash(workflow, app):
-    fixture = WorkflowStandata.get_by_name_and_categories(workflow, app)
-
     with open(WORKFLOW_HASHES_PATH, "r") as f:
         expected_hashes = json.load(f)
-    expected_hash = expected_hashes.get(app, {}).get(workflow)
+
+    workflow_data = expected_hashes.get(app, {}).get(workflow, {})
+    workflow_name = workflow_data.get("name")
+    expected_hash = workflow_data.get("hash")
+
+    fixture = WORKFLOW_STANDATA.find_by_application_and_name(app, workflow_name)
 
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
