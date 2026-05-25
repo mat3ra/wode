@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "@exabyte-io/eslint-config": "2025.5.13-0",
-        "@mat3ra/ade": "https://github.com/Exabyte-io/ade/archive/411e295e5cc9f5ba0d24487e7fb120080594b8d6.tar.gz",
+        "@mat3ra/ade": "https://github.com/Exabyte-io/ade/archive/bb3c213d87266cbb3cffd9adadc4a4c284172c52.tar.gz",
         "@mat3ra/code": "https://github.com/Exabyte-io/code/archive/d6df3bbe248ae76458d0254d2491f71a175c5f70.tar.gz",
         "@mat3ra/esse": "https://github.com/Exabyte-io/esse/archive/8ed93ffede62a93b2e63d9397704dc552f9482ec.tar.gz",
         "@mat3ra/ide": "https://github.com/Exabyte-io/ide/archive/9d2f11fabec9c26b3dc35113defa6b2bc0ce686d.tar.gz",
