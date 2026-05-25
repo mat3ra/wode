@@ -1,11 +1,36 @@
 from copy import deepcopy
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.ade.template import Template
 from mat3ra.code.entity import InMemoryEntitySnakeCase
-from mat3ra.esse.models.workflow.unit.input._inputItem import ExecutionUnitInputItemSchema, TemplateSchema
 from mat3ra.utils.extra.jinja import render_jinja_with_error_handling
-from pydantic import Field, field_validator
+from pydantic import BaseModel, Field, field_validator
+
+try:
+    from mat3ra.esse.models.workflow.unit.input._inputItem import (
+        ExecutionUnitInputItemSchema,
+        TemplateSchema,
+    )
+except ImportError:
+    class ContextProvider(BaseModel):
+        name: str
+
+    class TemplateSchema(BaseModel):
+        id: Optional[str] = Field(None, alias="_id")
+        slug: Optional[str] = None
+        systemName: Optional[str] = None
+        schemaVersion: Optional[str] = "2022.8.16"
+        name: str
+        executableName: str
+        applicationName: str
+        applicationVersion: str
+        contextProviders: List[ContextProvider]
+        content: str
+
+    class ExecutionUnitInputItemSchema(BaseModel):
+        template: TemplateSchema = Field(..., title="template schema")
+        rendered: Optional[str] = None
+        isManuallyChanged: Optional[bool] = False
 
 
 class ExecutionUnitInput(ExecutionUnitInputItemSchema, InMemoryEntitySnakeCase):

@@ -6,7 +6,6 @@ from mat3ra.utils import (
     calculate_hash_from_object,
     remove_comments_from_source_code,
     remove_empty_lines_from_string,
-    remove_timestampable_keys,
 )
 from mat3ra.utils.extra.jinja import replace_in_text
 from pydantic import Field, field_validator
@@ -41,10 +40,36 @@ class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
                 item.template.content = replace_in_text(item.template.content, pattern, replacement)
 
     def get_hash_object(self) -> Dict[str, Any]:
-        app = self.application.to_dict() if self.application else {}
-        app.pop("isUsingMaterial", None)  # Exclude from hash to match JavaScript
-        exe = self.executable.to_dict() if self.executable else {}
-        flv = self.flavor.to_dict() if self.flavor else {}
+        data = self.to_dict()
+        application = dict(data.get("application") or {})
+        if application.get("isDefault") and "isDefaultVersion" not in application:
+            application["isDefaultVersion"] = True
+
+        executable_source = data.get("executable") or {}
+        executable = {
+            "applicationName": executable_source.get("applicationName"),
+            "applicationVersion": "*",
+            "hasAdvancedComputeOptions": executable_source.get("hasAdvancedComputeOptions", False),
+            "isDefault": executable_source.get("isDefault", False),
+            "name": executable_source.get("name"),
+            "schemaVersion": executable_source.get("schemaVersion", "2022.8.16"),
+        }
+
+        flavor_source = data.get("flavor") or {}
+        flavor = {
+            "applicationName": flavor_source.get("applicationName"),
+            "applicationVersion": "*",
+            "executableName": flavor_source.get("executableName"),
+            "input": flavor_source.get("input") or [],
+            "isDefault": flavor_source.get("isDefault", False),
+            "monitors": flavor_source.get("monitors") or [],
+            "name": flavor_source.get("name"),
+            "postProcessors": flavor_source.get("postProcessors") or [],
+            "preProcessors": flavor_source.get("preProcessors") or [],
+            "results": flavor_source.get("results") or [],
+            "schemaVersion": flavor_source.get("schemaVersion", "2022.8.16"),
+        }
+
         input_hash = calculate_hash_from_object(
             [
                 remove_empty_lines_from_string(remove_comments_from_source_code(item.template.content))
@@ -53,8 +78,8 @@ class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
         )
         return {
             **super().get_hash_object(),
-            "application": remove_timestampable_keys(app),
-            "executable": remove_timestampable_keys(exe),
-            "flavor": remove_timestampable_keys(flv),
+            "application": application,
+            "executable": executable,
+            "flavor": flavor,
             "input": input_hash,
         }

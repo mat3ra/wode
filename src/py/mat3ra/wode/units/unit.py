@@ -4,7 +4,7 @@ from mat3ra.code.entity import InMemoryEntitySnakeCase
 from mat3ra.code.mixins import HashedEntityMixin
 from mat3ra.esse.models.workflow.unit.base import WorkflowBaseUnitSchema
 from mat3ra.utils.uuid import get_uuid
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Unit(WorkflowBaseUnitSchema, HashedEntityMixin, InMemoryEntitySnakeCase):
@@ -28,6 +28,13 @@ class Unit(WorkflowBaseUnitSchema, HashedEntityMixin, InMemoryEntitySnakeCase):
     monitors: List[Any] = Field(default_factory=list)
     results: List[Any] = Field(default_factory=list)
     context: Dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("context", mode="before")
+    @classmethod
+    def _coerce_context(cls, value: Any) -> Dict[str, Any]:
+        if value is None or value == []:
+            return {}
+        return value
 
 
     def get_hash_object(self) -> Dict[str, Any]:

@@ -85,13 +85,11 @@ class Subworkflow(
 
     def get_hash_object(self) -> dict:
         app_dict = self.application.to_dict() if self.application else {}
-        # Exclude isUsingMaterial from hash calculation to match JavaScript behavior
-        app_dict.pop("isUsingMaterial", None)
-        app_hash = calculate_hash_from_object(remove_timestampable_keys(app_dict))
-        
+        if app_dict.get("isDefault"):
+            app_dict = {**app_dict, "isDefaultVersion": True}
         model_dict = self.model.to_dict() if self.model else {}
         return {
-            "application": app_hash,
+            "application": calculate_hash_from_object(remove_timestampable_keys(app_dict)),
             "model": Model.create(model_dict).calculate_hash(),
             "units": ",".join(u.calculate_hash() for u in self.units),
         }

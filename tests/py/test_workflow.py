@@ -190,10 +190,8 @@ def test_calculate_hash(workflow, app):
         expected_hashes = json.load(f)
 
     workflow_data = expected_hashes.get(app, {}).get(workflow, {})
-    workflow_name = workflow_data.get("name")
     expected_hash = workflow_data.get("hash")
 
-    fixture = WORKFLOW_STANDATA.find_by_application_and_name(app, workflow_name)
-
+    fixture = WORKFLOW_STANDATA.get_by_categories(app, workflow)[0]
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
