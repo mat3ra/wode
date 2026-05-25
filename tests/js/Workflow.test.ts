@@ -274,7 +274,7 @@ describe("Workflow", () => {
                     fixtureFile,
                 ) as unknown as [WorkflowSchema];
                 const wf = new Workflow(workflow);
-                const expectedHash = workflowHashes.espresso[fixtureFile];
+                const expectedHash = workflowHashes.espresso[fixtureFile].hash;
                 if (!expectedHash) {
                     // eslint-disable-next-line no-console
                     console.log(`Hash for espresso/${fixtureFile}: ${wf.calculateHash()}`);

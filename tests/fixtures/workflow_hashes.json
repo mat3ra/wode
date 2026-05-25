@@ -1,5 +1,8 @@
 {
     "espresso": {
-        "band_gap": "86ab63a1fcfe6b3a908950acf5807e4c"
+        "band_gap": {
+            "name": "Band Gap",
+            "hash": "ee018845c33a3a199f0bf5c326c8f65d"
+        }
     }
 }

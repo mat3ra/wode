@@ -96,15 +96,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         isDefault?: boolean;
         preProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         postProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         monitors: {
             name: string;
+            [k: string]: unknown;
         }[];
         results: {
             name: string;
+            [k: string]: unknown;
         }[];
         tags?: string[];
         status?: "idle" | "active" | "warning" | "error" | "finished";
@@ -150,15 +154,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         isDefault?: boolean;
         preProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         postProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         monitors: {
             name: string;
+            [k: string]: unknown;
         }[];
         results: {
             name: string;
+            [k: string]: unknown;
         }[];
         tags?: string[];
         status?: "idle" | "active" | "warning" | "error" | "finished";
@@ -191,15 +199,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         isDefault?: boolean;
         preProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         postProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         monitors: {
             name: string;
+            [k: string]: unknown;
         }[];
         results: {
             name: string;
+            [k: string]: unknown;
         }[];
         tags?: string[];
         status?: "idle" | "active" | "warning" | "error" | "finished";
@@ -225,15 +237,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         isDefault?: boolean;
         preProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         postProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         monitors: {
             name: string;
+            [k: string]: unknown;
         }[];
         results: {
             name: string;
+            [k: string]: unknown;
         }[];
         tags?: string[];
         status?: "idle" | "active" | "warning" | "error" | "finished";
@@ -284,15 +300,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             isDefault?: boolean;
             preProcessors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             postProcessors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             monitors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             results: {
                 name: string;
+                [k: string]: unknown;
             }[];
             executableName: string;
             applicationName: string;
@@ -639,15 +659,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         isDefault?: boolean;
         preProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         postProcessors: {
             name: string;
+            [k: string]: unknown;
         }[];
         monitors: {
             name: string;
+            [k: string]: unknown;
         }[];
         results: {
             name: string;
+            [k: string]: unknown;
         }[];
         tags?: string[];
         status?: "idle" | "active" | "warning" | "error" | "finished";

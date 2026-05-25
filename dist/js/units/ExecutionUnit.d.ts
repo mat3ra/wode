@@ -82,15 +82,19 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             isDefault?: boolean;
             preProcessors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             postProcessors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             monitors: {
                 name: string;
+                [k: string]: unknown;
             }[];
             results: {
                 name: string;
+                [k: string]: unknown;
             }[];
             executableName: string;
             applicationName: string;

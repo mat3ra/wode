@@ -6,6 +6,7 @@ from mat3ra.code.mixins import HashedEntityMixin
 from mat3ra.esse.models.workflow.subworkflow import Subworkflow as SubworkflowSchema
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
+from mat3ra.utils.object import calculate_hash_from_object, remove_timestampable_keys
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field, field_validator
 
@@ -84,9 +85,13 @@ class Subworkflow(
 
     def get_hash_object(self) -> dict:
         app_dict = self.application.to_dict() if self.application else {}
+        # Exclude isUsingMaterial from hash calculation to match JavaScript behavior
+        app_dict.pop("isUsingMaterial", None)
+        app_hash = calculate_hash_from_object(remove_timestampable_keys(app_dict))
+        
         model_dict = self.model.to_dict() if self.model else {}
         return {
-            "application": Application.create(app_dict).calculate_hash(),
+            "application": app_hash,
             "model": Model.create(model_dict).calculate_hash(),
             "units": ",".join(u.calculate_hash() for u in self.units),
         }

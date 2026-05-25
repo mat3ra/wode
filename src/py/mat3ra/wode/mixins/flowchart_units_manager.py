@@ -20,6 +20,10 @@ class FlowchartUnitsManager:
     def set_units(self, units: List[Unit]) -> None:
         self.units = units
 
+    def _set_units_order_in_place(self) -> None:
+        self.set_units_head(self.units)
+        self.set_next_links(self.units)
+
     def get_unit(self, flowchart_id: str) -> Optional[Unit]:
         for unit in self.units:
             if unit.flowchartId == flowchart_id:
@@ -95,11 +99,7 @@ class FlowchartUnitsManager:
         for i in range(len(units) - 1):
             unit_next = getattr(units[i], "next", None)
 
-            if unit_next is None:
-                units[i].next = units[i + 1].flowchartId
-                if i > 0:
-                    units[i - 1].next = units[i].flowchartId
-            elif unit_next not in flowchart_ids:
+            if unit_next is None or unit_next not in flowchart_ids:
                 units[i].next = units[i + 1].flowchartId
 
         return units
@@ -132,7 +132,7 @@ class FlowchartUnitsManager:
             self.set_units([unit])
         else:
             self._add_to_list(self.units, unit, head, index)
-            self.set_units(self.set_next_links(self.set_units_head(self.units)))
+            self._set_units_order_in_place()
 
     def remove_unit(self, flowchart_id: str) -> None:
         """
@@ -157,8 +157,8 @@ class FlowchartUnitsManager:
         self._clear_link_to_unit(unit_to_remove.flowchartId)
 
         remaining_units = [unit for unit in self.units if unit.flowchartId != flowchart_id]
-        units_with_head = self.set_units_head(remaining_units)
-        self.units = self.set_next_links(units_with_head)
+        self.units = remaining_units
+        self._set_units_order_in_place()
 
     def replace_unit(self, index: int, unit: Unit) -> None:
         """
@@ -171,7 +171,7 @@ class FlowchartUnitsManager:
 
         if 0 <= index < len(self.units):
             self.units[index] = unit
-            self.set_units(self.set_next_links(self.set_units_head(self.units)))
+            self._set_units_order_in_place()
 
     def set_unit(
         self,
