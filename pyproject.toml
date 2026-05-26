@@ -26,7 +26,7 @@ dependencies = [
     "mat3ra-mode",
     "mat3ra-ade",
     "mat3ra-made",
-    "mat3ra-standata"
+    "mat3ra-standata @ git+https://github.com/Exabyte-io/standata.git@c1d538b55e7c5305ca98d23b353de24caff5a7a8",
 ]
 
 [project.optional-dependencies]
