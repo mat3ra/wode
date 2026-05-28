@@ -61,6 +61,10 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
             hasAdvancedComputeOptions?: boolean;
             isLicensed?: boolean;
             isUsingMaterial?: boolean;
+            runConfig?: {
+                commandTemplate: string;
+                outFileName: string;
+            };
         };
         executable: {
             _id?: string;

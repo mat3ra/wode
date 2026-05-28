@@ -1,6 +1,9 @@
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
-import type { BoundaryConditionsContextItemSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    BoundaryConditionsContextItemSchema,
+    MaterialMetadataBoundaryConditions,
+} from "@mat3ra/esse/dist/js/types";
 
 import materialContextMixin, {
     type MaterialContextMixin,
@@ -16,6 +19,14 @@ type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 interface BoundaryConditionsFormDataManager extends MaterialContextMixin {}
 
 const jsonSchemaId = "context-providers-directory/boundary-conditions-data-provider";
+
+// TODO: move to esse
+enum BoundaryConditionsType {
+    pbc = "pbc",
+    bc1 = "bc1",
+    bc2 = "bc2",
+    bc3 = "bc3",
+}
 
 class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "boundaryConditions" as const;
@@ -45,9 +56,11 @@ class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider<Schema, E
     }
 
     getDefaultData(): Schema["data"] {
+        const metadata = this.material?.metadata as MaterialMetadataBoundaryConditions | undefined;
+
         return {
-            type: this.material?.metadata?.boundaryConditions?.type || "pbc",
-            offset: this.material?.metadata?.boundaryConditions?.offset || 0,
+            type: metadata?.boundaryConditions?.type || BoundaryConditionsType.pbc,
+            offset: metadata?.boundaryConditions?.offset || 0,
             electricField: 0,
             targetFermiEnergy: 0,
         };

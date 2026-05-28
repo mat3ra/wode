@@ -7,6 +7,14 @@ const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/ess
 const MaterialContextMixin_1 = __importDefault(require("../mixins/MaterialContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("./base/JSONSchemaDataProvider"));
 const jsonSchemaId = "context-providers-directory/boundary-conditions-data-provider";
+// TODO: move to esse
+var BoundaryConditionsType;
+(function (BoundaryConditionsType) {
+    BoundaryConditionsType["pbc"] = "pbc";
+    BoundaryConditionsType["bc1"] = "bc1";
+    BoundaryConditionsType["bc2"] = "bc2";
+    BoundaryConditionsType["bc3"] = "bc3";
+})(BoundaryConditionsType || (BoundaryConditionsType = {}));
 class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider_1.default {
     static createFromUnitContext(unitContext, externalContext) {
         const contextItem = this.findContextItem(unitContext, "boundaryConditions");
@@ -27,10 +35,11 @@ class BoundaryConditionsFormDataManager extends JSONSchemaDataProvider_1.default
         this.initMaterialContextMixin(externalContext);
     }
     getDefaultData() {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c;
+        const metadata = (_a = this.material) === null || _a === void 0 ? void 0 : _a.metadata;
         return {
-            type: ((_c = (_b = (_a = this.material) === null || _a === void 0 ? void 0 : _a.metadata) === null || _b === void 0 ? void 0 : _b.boundaryConditions) === null || _c === void 0 ? void 0 : _c.type) || "pbc",
-            offset: ((_f = (_e = (_d = this.material) === null || _d === void 0 ? void 0 : _d.metadata) === null || _e === void 0 ? void 0 : _e.boundaryConditions) === null || _f === void 0 ? void 0 : _f.offset) || 0,
+            type: ((_b = metadata === null || metadata === void 0 ? void 0 : metadata.boundaryConditions) === null || _b === void 0 ? void 0 : _b.type) || BoundaryConditionsType.pbc,
+            offset: ((_c = metadata === null || metadata === void 0 ? void 0 : metadata.boundaryConditions) === null || _c === void 0 ? void 0 : _c.offset) || 0,
             electricField: 0,
             targetFermiEnergy: 0,
         };

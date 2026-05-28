@@ -279,6 +279,10 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             hasAdvancedComputeOptions?: boolean;
             isLicensed?: boolean;
             isUsingMaterial?: boolean;
+            runConfig?: {
+                commandTemplate: string;
+                outFileName: string;
+            };
         };
         executable: {
             _id?: string;
