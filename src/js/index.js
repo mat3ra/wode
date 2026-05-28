@@ -1,5 +1,5 @@
 import { wodeProviders } from "./context/providers";
-import { PointsPathFormDataProvider } from "./context/providers/PointsPathFormDataProvider";
+import { PointsPathFormDataProvider } from "./context/providers/PointsPath/PointsPathFormDataProvider";
 import { globalSettings } from "./context/providers/settings";
 import {
     TAB_NAVIGATION_CONFIG,
@@ -23,7 +23,7 @@ import {
 } from "./units";
 import { builders } from "./units/builders";
 import { UnitFactory } from "./units/factory";
-import { defaultMapConfig } from "./units/map";
+import { defaultMapConfig } from "./units/MapUnit";
 import { createWorkflow, createWorkflowConfigs, createWorkflows, Workflow } from "./workflows";
 
 export {

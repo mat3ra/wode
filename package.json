@@ -6,9 +6,10 @@
         "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/js/setup.js tests/js",
         "lint": "eslint src/js tests/js && prettier --write src/js tests/js",
         "lint:fix": "eslint --fix --cache src/js tests/js && prettier --write src/js tests/js",
-        "transpile": "babel --out-dir dist/js src/js",
+        "transpile": "tsc --project tsconfig.json",
         "prettier": "prettier --check src/js tests/js",
-        "prepare": "husky install || exit 0"
+        "prepare": "husky install || exit 0",
+        "generate-mixins": "ts-node scripts/generate-mixins.ts"
     },
     "repository": {
         "type": "git",
@@ -29,44 +30,46 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/wode",
     "dependencies": {
-        "@babel/cli": "7.16.0",
-        "@babel/core": "7.16.0",
-        "@babel/eslint-parser": "7.16.3",
-        "@babel/plugin-proposal-class-properties": "7.16.0",
-        "@babel/preset-env": "7.16.4",
-        "@babel/preset-react": "7.16.7",
-        "@babel/register": "^7.16.0",
-        "@babel/runtime-corejs3": "7.16.8",
         "@exabyte-io/periodic-table.js": "2022.6.8-0",
+        "@types/json-schema": "^7.0.15",
+        "@types/nunjucks": "^3.2.6",
+        "@types/react-jsonschema-form": "^1.7.13",
         "crypto-js": "^4.2.0",
         "js-yaml": "^4.1.0",
         "lodash": "^4.17.21",
         "mixwith": "^0.1.1",
+        "nunjucks": "^3.2.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.6",
         "underscore": "^1.13.3",
         "underscore.string": "^3.3.4",
         "v20": "^0.1.0"
     },
     "devDependencies": {
-        "@mat3ra/ade": "2025.11.26-0",
         "@exabyte-io/eslint-config": "2025.5.13-0",
+        "@mat3ra/ade": "git+https://github.com/Exabyte-io/ade#6d494337d83e1b22fe272ff74cc1b6842a7c6561",
+        "@mat3ra/code": "git+https://github.com/Exabyte-io/code.git#cb3fa59e2cc143d744f9019322208d928ff8de88",
+        "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse#b324747a87f4b3363936974f512e75fe255b52a9",
         "@mat3ra/ide": "2025.11.19-0",
+        "@mat3ra/made": "git+https://github.com/Exabyte-io/made.git#47b3e12a859c45fa72079ed4ddd1675a6a32b4fe",
         "@mat3ra/mode": "2025.11.13-0",
-        "@mat3ra/utils": "2025.9.20-0",
-        "@mat3ra/code": "2025.10.24-0",
-        "@mat3ra/esse": "2025.11.26-0",
-        "@mat3ra/made": "2025.7.15-0",
         "@mat3ra/standata": "2026.1.12-0",
+        "@mat3ra/tsconfig": "^2024.6.3-0",
+        "@mat3ra/utils": "2025.9.20-0",
         "chai": "^4.3.4",
-        "eslint": "7.32.0",
-        "eslint-config-airbnb": "19.0.2",
+        "eslint": "^7.32.0",
+        "eslint-config-airbnb": "^19.0.2",
         "eslint-config-prettier": "^8.5.0",
-        "eslint-import-resolver-exports": "^1.0.0-beta.2",
-        "eslint-plugin-import": "2.25.3",
-        "eslint-plugin-jsdoc": "37.1.0",
-        "eslint-plugin-jsx-a11y": "6.5.1",
+        "eslint-import-resolver-exports": "^1.0.0-beta.5",
+        "eslint-import-resolver-meteor": "^0.4.0",
+        "eslint-import-resolver-node": "^0.3.9",
+        "eslint-plugin-import": "^2.25.3",
+        "eslint-plugin-jsdoc": "^37.1.0",
+        "eslint-plugin-jsx-a11y": "^6.5.1",
+        "eslint-plugin-mui-path-imports": "0.0.15",
         "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "7.30.0",
-        "eslint-plugin-simple-import-sort": "7.0.0",
+        "eslint-plugin-react": "^7.30.0",
+        "eslint-plugin-simple-import-sort": "^7.0.0",
         "husky": "^7.0.4",
         "lint-staged": "^12.1.2",
         "mocha": "^9.1.3",
@@ -75,19 +78,25 @@
     },
     "peerDependencies": {
         "@mat3ra/ade": "*",
-        "@mat3ra/ide": "*",
-        "@mat3ra/mode": "*",
-        "@mat3ra/standata": "*",
-        "@mat3ra/utils": "*",
         "@mat3ra/code": "*",
         "@mat3ra/esse": "*",
-        "@mat3ra/made": "*"
+        "@mat3ra/ide": "*",
+        "@mat3ra/made": "*",
+        "@mat3ra/mode": "*",
+        "@mat3ra/standata": "*",
+        "@mat3ra/utils": "*"
     },
     "engines": {
         "node": ">=20.0.0"
     },
     "lint-staged": {
-        "src/js/**/*.js": ["eslint --cache --fix", "prettier --write"],
-        "tests/js/**/*.js": ["eslint --cache --fix", "prettier --write"]
+        "src/js/**/*.js": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ],
+        "tests/js/**/*.js": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ]
     }
 }
