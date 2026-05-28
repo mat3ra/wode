@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Literal
 
 from mat3ra.ade import Application, Executable, Flavor
-from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchemaBase
+from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema
 from mat3ra.utils import (
     calculate_hash_from_object,
     remove_comments_from_source_code,
@@ -14,7 +14,7 @@ from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
 
 
-class ExecutionUnit(Unit, ExecutionUnitSchemaBase):
+class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
     executable: Executable = None
     flavor: Flavor = None
