@@ -3,7 +3,7 @@ from typing import Any, List, Optional, Union
 from mat3ra.ade.application import Application
 from mat3ra.code.entity import InMemoryEntitySnakeCase
 from mat3ra.code.mixins import HashedEntityMixin
-from mat3ra.esse.models.workflow.subworkflow import Subworkflow as SubworkflowSchema
+from mat3ra.esse.models.workflow.subworkflow import SubworkflowSchema
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
 from mat3ra.utils.object import calculate_hash_from_object, remove_timestampable_keys
