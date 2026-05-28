@@ -1,42 +1,29 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.NEBFormDataProvider = void 0;
-var _ade = require("@mat3ra/ade");
-var _JSONSchemasInterface = _interopRequireDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-class NEBFormDataProvider extends _ade.JSONSchemaFormDataProvider {
-  constructor(...args) {
-    super(...args);
-    _defineProperty(this, "jsonSchemaId", "context-providers-directory/neb-data-provider");
-  }
-  // eslint-disable-next-line class-methods-use-this
-  get defaultData() {
-    return {
-      nImages: 1
-    };
-  }
-  get jsonSchemaPatchConfig() {
-    return {
-      nImages: {
-        default: this.defaultData.nImages
-      }
-    };
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  get uiSchema() {
-    return {
-      nImages: {}
-    };
-  }
-  get jsonSchema() {
-    return _JSONSchemasInterface.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
-  }
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const JSONSchemaFormDataProvider_1 = __importDefault(require("./base/JSONSchemaFormDataProvider"));
+const jsonSchemaId = "context-providers-directory/neb-data-provider";
+const defaultData = {
+    nImages: 1,
+};
+class NEBFormDataProvider extends JSONSchemaFormDataProvider_1.default {
+    constructor(contextItem, externalContext) {
+        super(contextItem, externalContext);
+        this.name = "neb";
+        this.domain = "important";
+        this.uiSchema = {
+            nImages: {},
+        };
+        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+            nImages: { default: defaultData.nImages },
+        });
+    }
+    // eslint-disable-next-line class-methods-use-this
+    getDefaultData() {
+        return defaultData;
+    }
 }
-exports.NEBFormDataProvider = NEBFormDataProvider;
+exports.default = NEBFormDataProvider;

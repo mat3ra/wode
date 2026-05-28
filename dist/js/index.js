@@ -1,177 +1,40 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "AssertionUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.AssertionUnit;
-  }
-});
-Object.defineProperty(exports, "AssignmentUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.AssignmentUnit;
-  }
-});
-Object.defineProperty(exports, "BaseUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.BaseUnit;
-  }
-});
-Object.defineProperty(exports, "ConditionUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.ConditionUnit;
-  }
-});
-Object.defineProperty(exports, "ExecutionUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.ExecutionUnit;
-  }
-});
-Object.defineProperty(exports, "IOUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.IOUnit;
-  }
-});
-Object.defineProperty(exports, "MapUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.MapUnit;
-  }
-});
-Object.defineProperty(exports, "PointsPathFormDataProvider", {
-  enumerable: true,
-  get: function () {
-    return _PointsPathFormDataProvider.PointsPathFormDataProvider;
-  }
-});
-Object.defineProperty(exports, "ProcessingUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.ProcessingUnit;
-  }
-});
-Object.defineProperty(exports, "ReduceUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.ReduceUnit;
-  }
-});
-Object.defineProperty(exports, "Subworkflow", {
-  enumerable: true,
-  get: function () {
-    return _subworkflows.Subworkflow;
-  }
-});
-Object.defineProperty(exports, "SubworkflowUnit", {
-  enumerable: true,
-  get: function () {
-    return _units.SubworkflowUnit;
-  }
-});
-Object.defineProperty(exports, "TAB_NAVIGATION_CONFIG", {
-  enumerable: true,
-  get: function () {
-    return _enums.TAB_NAVIGATION_CONFIG;
-  }
-});
-Object.defineProperty(exports, "UNIT_NAME_INVALID_CHARS", {
-  enumerable: true,
-  get: function () {
-    return _enums.UNIT_NAME_INVALID_CHARS;
-  }
-});
-Object.defineProperty(exports, "UNIT_STATUSES", {
-  enumerable: true,
-  get: function () {
-    return _enums.UNIT_STATUSES;
-  }
-});
-Object.defineProperty(exports, "UNIT_TYPES", {
-  enumerable: true,
-  get: function () {
-    return _enums.UNIT_TYPES;
-  }
-});
-Object.defineProperty(exports, "UnitFactory", {
-  enumerable: true,
-  get: function () {
-    return _factory.UnitFactory;
-  }
-});
-Object.defineProperty(exports, "WORKFLOW_STATUSES", {
-  enumerable: true,
-  get: function () {
-    return _enums.WORKFLOW_STATUSES;
-  }
-});
-Object.defineProperty(exports, "Workflow", {
-  enumerable: true,
-  get: function () {
-    return _workflows.Workflow;
-  }
-});
-Object.defineProperty(exports, "builders", {
-  enumerable: true,
-  get: function () {
-    return _builders.builders;
-  }
-});
-Object.defineProperty(exports, "createSubworkflowByName", {
-  enumerable: true,
-  get: function () {
-    return _subworkflows.createSubworkflowByName;
-  }
-});
-Object.defineProperty(exports, "createWorkflow", {
-  enumerable: true,
-  get: function () {
-    return _workflows.createWorkflow;
-  }
-});
-Object.defineProperty(exports, "createWorkflowConfigs", {
-  enumerable: true,
-  get: function () {
-    return _workflows.createWorkflowConfigs;
-  }
-});
-Object.defineProperty(exports, "createWorkflows", {
-  enumerable: true,
-  get: function () {
-    return _workflows.createWorkflows;
-  }
-});
-Object.defineProperty(exports, "defaultMapConfig", {
-  enumerable: true,
-  get: function () {
-    return _map.defaultMapConfig;
-  }
-});
-Object.defineProperty(exports, "globalSettings", {
-  enumerable: true,
-  get: function () {
-    return _settings.globalSettings;
-  }
-});
-Object.defineProperty(exports, "wodeProviders", {
-  enumerable: true,
-  get: function () {
-    return _providers.wodeProviders;
-  }
-});
-var _providers = require("./context/providers");
-var _PointsPathFormDataProvider = require("./context/providers/PointsPathFormDataProvider");
-var _settings = require("./context/providers/settings");
-var _enums = require("./enums");
-var _subworkflows = require("./subworkflows");
-var _units = require("./units");
-var _builders = require("./units/builders");
-var _factory = require("./units/factory");
-var _map = require("./units/map");
-var _workflows = require("./workflows");
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.globalSettings = exports.PointsPathFormDataProvider = exports.wodeProviders = exports.defaultMapConfig = exports.SubworkflowUnit = exports.ReduceUnit = exports.ProcessingUnit = exports.MapUnit = exports.IOUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.ExecutionUnit = exports.BaseUnit = exports.WORKFLOW_STATUSES = exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.UNIT_STATUSES = exports.UNIT_TYPES = exports.builders = exports.UnitFactory = exports.createSubworkflowByName = exports.createWorkflowConfigs = exports.createWorkflows = exports.createWorkflow = exports.Workflow = exports.Subworkflow = void 0;
+const providers_1 = require("./context/providers");
+Object.defineProperty(exports, "wodeProviders", { enumerable: true, get: function () { return providers_1.wodeProviders; } });
+const PointsPathFormDataProvider_1 = require("./context/providers/PointsPath/PointsPathFormDataProvider");
+Object.defineProperty(exports, "PointsPathFormDataProvider", { enumerable: true, get: function () { return PointsPathFormDataProvider_1.PointsPathFormDataProvider; } });
+const settings_1 = require("./context/providers/settings");
+Object.defineProperty(exports, "globalSettings", { enumerable: true, get: function () { return settings_1.globalSettings; } });
+const enums_1 = require("./enums");
+Object.defineProperty(exports, "TAB_NAVIGATION_CONFIG", { enumerable: true, get: function () { return enums_1.TAB_NAVIGATION_CONFIG; } });
+Object.defineProperty(exports, "UNIT_NAME_INVALID_CHARS", { enumerable: true, get: function () { return enums_1.UNIT_NAME_INVALID_CHARS; } });
+Object.defineProperty(exports, "UNIT_STATUSES", { enumerable: true, get: function () { return enums_1.UNIT_STATUSES; } });
+Object.defineProperty(exports, "UNIT_TYPES", { enumerable: true, get: function () { return enums_1.UNIT_TYPES; } });
+Object.defineProperty(exports, "WORKFLOW_STATUSES", { enumerable: true, get: function () { return enums_1.WORKFLOW_STATUSES; } });
+const subworkflows_1 = require("./subworkflows");
+Object.defineProperty(exports, "createSubworkflowByName", { enumerable: true, get: function () { return subworkflows_1.createSubworkflowByName; } });
+Object.defineProperty(exports, "Subworkflow", { enumerable: true, get: function () { return subworkflows_1.Subworkflow; } });
+const units_1 = require("./units");
+Object.defineProperty(exports, "AssertionUnit", { enumerable: true, get: function () { return units_1.AssertionUnit; } });
+Object.defineProperty(exports, "AssignmentUnit", { enumerable: true, get: function () { return units_1.AssignmentUnit; } });
+Object.defineProperty(exports, "BaseUnit", { enumerable: true, get: function () { return units_1.BaseUnit; } });
+Object.defineProperty(exports, "ConditionUnit", { enumerable: true, get: function () { return units_1.ConditionUnit; } });
+Object.defineProperty(exports, "ExecutionUnit", { enumerable: true, get: function () { return units_1.ExecutionUnit; } });
+Object.defineProperty(exports, "IOUnit", { enumerable: true, get: function () { return units_1.IOUnit; } });
+Object.defineProperty(exports, "MapUnit", { enumerable: true, get: function () { return units_1.MapUnit; } });
+Object.defineProperty(exports, "ProcessingUnit", { enumerable: true, get: function () { return units_1.ProcessingUnit; } });
+Object.defineProperty(exports, "ReduceUnit", { enumerable: true, get: function () { return units_1.ReduceUnit; } });
+Object.defineProperty(exports, "SubworkflowUnit", { enumerable: true, get: function () { return units_1.SubworkflowUnit; } });
+const builders_1 = require("./units/builders");
+Object.defineProperty(exports, "builders", { enumerable: true, get: function () { return builders_1.builders; } });
+const factory_1 = require("./units/factory");
+Object.defineProperty(exports, "UnitFactory", { enumerable: true, get: function () { return factory_1.UnitFactory; } });
+const MapUnit_1 = require("./units/MapUnit");
+Object.defineProperty(exports, "defaultMapConfig", { enumerable: true, get: function () { return MapUnit_1.defaultMapConfig; } });
+const workflows_1 = require("./workflows");
+Object.defineProperty(exports, "createWorkflow", { enumerable: true, get: function () { return workflows_1.createWorkflow; } });
+Object.defineProperty(exports, "createWorkflowConfigs", { enumerable: true, get: function () { return workflows_1.createWorkflowConfigs; } });
+Object.defineProperty(exports, "createWorkflows", { enumerable: true, get: function () { return workflows_1.createWorkflows; } });
+Object.defineProperty(exports, "Workflow", { enumerable: true, get: function () { return workflows_1.Workflow; } });

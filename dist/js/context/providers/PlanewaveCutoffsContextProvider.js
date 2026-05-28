@@ -1,67 +1,41 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PlanewaveCutoffsContextProvider = void 0;
-var _ade = require("@mat3ra/ade");
-var _JSONSchemasInterface = _interopRequireDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-var _ApplicationContextMixin = require("../mixins/ApplicationContextMixin");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-const cutoffConfig = {
-  vasp: {},
-  // assuming default cutoffs for VASP
-  espresso: {
-    // assuming the default GBRV set of pseudopotentials is used
-    wavefunction: 40,
-    density: 200
-  }
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-class PlanewaveCutoffsContextProvider extends _ade.ContextProvider {
-  constructor(config) {
-    super(config);
-    _defineProperty(this, "jsonSchemaId", "context-providers-directory/planewave-cutoffs-context-provider");
-    this.initApplicationContextMixin();
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  get uiSchema() {
-    return {
-      wavefunction: {},
-      density: {}
-    };
-  }
-  get defaultData() {
-    return {
-      wavefunction: this.defaultECUTWFC,
-      density: this.defaultECUTRHO
-    };
-  }
-  get jsonSchemaPatchConfig() {
-    return {
-      wavefunction: {
-        default: this.defaultData.wavefunction
-      },
-      density: {
-        default: this.defaultData.density
-      }
-    };
-  }
-  get _cutoffConfigPerApplication() {
-    return cutoffConfig[this.application.name];
-  }
-  get defaultECUTWFC() {
-    return this._cutoffConfigPerApplication.wavefunction || null;
-  }
-  get defaultECUTRHO() {
-    return this._cutoffConfigPerApplication.density || null;
-  }
-  get jsonSchema() {
-    return _JSONSchemasInterface.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
-  }
+Object.defineProperty(exports, "__esModule", { value: true });
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const ApplicationContextMixin_1 = require("../mixins/ApplicationContextMixin");
+const ContextProvider_1 = __importDefault(require("./base/ContextProvider"));
+const cutoffConfig = {
+    vasp: { wavefunction: undefined, density: undefined },
+    espresso: { wavefunction: 40, density: 200 },
+};
+const jsonSchemaId = "context-providers-directory/planewave-cutoffs-context-provider";
+class PlanewaveCutoffsContextProvider extends ContextProvider_1.default {
+    constructor(contextItem, externalContext) {
+        super(contextItem, externalContext);
+        this.name = "cutoffs";
+        this.domain = "important";
+        this.entityName = "subworkflow";
+        this.uiSchema = {
+            wavefunction: {},
+            density: {},
+        };
+        this.initApplicationContextMixin(externalContext);
+        const { wavefunction, density } = this.getDefaultData();
+        this.jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
+            wavefunction: { default: wavefunction },
+            density: { default: density },
+        });
+    }
+    getDefaultData() {
+        // TODO-QUESTION: what if the application is not in the cutoffConfig?
+        const { wavefunction, density } = cutoffConfig[this.application.name] || {};
+        return {
+            wavefunction,
+            density,
+        };
+    }
 }
-exports.PlanewaveCutoffsContextProvider = PlanewaveCutoffsContextProvider;
-(0, _ApplicationContextMixin.applicationContextMixin)(PlanewaveCutoffsContextProvider.prototype);
+exports.default = PlanewaveCutoffsContextProvider;
+(0, ApplicationContextMixin_1.applicationContextMixin)(PlanewaveCutoffsContextProvider.prototype);

@@ -1,35 +1,23 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "Workflow", {
-  enumerable: true,
-  get: function () {
-    return _workflow.Workflow;
-  }
-});
-Object.defineProperty(exports, "createWorkflow", {
-  enumerable: true,
-  get: function () {
-    return _create.createWorkflow;
-  }
-});
-exports.createWorkflowConfigs = createWorkflowConfigs;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createWorkflow = exports.Workflow = void 0;
 exports.createWorkflows = createWorkflows;
-var _ade = require("@mat3ra/ade");
-var _JSONSchemasInterface = _interopRequireDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
-var _schemas = _interopRequireDefault(require("@mat3ra/esse/dist/js/schemas.json"));
-var _patch = require("../patch");
-var _create = require("./create");
-var _workflow = require("./workflow");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+exports.createWorkflowConfigs = createWorkflowConfigs;
+const ade_1 = require("@mat3ra/ade");
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const schemas_json_1 = __importDefault(require("@mat3ra/esse/dist/js/schemas.json"));
 // Import Template here to apply context provider patch
 // eslint-disable-next-line no-unused-vars
-
+const patch_1 = require("../patch");
+const create_1 = require("./create");
+Object.defineProperty(exports, "createWorkflow", { enumerable: true, get: function () { return create_1.createWorkflow; } });
+const workflow_1 = require("./workflow");
+Object.defineProperty(exports, "Workflow", { enumerable: true, get: function () { return workflow_1.Workflow; } });
 // Running this to set schemas for validation, removing the redundant data from application-flavors tree: `flavors`
-_JSONSchemasInterface.default.setSchemas(_schemas.default);
-
+JSONSchemasInterface_1.default.setSchemas(schemas_json_1.default);
 /*
     Workflow construction follows these rules:
         1. Workflow is constructed as a collection of subworkflows defined in JSON
@@ -38,47 +26,37 @@ _JSONSchemasInterface.default.setSchemas(_schemas.default);
         4. map units are added along with their workflows according to data in "units"
         5. top-level subworkflows are added directly in the order also specified by "units"
  */
-function createWorkflows({
-  appName = null,
-  workflowCls = _workflow.Workflow,
-  workflowSubworkflowMapByApplication,
-  ...swArgs
-}) {
-  let apps = appName !== null ? [appName] : _ade.allApplications;
-  const allApplicationsFromWorkflowData = Object.keys(workflowSubworkflowMapByApplication.workflows);
-  // output warning if allApplications and allApplicationsFromWorkflowData do not match
-  if (appName === null) {
-    if (apps && apps.sort().join(",") !== allApplicationsFromWorkflowData.sort().join(",")) {
-      // eslint-disable-next-line no-console
-      console.warn(`Warning: allApplications and allApplicationsFromWorkflowData do not match:
+function createWorkflows({ appName = null, workflowCls = workflow_1.Workflow, workflowSubworkflowMapByApplication, ...swArgs }) {
+    let apps = appName !== null ? [appName] : ade_1.allApplications;
+    const allApplicationsFromWorkflowData = Object.keys(workflowSubworkflowMapByApplication.workflows);
+    // output warning if allApplications and allApplicationsFromWorkflowData do not match
+    if (appName === null) {
+        if (apps && apps.sort().join(",") !== allApplicationsFromWorkflowData.sort().join(",")) {
+            // eslint-disable-next-line no-console
+            console.warn(`Warning: allApplications and allApplicationsFromWorkflowData do not match:
                 ${apps.sort().join(",")} !== ${allApplicationsFromWorkflowData.sort().join(",")}`);
-      console.warn("Using allApplicationsFromWorkflowData");
+            console.warn("Using allApplicationsFromWorkflowData");
+        }
+        apps = allApplicationsFromWorkflowData;
     }
-    apps = allApplicationsFromWorkflowData;
-  }
-  const wfs = [];
-  const {
-    workflows
-  } = workflowSubworkflowMapByApplication;
-  apps.map(name => {
-    const {
-      [name]: dataByApp
-    } = workflows;
-    Object.values(dataByApp).map(workflowDataForApp => {
-      wfs.push((0, _create.createWorkflow)({
-        appName: name,
-        workflowData: workflowDataForApp,
-        workflowSubworkflowMapByApplication,
-        workflowCls,
-        ...swArgs
-      }));
-      return null;
+    const wfs = [];
+    const { workflows } = workflowSubworkflowMapByApplication;
+    apps.map((name) => {
+        const { [name]: dataByApp } = workflows;
+        Object.values(dataByApp).map((workflowDataForApp) => {
+            wfs.push((0, create_1.createWorkflow)({
+                appName: name,
+                workflowData: workflowDataForApp,
+                workflowSubworkflowMapByApplication,
+                workflowCls,
+                ...swArgs,
+            }));
+            return null;
+        });
+        return null;
     });
-    return null;
-  });
-  return wfs;
+    return wfs;
 }
-
 /**
  * @summary Create workflow configurations for all applications
  * @param applications {Array<String>} array of application names
@@ -87,27 +65,22 @@ function createWorkflows({
  * @param swArgs {Object} other classes for instantiation
  * @returns {Array<Object>} array of workflow configurations
  */
-function createWorkflowConfigs({
-  applications,
-  workflowCls = _workflow.Workflow,
-  workflowSubworkflowMapByApplication,
-  ...swArgs
-}) {
-  const configs = [];
-  applications.forEach(app => {
-    const workflows = createWorkflows({
-      appName: app,
-      workflowCls,
-      workflowSubworkflowMapByApplication,
-      ...swArgs
+function createWorkflowConfigs({ applications, workflowCls = workflow_1.Workflow, workflowSubworkflowMapByApplication, ...swArgs }) {
+    const configs = [];
+    applications.forEach((app) => {
+        const workflows = createWorkflows({
+            appName: app,
+            workflowCls,
+            workflowSubworkflowMapByApplication,
+            ...swArgs,
+        });
+        workflows.forEach((wf) => {
+            configs.push({
+                application: app,
+                name: wf.prop("name"),
+                config: wf.toJSON(),
+            });
+        });
     });
-    workflows.forEach(wf => {
-      configs.push({
-        application: app,
-        name: wf.prop("name"),
-        config: wf.toJSON()
-      });
-    });
-  });
-  return configs;
+    return configs;
 }

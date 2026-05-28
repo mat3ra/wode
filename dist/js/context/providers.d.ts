@@ -1,0 +1,55 @@
+import BoundaryConditionsFormDataProvider from "./providers/BoundaryConditionsFormDataProvider";
+import QENEBContextProvider from "./providers/by_application/espresso/QENEBContextProvider";
+import QEPWXContextProvider from "./providers/by_application/espresso/QEPWXContextProvider";
+import NWChemTotalEnergyContextProvider from "./providers/by_application/nwchem/NWChemTotalEnergyContextProvider";
+import VASPContextProvider from "./providers/by_application/vasp/VASPContextProvider";
+import VASPNEBContextProvider from "./providers/by_application/vasp/VASPNEBContextProvider";
+import CollinearMagnetizationContextProvider from "./providers/CollinearMagnetizationContextProvider";
+import HubbardContextProviderLegacy from "./providers/Hubbard/HubbardContextProviderLegacy";
+import HubbardJContextProvider from "./providers/Hubbard/HubbardJContextProvider";
+import HubbardUContextProvider from "./providers/Hubbard/HubbardUContextProvider";
+import HubbardVContextProvider from "./providers/Hubbard/HubbardVContextProvider";
+import IonDynamicsContextProvider from "./providers/IonDynamicsContextProvider";
+import MLSettingsContextProvider from "./providers/MLSettingsContextProvider";
+import MLTrainTestSplitContextProvider from "./providers/MLTrainTestSplitContextProvider";
+import NEBFormDataProvider from "./providers/NEBFormDataProvider";
+import NonCollinearMagnetizationContextProvider from "./providers/NonCollinearMagnetizationContextProvider";
+import PlanewaveCutoffsContextProvider from "./providers/PlanewaveCutoffsContextProvider";
+import IGridFormDataManager from "./providers/PointsGrid/IGridFormDataManager";
+import KGridFormDataManager from "./providers/PointsGrid/KGridFormDataManager";
+import QGridFormDataManager from "./providers/PointsGrid/QGridFormDataManager";
+import ExplicitKPath2PIBAFormDataManager from "./providers/PointsPath/ExplicitKPath2PIBAFormDataManager";
+import ExplicitKPathFormDataManager from "./providers/PointsPath/ExplicitKPathFormDataManager";
+import IPathFormDataManager from "./providers/PointsPath/IPathFormDataManager";
+import KPathFormDataManager from "./providers/PointsPath/KPathFormDataManager";
+import QPathFormDataManager from "./providers/PointsPath/QPathFormDataManager";
+/** ********************************
+ * Method-based context providers *
+ ********************************* */
+export declare const newWodeProviders: {
+    PlanewaveCutoffDataManager: typeof PlanewaveCutoffsContextProvider;
+    KGridFormDataManager: typeof KGridFormDataManager;
+    QGridFormDataManager: typeof QGridFormDataManager;
+    IGridFormDataManager: typeof IGridFormDataManager;
+    QPathFormDataManager: typeof QPathFormDataManager;
+    IPathFormDataManager: typeof IPathFormDataManager;
+    KPathFormDataManager: typeof KPathFormDataManager;
+    ExplicitKPathFormDataManager: typeof ExplicitKPathFormDataManager;
+    ExplicitKPath2PIBAFormDataManager: typeof ExplicitKPath2PIBAFormDataManager;
+    HubbardJContextManager: typeof HubbardJContextProvider;
+    HubbardUContextManager: typeof HubbardUContextProvider;
+    HubbardVContextManager: typeof HubbardVContextProvider;
+    HubbardContextManagerLegacy: typeof HubbardContextProviderLegacy;
+    NEBFormDataManager: typeof NEBFormDataProvider;
+    BoundaryConditionsFormDataManager: typeof BoundaryConditionsFormDataProvider;
+    MLSettingsDataManager: typeof MLSettingsContextProvider;
+    MLTrainTestSplitDataManager: typeof MLTrainTestSplitContextProvider;
+    IonDynamicsContextProvider: typeof IonDynamicsContextProvider;
+    CollinearMagnetizationDataManager: typeof CollinearMagnetizationContextProvider;
+    NonCollinearMagnetizationDataManager: typeof NonCollinearMagnetizationContextProvider;
+    QEPWXInputDataManager: typeof QEPWXContextProvider;
+    QENEBInputDataManager: typeof QENEBContextProvider;
+    VASPInputDataManager: typeof VASPContextProvider;
+    VASPNEBInputDataManager: typeof VASPNEBContextProvider;
+    NWChemInputDataManager: typeof NWChemTotalEnergyContextProvider;
+};

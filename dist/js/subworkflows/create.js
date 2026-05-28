@@ -1,52 +1,40 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createUnit = createUnit;
 exports.createSubworkflow = createSubworkflow;
 exports.createSubworkflowByName = createSubworkflowByName;
-exports.createUnit = createUnit;
-var _ade = require("@mat3ra/ade");
-var _mode = require("@mat3ra/mode");
-var _standata = require("@mat3ra/standata");
-var _lodash = _interopRequireDefault(require("lodash"));
-var _units = require("../units");
-var _builders = require("../units/builders");
-var _utils = require("../utils");
-var _dynamic = require("./dynamic");
-var _subworkflow = require("./subworkflow");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const ade_1 = require("@mat3ra/ade");
+const mode_1 = require("@mat3ra/mode");
+const standata_1 = require("@mat3ra/standata");
+const lodash_1 = __importDefault(require("lodash"));
+const units_1 = require("../units");
+const builders_1 = require("../units/builders");
+const utils_1 = require("../utils");
+const dynamic_1 = require("./dynamic");
+const subworkflow_1 = require("./subworkflow");
 // NOTE: DFTModel => DFTModelConfig, configs should have the same name as the model/method class + "Config" at the end
 function _getConfigFromModelOrMethodName(name, kind) {
-  const configs = kind === "Model" ? _mode.default_models : _mode.default_methods;
-  if (!configs[`${name}Config`]) {
-    // eslint-disable-next-line no-param-reassign
-    name = `Unknown${kind}`;
-  }
-  return configs[`${name}Config`];
+    const configs = kind === "Model" ? mode_1.default_models : mode_1.default_methods;
+    if (!configs[`${name}Config`]) {
+        // eslint-disable-next-line no-param-reassign
+        name = `Unknown${kind}`;
+    }
+    return configs[`${name}Config`];
 }
-
 /**
  * @summary Create model from subworkflow data
  * @param config {Object} model config
  * @param modelFactoryCls {any} model factory to use
  * @returns {DFTModel|Model}
  */
-function createModel({
-  config,
-  modelFactoryCls
-}) {
-  const {
-    name,
-    config: modelConfig = {}
-  } = config;
-  const defaultConfig = _getConfigFromModelOrMethodName(name, "Model");
-  return modelFactoryCls.create({
-    ...defaultConfig,
-    ...modelConfig
-  });
+function createModel({ config, modelFactoryCls }) {
+    const { name, config: modelConfig = {} } = config;
+    const defaultConfig = _getConfigFromModelOrMethodName(name, "Model");
+    return modelFactoryCls.create({ ...defaultConfig, ...modelConfig });
 }
-
 /**
  * @summary Create method from subworkflow data
  * @param config {Object} method configuration
@@ -54,30 +42,20 @@ function createModel({
  * @param applicationConfig {Object} application configuration
  * @returns {{method, setSearchText}}
  */
-function createMethod({
-  config,
-  methodFactoryCls,
-  applicationConfig = {}
-}) {
-  const {
-    name,
-    setSearchText = null,
-    config: methodConfig = {}
-  } = config;
-  const defaultConfig = _getConfigFromModelOrMethodName(name, "Method");
-  const defaultConfigForApp = new _standata.ApplicationMethodStandata().getDefaultMethodConfigForApplication(applicationConfig);
-  const defaultConfigForAppSimple = defaultConfigForApp && defaultConfigForApp.units ? _mode.MethodConversionHandler.convertToSimple(defaultConfigForApp) : defaultConfigForApp;
-  const method = methodFactoryCls.create({
-    ...defaultConfig,
-    ...defaultConfigForAppSimple,
-    ...methodConfig
-  });
-  return {
-    method,
-    setSearchText
-  };
+function createMethod({ config, methodFactoryCls, applicationConfig = {} }) {
+    const { name, setSearchText = null, config: methodConfig = {} } = config;
+    const defaultConfig = _getConfigFromModelOrMethodName(name, "Method");
+    const defaultConfigForApp = new standata_1.ApplicationMethodStandata().getDefaultMethodConfigForApplication(applicationConfig);
+    const defaultConfigForAppSimple = defaultConfigForApp && defaultConfigForApp.units
+        ? mode_1.MethodConversionHandler.convertToSimple(defaultConfigForApp)
+        : defaultConfigForApp;
+    const method = methodFactoryCls.create({
+        ...defaultConfig,
+        ...defaultConfigForAppSimple,
+        ...methodConfig,
+    });
+    return { method, setSearchText };
 }
-
 /**
  * @summary Create top-level objects used in subworkflow initialization
  * @param subworkflowData {Object} subworkflow data
@@ -86,38 +64,22 @@ function createMethod({
  * @param methodFactoryCls {any} method factory class
  * @returns {{application: *, method: *, model: (DFTModel|Model), setSearchText: String|null}}
  */
-function createTopLevel({
-  subworkflowData,
-  modelFactoryCls,
-  methodFactoryCls,
-  AppRegistry
-}) {
-  const {
-    application: appConfig,
-    model: modelConfig,
-    method: methodConfig
-  } = subworkflowData;
-  const application = AppRegistry.createApplication(appConfig);
-  const model = createModel({
-    config: modelConfig,
-    modelFactoryCls
-  });
-  const {
-    method,
-    setSearchText
-  } = createMethod({
-    config: methodConfig,
-    methodFactoryCls,
-    applicationConfig: appConfig
-  });
-  return {
-    application,
-    model,
-    method,
-    setSearchText
-  };
+function createTopLevel({ subworkflowData, modelFactoryCls, methodFactoryCls, AppRegistry }) {
+    const { application: appConfig, model: modelConfig, method: methodConfig } = subworkflowData;
+    const application = AppRegistry.createApplication(appConfig);
+    const model = createModel({ config: modelConfig, modelFactoryCls });
+    const { method, setSearchText } = createMethod({
+        config: methodConfig,
+        methodFactoryCls,
+        applicationConfig: appConfig,
+    });
+    return {
+        application,
+        model,
+        method,
+        setSearchText,
+    };
 }
-
 /**
  * @summary Create workflow unit from JSON configuration
  *      Supports applying functions to the builder prior to building via "functions"
@@ -128,40 +90,17 @@ function createTopLevel({
  * @param unitFactoryCls {*} workflow unit class factory
  * @returns {*|{head: boolean, preProcessors: [], postProcessors: [], name: *, flowchartId: *, type: *, results: [], monitors: []}}
  */
-function createUnit({
-  config,
-  application,
-  unitBuilders,
-  unitFactoryCls,
-  cache = []
-}) {
-  const {
-    type,
-    config: unitConfig
-  } = config;
-  if (type === "executionBuilder") {
-    const {
-      name,
-      execName,
-      flavorName,
-      flowchartId
-    } = unitConfig;
-    const builder = new unitBuilders.ExecutionUnitConfigBuilder(name, application, execName, flavorName, flowchartId, cache);
-
-    // config should contain "functions" and "attributes"
-    const cfg = (0, _utils.applyConfig)({
-      obj: builder,
-      config,
-      callBuild: true
-    });
-    return unitFactoryCls.create(cfg);
-  }
-  return unitFactoryCls.create({
-    type,
-    ...unitConfig
-  });
+function createUnit({ config, application, unitBuilders, unitFactoryCls, cache = [] }) {
+    const { type, config: unitConfig } = config;
+    if (type === "executionBuilder") {
+        const { name, execName, flavorName, flowchartId } = unitConfig;
+        const builder = new unitBuilders.ExecutionUnitConfigBuilder(name, application, execName, flavorName, flowchartId, cache);
+        // config should contain "functions" and "attributes"
+        const cfg = (0, utils_1.applyConfig)({ obj: builder, config, callBuild: true });
+        return unitFactoryCls.create(cfg);
+    }
+    return unitFactoryCls.create({ type, ...unitConfig });
 }
-
 /**
  * @summary Dynamically create subworkflow units
  * @param dynamicSubworkflow {String} name of unit creation function
@@ -171,98 +110,54 @@ function createUnit({
  * @param application {*} application (optional)
  * @returns {*}
  */
-function createDynamicUnits({
-  dynamicSubworkflow,
-  units,
-  unitBuilders,
-  unitFactoryCls,
-  application = null
-}) {
-  const {
-    name,
-    subfolder
-  } = dynamicSubworkflow;
-  const func = subfolder && _lodash.default.get(_dynamic.dynamicSubworkflowsByApp, `${subfolder}.${name}`, () => {});
-  switch (name) {
-    case "surfaceEnergy":
-      // eslint-disable-next-line no-case-declarations
-      const [scfUnit] = units;
-      return (0, _dynamic.getSurfaceEnergySubworkflowUnits)({
-        scfUnit,
-        unitBuilders
-      });
-    case "getQpointIrrep":
-      return func({
-        unitBuilders,
-        unitFactoryCls,
-        application
-      });
-    default:
-      throw new Error(`dynamicSubworkflow=${name} not recognized`);
-  }
-}
-function createSubworkflow({
-  subworkflowData,
-  cache = [],
-  AppRegistry = _ade.ApplicationRegistry,
-  modelFactoryCls = _mode.ModelFactory,
-  methodFactoryCls = _mode.MethodFactory,
-  subworkflowCls = _subworkflow.Subworkflow,
-  unitFactoryCls = _units.UnitFactory,
-  unitBuilders = _builders.builders
-}) {
-  const {
-    application,
-    model,
-    method,
-    setSearchText
-  } = createTopLevel({
-    subworkflowData,
-    AppRegistry,
-    modelFactoryCls,
-    methodFactoryCls
-  });
-  let units = [];
-  const {
-    name,
-    units: unitConfigs,
-    config = {},
-    dynamicSubworkflow = null
-  } = subworkflowData;
-  unitConfigs.forEach(_config => {
-    units.push(createUnit({
-      config: _config,
-      application,
-      unitBuilders,
-      unitFactoryCls,
-      cache
-    }));
-  });
-  if (dynamicSubworkflow) {
-    units = createDynamicUnits({
-      dynamicSubworkflow,
-      units,
-      unitBuilders,
-      unitFactoryCls,
-      application
-    });
-  }
-  let subworkflow = subworkflowCls.fromArguments(application, model, method, name, units, config);
-  const {
-    functions = {},
-    attributes = {}
-  } = config;
-  subworkflow = (0, _utils.applyConfig)({
-    obj: subworkflow,
-    config: {
-      functions,
-      attributes
+function createDynamicUnits({ dynamicSubworkflow, units, unitBuilders, unitFactoryCls, application = null, }) {
+    const { name, subfolder } = dynamicSubworkflow;
+    const func = subfolder && lodash_1.default.get(dynamic_1.dynamicSubworkflowsByApp, `${subfolder}.${name}`, () => { });
+    switch (name) {
+        case "surfaceEnergy":
+            // eslint-disable-next-line no-case-declarations
+            const [scfUnit] = units;
+            return (0, dynamic_1.getSurfaceEnergySubworkflowUnits)({ scfUnit, unitBuilders });
+        case "getQpointIrrep":
+            return func({ unitBuilders, unitFactoryCls, application });
+        default:
+            throw new Error(`dynamicSubworkflow=${name} not recognized`);
     }
-  });
-  if (setSearchText) subworkflow.model.Method.setSearchText(setSearchText);
-  return subworkflow;
 }
-
+function createSubworkflow({ subworkflowData, cache = [], AppRegistry = ade_1.ApplicationRegistry, modelFactoryCls = mode_1.ModelFactory, methodFactoryCls = mode_1.MethodFactory, subworkflowCls = subworkflow_1.Subworkflow, unitFactoryCls = units_1.UnitFactory, unitBuilders = builders_1.builders, }) {
+    const { application, model, method, setSearchText } = createTopLevel({
+        subworkflowData,
+        AppRegistry,
+        modelFactoryCls,
+        methodFactoryCls,
+    });
+    let units = [];
+    const { name, units: unitConfigs, config = {}, dynamicSubworkflow = null } = subworkflowData;
+    unitConfigs.forEach((_config) => {
+        units.push(createUnit({
+            config: _config,
+            application,
+            unitBuilders,
+            unitFactoryCls,
+            cache,
+        }));
+    });
+    if (dynamicSubworkflow) {
+        units = createDynamicUnits({
+            dynamicSubworkflow,
+            units,
+            unitBuilders,
+            unitFactoryCls,
+            application,
+        });
+    }
+    let subworkflow = subworkflowCls.fromArguments(application, model, method, name, units, config);
+    const { functions = {}, attributes = {} } = config;
+    subworkflow = (0, utils_1.applyConfig)({ obj: subworkflow, config: { functions, attributes } });
+    if (setSearchText)
+        subworkflow.model.Method.setSearchText(setSearchText);
+    return subworkflow;
+}
 /**
  * @summary Convenience wrapper around createSubworkflow to create by app name and swf name
  * @param appName {String} application name
@@ -271,23 +166,12 @@ function createSubworkflow({
  * @param swArgs {Object} classes for instantiation
  * @returns {*} subworkflow object
  */
-function createSubworkflowByName({
-  appName,
-  swfName,
-  workflowSubworkflowMapByApplication,
-  ...swArgs
-}) {
-  const {
-    subworkflows
-  } = workflowSubworkflowMapByApplication;
-  const {
-    [appName]: allSubworkflowData
-  } = subworkflows;
-  const {
-    [swfName]: subworkflowData
-  } = allSubworkflowData;
-  return createSubworkflow({
-    subworkflowData,
-    ...swArgs
-  });
+function createSubworkflowByName({ appName, swfName, workflowSubworkflowMapByApplication, ...swArgs }) {
+    const { subworkflows } = workflowSubworkflowMapByApplication;
+    const { [appName]: allSubworkflowData } = subworkflows;
+    const { [swfName]: subworkflowData } = allSubworkflowData;
+    return createSubworkflow({
+        subworkflowData,
+        ...swArgs,
+    });
 }
