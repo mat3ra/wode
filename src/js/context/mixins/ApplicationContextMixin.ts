@@ -1,25 +1,19 @@
-import type { Application } from "@mat3ra/ade";
+import type { ApplicationSchema } from "@mat3ra/esse/dist/js/types";
 
 import type ContextProvider from "../providers/base/ContextProvider";
-import { globalSettings } from "../providers/settings";
 
 export type ApplicationContextMixin = {
-    readonly application: Application;
+    application: ApplicationSchema;
     initApplicationContextMixin(externalContext: ApplicationExternalContext): void;
 };
 
-type PrivateProperties = {
-    application?: Application;
-};
+export type ApplicationExternalContext = { application: ApplicationSchema };
 
-export type ApplicationExternalContext = { application?: Application };
-
-export function applicationContextMixin(item: ContextProvider) {
+export default function applicationContextMixin(item: ContextProvider) {
     // @ts-expect-error
-    const properties: Provider & ApplicationContextMixin & PrivateProperties = {
+    const properties: ContextProvider & ApplicationContextMixin = {
         initApplicationContextMixin(externalContext: ApplicationExternalContext) {
-            this.application =
-                externalContext.application ?? globalSettings.Application.createDefault();
+            this.application = externalContext.application;
         },
     };
 

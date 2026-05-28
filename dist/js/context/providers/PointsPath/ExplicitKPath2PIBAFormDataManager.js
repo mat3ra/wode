@@ -11,5 +11,9 @@ class ExplicitKPath2PIBAFormDataManager extends PointsPathFormDataProvider_1.def
         this.is2PIBA = true;
         this.useExplicitPath = true;
     }
+    static createFromUnitContext(unitContext, externalContext) {
+        const contextItem = this.findContextItem(unitContext, "explicitKPath2PIBA");
+        return new ExplicitKPath2PIBAFormDataManager(contextItem, externalContext);
+    }
 }
 exports.default = ExplicitKPath2PIBAFormDataManager;

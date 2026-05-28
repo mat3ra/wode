@@ -11,7 +11,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
     // @ts-expect-error
     const properties: InMemoryEntity & ExecutionUnitSchemaMixin = {
         get type() {
-            return this.prop<ExecutionUnitMixinSchema["type"]>("type");
+            return this.requiredProp<ExecutionUnitMixinSchema["type"]>("type");
         },
         set type(value: ExecutionUnitMixinSchema["type"]) {
             this.setProp("type", value);
@@ -23,13 +23,13 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
             this.setProp("application", value);
         },
         get executable() {
-            return this.prop<ExecutionUnitMixinSchema["executable"]>("executable");
+            return this.requiredProp<ExecutionUnitMixinSchema["executable"]>("executable");
         },
         set executable(value: ExecutionUnitMixinSchema["executable"]) {
             this.setProp("executable", value);
         },
         get flavor() {
-            return this.prop<ExecutionUnitMixinSchema["flavor"]>("flavor");
+            return this.requiredProp<ExecutionUnitMixinSchema["flavor"]>("flavor");
         },
         set flavor(value: ExecutionUnitMixinSchema["flavor"]) {
             this.setProp("flavor", value);
@@ -41,7 +41,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
             this.setProp("input", value);
         },
         get context() {
-            return this.prop<ExecutionUnitMixinSchema["context"]>("context");
+            return this.requiredProp<ExecutionUnitMixinSchema["context"]>("context");
         },
         set context(value: ExecutionUnitMixinSchema["context"]) {
             this.setProp("context", value);

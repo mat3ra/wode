@@ -9,9 +9,13 @@ function materialsSetContextMixin(item) {
             this.materialsSet = externalContext.materialsSet;
         },
         sortMaterialsByIndexInSet(materials = []) {
+            const { materialsSet } = this;
+            if (!materialsSet) {
+                return materials;
+            }
             // DO NOT SORT IN PLACE AS IT CHANGES THE ORDER IN `this.materials` AND HAS SIDE EFFECTS (MaterialViewer).
-            return materials.concat().sort((a, b) => {
-                return (0, utils_1.compareEntitiesInOrderedSetForSorting)(a, b, this.materialsSet._id, false);
+            return [...materials].sort((a, b) => {
+                return (0, utils_1.compareEntitiesInOrderedSetForSorting)(a, b, materialsSet._id, false);
             });
         },
     };

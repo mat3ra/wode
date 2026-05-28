@@ -1,3 +1,4 @@
+import type { ContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import type { UiSchema } from "react-jsonschema-form";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./JSONSchemaDataProvider";
 /**
@@ -10,7 +11,7 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./JSONSchemaD
  *      formData={provider.getData(unit.important)} />
  * ```
  */
-declare abstract class JSONSchemaFormDataProvider<N extends string = string, D extends object = object, ED extends object = object, EC extends JinjaExternalContext = JinjaExternalContext> extends JSONSchemaDataProvider<N, D, ED, EC> {
+declare abstract class JSONSchemaFormDataProvider<S extends ContextItemSchema = ContextItemSchema, EC extends JinjaExternalContext = JinjaExternalContext, DataForRendering = S["data"]> extends JSONSchemaDataProvider<S, EC, DataForRendering> {
     fields: object;
     protected abstract uiSchema: UiSchema;
     get uiSchemaStyled(): UiSchema;

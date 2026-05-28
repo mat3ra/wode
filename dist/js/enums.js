@@ -1,11 +1,6 @@
 "use strict";
-/**
- * THIS ENUMS ARE SHARED WITH TESTS.
- * DO NOT IMPORT ANYTHINGS IN THIS MODULE.
- */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.WORKFLOW_STATUSES = exports.UNIT_TAGS = exports.UNIT_STATUSES = exports.UnitType = exports.UNIT_TYPES = exports.IO_ID_COLUMN = void 0;
-exports.IO_ID_COLUMN = "exabyteId";
+exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.WORKFLOW_STATUSES = exports.UnitStatus = exports.UnitTag = exports.UnitType = exports.UNIT_TYPES = void 0;
 exports.UNIT_TYPES = {
     // not currently used
     convergence: "convergence",
@@ -17,7 +12,6 @@ exports.UNIT_TYPES = {
     assignment: "assignment",
     condition: "condition",
     subworkflow: "subworkflow",
-    processing: "processing",
     io: "io",
     assertion: "assertion",
 };
@@ -31,21 +25,22 @@ var UnitType;
     UnitType["assignment"] = "assignment";
     UnitType["condition"] = "condition";
     UnitType["subworkflow"] = "subworkflow";
-    UnitType["processing"] = "processing";
     UnitType["io"] = "io";
     UnitType["assertion"] = "assertion";
 })(UnitType || (exports.UnitType = UnitType = {}));
-exports.UNIT_STATUSES = {
-    idle: "idle",
-    active: "active",
-    finished: "finished",
-    error: "error",
-    warning: "warning",
-};
-exports.UNIT_TAGS = {
-    hasConvergenceParam: "hasConvergenceParam",
-    hasConvergenceResult: "hasConvergenceResult",
-};
+var UnitTag;
+(function (UnitTag) {
+    UnitTag["hasConvergenceParam"] = "hasConvergenceParam";
+    UnitTag["hasConvergenceResult"] = "hasConvergenceResult";
+})(UnitTag || (exports.UnitTag = UnitTag = {}));
+var UnitStatus;
+(function (UnitStatus) {
+    UnitStatus["idle"] = "idle";
+    UnitStatus["active"] = "active";
+    UnitStatus["finished"] = "finished";
+    UnitStatus["error"] = "error";
+    UnitStatus["warning"] = "warning";
+})(UnitStatus || (exports.UnitStatus = UnitStatus = {}));
 exports.WORKFLOW_STATUSES = {
     "up-to-date": "up-to-date",
     outdated: "outdated",

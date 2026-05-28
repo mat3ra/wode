@@ -1,21 +1,52 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.globalSettings = exports.PointsPathFormDataProvider = exports.wodeProviders = exports.defaultMapConfig = exports.SubworkflowUnit = exports.ReduceUnit = exports.ProcessingUnit = exports.MapUnit = exports.IOUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.ExecutionUnit = exports.BaseUnit = exports.WORKFLOW_STATUSES = exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.UNIT_STATUSES = exports.UNIT_TYPES = exports.builders = exports.UnitFactory = exports.createSubworkflowByName = exports.createWorkflowConfigs = exports.createWorkflows = exports.createWorkflow = exports.Workflow = exports.Subworkflow = void 0;
-const providers_1 = require("./context/providers");
-Object.defineProperty(exports, "wodeProviders", { enumerable: true, get: function () { return providers_1.wodeProviders; } });
-const PointsPathFormDataProvider_1 = require("./context/providers/PointsPath/PointsPathFormDataProvider");
-Object.defineProperty(exports, "PointsPathFormDataProvider", { enumerable: true, get: function () { return PointsPathFormDataProvider_1.PointsPathFormDataProvider; } });
+exports.utils = exports.globalSettings = exports.PointsPathFormDataProvider = exports.defaultMapConfig = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.ExecutionUnit = exports.BaseUnit = exports.WORKFLOW_STATUSES = exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.UnitFactory = exports.Workflow = exports.Subworkflow = void 0;
+const PointsPathFormDataProvider_1 = __importDefault(require("./context/providers/PointsPath/PointsPathFormDataProvider"));
+exports.PointsPathFormDataProvider = PointsPathFormDataProvider_1.default;
 const settings_1 = require("./context/providers/settings");
 Object.defineProperty(exports, "globalSettings", { enumerable: true, get: function () { return settings_1.globalSettings; } });
 const enums_1 = require("./enums");
 Object.defineProperty(exports, "TAB_NAVIGATION_CONFIG", { enumerable: true, get: function () { return enums_1.TAB_NAVIGATION_CONFIG; } });
 Object.defineProperty(exports, "UNIT_NAME_INVALID_CHARS", { enumerable: true, get: function () { return enums_1.UNIT_NAME_INVALID_CHARS; } });
-Object.defineProperty(exports, "UNIT_STATUSES", { enumerable: true, get: function () { return enums_1.UNIT_STATUSES; } });
-Object.defineProperty(exports, "UNIT_TYPES", { enumerable: true, get: function () { return enums_1.UNIT_TYPES; } });
 Object.defineProperty(exports, "WORKFLOW_STATUSES", { enumerable: true, get: function () { return enums_1.WORKFLOW_STATUSES; } });
-const subworkflows_1 = require("./subworkflows");
-Object.defineProperty(exports, "createSubworkflowByName", { enumerable: true, get: function () { return subworkflows_1.createSubworkflowByName; } });
-Object.defineProperty(exports, "Subworkflow", { enumerable: true, get: function () { return subworkflows_1.Subworkflow; } });
+const Subworkflow_1 = __importDefault(require("./Subworkflow"));
+exports.Subworkflow = Subworkflow_1.default;
 const units_1 = require("./units");
 Object.defineProperty(exports, "AssertionUnit", { enumerable: true, get: function () { return units_1.AssertionUnit; } });
 Object.defineProperty(exports, "AssignmentUnit", { enumerable: true, get: function () { return units_1.AssignmentUnit; } });
@@ -24,17 +55,13 @@ Object.defineProperty(exports, "ConditionUnit", { enumerable: true, get: functio
 Object.defineProperty(exports, "ExecutionUnit", { enumerable: true, get: function () { return units_1.ExecutionUnit; } });
 Object.defineProperty(exports, "IOUnit", { enumerable: true, get: function () { return units_1.IOUnit; } });
 Object.defineProperty(exports, "MapUnit", { enumerable: true, get: function () { return units_1.MapUnit; } });
-Object.defineProperty(exports, "ProcessingUnit", { enumerable: true, get: function () { return units_1.ProcessingUnit; } });
 Object.defineProperty(exports, "ReduceUnit", { enumerable: true, get: function () { return units_1.ReduceUnit; } });
 Object.defineProperty(exports, "SubworkflowUnit", { enumerable: true, get: function () { return units_1.SubworkflowUnit; } });
-const builders_1 = require("./units/builders");
-Object.defineProperty(exports, "builders", { enumerable: true, get: function () { return builders_1.builders; } });
 const factory_1 = require("./units/factory");
 Object.defineProperty(exports, "UnitFactory", { enumerable: true, get: function () { return factory_1.UnitFactory; } });
 const MapUnit_1 = require("./units/MapUnit");
 Object.defineProperty(exports, "defaultMapConfig", { enumerable: true, get: function () { return MapUnit_1.defaultMapConfig; } });
-const workflows_1 = require("./workflows");
-Object.defineProperty(exports, "createWorkflow", { enumerable: true, get: function () { return workflows_1.createWorkflow; } });
-Object.defineProperty(exports, "createWorkflowConfigs", { enumerable: true, get: function () { return workflows_1.createWorkflowConfigs; } });
-Object.defineProperty(exports, "createWorkflows", { enumerable: true, get: function () { return workflows_1.createWorkflows; } });
-Object.defineProperty(exports, "Workflow", { enumerable: true, get: function () { return workflows_1.Workflow; } });
+const utils = __importStar(require("./utils"));
+exports.utils = utils;
+const Workflow_1 = __importDefault(require("./Workflow"));
+exports.Workflow = Workflow_1.default;

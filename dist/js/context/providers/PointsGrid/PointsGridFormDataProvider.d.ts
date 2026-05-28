@@ -1,60 +1,145 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { PointsGridDataProviderSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import type { GridContextItemSchema, PointsGridDataProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../mixins/MaterialContextMixin";
-import type { ContextItem, Domain } from "../base/ContextProvider";
 import type { JinjaExternalContext } from "../base/JSONSchemaDataProvider";
 import JSONSchemaFormDataProvider from "../base/JSONSchemaFormDataProvider";
-type Name = string;
+type Schema = GridContextItemSchema;
 type Data = PointsGridDataProviderSchema;
-type EContext = JinjaExternalContext & MaterialExternalContext & {
-    divisor: number;
-};
-type Base = typeof JSONSchemaFormDataProvider<Name, Data, object, EContext> & Constructor<MaterialContextMixin>;
+export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
+type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
+type GridMetricType = Data["gridMetricType"];
 declare const PointsGridFormDataProvider_base: Base;
-export default abstract class PointsGridFormDataProvider<N extends string = string> extends PointsGridFormDataProvider_base {
+declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends PointsGridFormDataProvider_base {
     abstract readonly name: N;
-    readonly domain: Domain;
-    dimensions: Vector3DSchema;
-    shifts: Vector3DSchema;
+    readonly domain: "important";
+    readonly entityName: "unit";
+    readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
+    dimensions: Data["dimensions"];
+    shifts: Data["shifts"];
     private reciprocalLattice;
     private gridMetricType;
     private gridMetricValue;
     private preferGridMetric;
     private defaultDimensions;
     private reciprocalVectorRatios;
-    private defaultMetric;
-    readonly jsonSchema: JSONSchema7 | undefined;
-    constructor(contextItem: ContextItem<Data>, externalContext: EContext);
+    readonly divisor: number;
+    protected defaultMetric: {
+        type: GridMetricType;
+        value: number;
+    };
+    abstract readonly jsonSchema: JSONSchema7;
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number);
     private initInstanceFields;
     private getDefaultGridMetricValue;
+    private resolveGridMetricValue;
+    getData(): Data;
     getDefaultData(): PointsGridDataProviderSchema;
-    private get jsonSchemaPatchConfig();
+    protected get jsonSchemaPatchConfig(): {
+        dimensions: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        shifts: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        reciprocalVectorRatios: {
+            default?: any[] | undefined;
+            type: string;
+            items: {
+                default?: string | number | readonly number[] | readonly string[] | undefined;
+                type: string;
+            };
+            minItems: number;
+            maxItems: number;
+        };
+        gridMetricType: {
+            default: "KPPRA" | "spacing";
+        };
+        description: string;
+        required: string[];
+        dependencies: {
+            gridMetricType: {
+                oneOf: ({
+                    properties: {
+                        gridMetricType: {
+                            enum: string[];
+                        };
+                        gridMetricValue: {
+                            type: string;
+                            minimum: number;
+                            title: string;
+                            default: number;
+                            exclusiveMinimum?: undefined;
+                        };
+                        preferGridMetric: {
+                            type: string;
+                            title: string;
+                            default: boolean;
+                        };
+                    };
+                } | {
+                    properties: {
+                        gridMetricType: {
+                            enum: string[];
+                        };
+                        gridMetricValue: {
+                            type: string;
+                            exclusiveMinimum: number;
+                            title: string;
+                            default: number;
+                            minimum?: undefined;
+                        };
+                        preferGridMetric: {
+                            type: string;
+                            title: string;
+                            default: boolean;
+                        };
+                    };
+                })[];
+            };
+        };
+    };
+    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    private get preferGridMetricForUi();
     get uiSchema(): {
         dimensions: {
-            "ui:options": {
-                addable: boolean;
-                orderable: boolean;
-                removable: boolean;
+            readonly "ui:options": {
+                readonly addable: false;
+                readonly orderable: false;
+                readonly removable: false;
             };
-            items: {
-                "ui:disabled": boolean;
-                "ui:placeholder": string;
-                "ui:emptyValue": number;
-                "ui:label": boolean;
+            readonly items: {
+                readonly "ui:disabled": boolean;
+                readonly "ui:placeholder": "1";
+                readonly "ui:emptyValue": number;
+                readonly "ui:label": false;
             };
         };
         shifts: {
-            "ui:options": {
-                addable: boolean;
-                orderable: boolean;
-                removable: boolean;
+            readonly "ui:options": {
+                readonly addable: false;
+                readonly orderable: false;
+                readonly removable: false;
             };
-            items: {
-                "ui:disabled": boolean;
-                "ui:placeholder": string;
-                "ui:emptyValue": number;
-                "ui:label": boolean;
+            readonly items: {
+                readonly "ui:disabled": boolean;
+                readonly "ui:placeholder": "1";
+                readonly "ui:emptyValue": number;
+                readonly "ui:label": false;
             };
         };
         gridMetricType: {
@@ -81,6 +166,6 @@ export default abstract class PointsGridFormDataProvider<N extends string = stri
     };
     private calculateDimensions;
     private calculateGridMetric;
-    setData(data?: Data): void;
+    setData(data: Data): void;
 }
-export {};
+export default PointsGridFormDataProvider;

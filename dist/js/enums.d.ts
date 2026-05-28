@@ -1,20 +1,14 @@
-/**
- * THIS ENUMS ARE SHARED WITH TESTS.
- * DO NOT IMPORT ANYTHINGS IN THIS MODULE.
- */
-export declare const IO_ID_COLUMN = "exabyteId";
 export declare const UNIT_TYPES: {
-    convergence: string;
-    exit: string;
-    execution: string;
-    map: string;
-    reduce: string;
-    assignment: string;
-    condition: string;
-    subworkflow: string;
-    processing: string;
-    io: string;
-    assertion: string;
+    readonly convergence: "convergence";
+    readonly exit: "exit";
+    readonly execution: "execution";
+    readonly map: "map";
+    readonly reduce: "reduce";
+    readonly assignment: "assignment";
+    readonly condition: "condition";
+    readonly subworkflow: "subworkflow";
+    readonly io: "io";
+    readonly assertion: "assertion";
 };
 export declare enum UnitType {
     convergence = "convergence",
@@ -25,45 +19,44 @@ export declare enum UnitType {
     assignment = "assignment",
     condition = "condition",
     subworkflow = "subworkflow",
-    processing = "processing",
     io = "io",
     assertion = "assertion"
 }
-export declare const UNIT_STATUSES: {
-    idle: string;
-    active: string;
-    finished: string;
-    error: string;
-    warning: string;
-};
-export declare const UNIT_TAGS: {
-    hasConvergenceParam: string;
-    hasConvergenceResult: string;
-};
+export declare enum UnitTag {
+    hasConvergenceParam = "hasConvergenceParam",
+    hasConvergenceResult = "hasConvergenceResult"
+}
+export declare enum UnitStatus {
+    idle = "idle",
+    active = "active",
+    finished = "finished",
+    error = "error",
+    warning = "warning"
+}
 export declare const WORKFLOW_STATUSES: {
-    "up-to-date": string;
-    outdated: string;
+    readonly "up-to-date": "up-to-date";
+    readonly outdated: "outdated";
 };
 export declare const TAB_NAVIGATION_CONFIG: {
-    overview: {
-        itemName: string;
-        className: string;
-        href: string;
+    readonly overview: {
+        readonly itemName: "Overview";
+        readonly className: "";
+        readonly href: "sw-overview";
     };
-    importantSettings: {
-        itemName: string;
-        className: string;
-        href: string;
+    readonly importantSettings: {
+        readonly itemName: "Important settings";
+        readonly className: "";
+        readonly href: "sw-important-settings";
     };
-    detailedView: {
-        itemName: string;
-        className: string;
-        href: string;
+    readonly detailedView: {
+        readonly itemName: "Detailed view";
+        readonly className: "";
+        readonly href: "sw-detailed-view";
     };
-    compute: {
-        itemName: string;
-        className: string;
-        href: string;
+    readonly compute: {
+        readonly itemName: "Compute";
+        readonly className: "";
+        readonly href: "sw-compute";
     };
 };
 export declare const UNIT_NAME_INVALID_CHARS = "/";

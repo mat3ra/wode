@@ -1,4 +1,6 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
+import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ReduceUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitType } from "../enums";
@@ -6,15 +8,39 @@ import {
     type ReduceUnitSchemaMixin,
     reduceUnitSchemaMixin,
 } from "../generated/ReduceUnitSchemaMixin";
-import { BaseUnit } from "./BaseUnit";
+import BaseUnit from "./BaseUnit";
 
 type Schema = ReduceUnitSchema;
 type Base = typeof BaseUnit<Schema> & Constructor<ReduceUnitSchemaMixin>;
 
-export class ReduceUnit extends (BaseUnit as Base) implements Schema {
-    constructor(unitName: string, mapUnit: string, input: ReduceUnitSchema["input"]) {
-        super({ type: UnitType.reduce, name: unitName, mapFlowchartId: mapUnit, input });
+export type ReduceUnitConfig = Partial<Omit<Schema, "type" | "flowchartId">> &
+    Pick<Schema, "flowchartId">;
+
+class ReduceUnit extends (BaseUnit as Base) implements Schema {
+    declare toJSON: () => Schema & AnyObject;
+
+    declare _json: Schema & AnyObject;
+
+    static get jsonSchema() {
+        return JSONSchemasInterface.getSchemaById("workflow/unit/flowchart");
+    }
+
+    constructor(config: ReduceUnitConfig) {
+        const schema: Schema = {
+            name: UnitType.reduce,
+            mapFlowchartId: "",
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            ...config,
+            type: UnitType.reduce,
+        };
+        super(schema);
     }
 }
 
 reduceUnitSchemaMixin(ReduceUnit.prototype);
+
+export default ReduceUnit;

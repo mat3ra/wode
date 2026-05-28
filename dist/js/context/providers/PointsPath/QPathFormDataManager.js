@@ -9,5 +9,9 @@ class QPathFormDataManager extends PointsPathFormDataProvider_1.default {
         super(...arguments);
         this.name = "qpath";
     }
+    static createFromUnitContext(unitContext, externalContext) {
+        const contextItem = this.findContextItem(unitContext, "qpath");
+        return new QPathFormDataManager(contextItem, externalContext);
+    }
 }
 exports.default = QPathFormDataManager;

@@ -1,0 +1,59 @@
+---
+description: Context provider data layers - persistent vs rendering, and how ExecutionUnit routes them
+alwaysApply: true
+---
+
+# ContextProvider: three data layers
+
+`ContextProvider` distinguishes **three** data concepts. Keep them separate when editing any provider, `ExecutionUnit.render`, or the ESSE schemas backing them.
+
+1. **Persistent data** — the user-editable / default form data. Stored on the persisted workflow as `ExecutionUnit.context[].data`. Shape comes from the ESSE context item schema (e.g. `PathContextItemSchema.data`).
+   - API: `getData()` / `setData(data)` / `getContextItemData()`
+   - Shown in RJSForm as `formData`
+   - Serialized to DB
+
+2. **Patched persistent data (rendering data)** — persistent data plus fields that must be derived from external context (material, lattice, application) but must **not** be stored or shown to the user. Example: kpath `coordinates` computed from a reciprocal lattice + symmetry point name.
+   - API: protected `patchForRendering(data)` (default = identity), public `getDataForRendering()` / `getContextItemDataForRendering()`
+   - Shape can be a proper superset of persistent data via the third generic: `ContextProvider<S, EC, DataForRendering>`
+   - When the superset shape exists, model it as a **separate ESSE schema** (e.g. `points-path-data-provider` + `points-path-data-provider-rendering`) rather than making derived fields optional on the persistent schema.
+
+3. **Full rendering context** — `{ ...patchedItemByName, ...externalContext }` passed to Jinja. Lives as `ExecutionUnit.renderingContext`. Not persisted.
+
+## Routing in `ExecutionUnit.render`
+
+```ts
+const persistentItems = providers.map((p) => p.getContextItemData());
+const renderingItems  = providers.map((p) => p.getContextItemDataForRendering());
+this.saveContext(persistentItems, renderingItems, externalContext);
+// this.context         <- persistentItems.filter(isEdited)   (DB)
+// this.renderingContext <- Object.fromEntries(renderingItems) + externalContext  (Jinja)
+```
+
+The two arrays **must** come from the two different hooks. Never reuse `getContextItemData()` for the rendering context, and never patch derived fields into `setData`/`getDefaultData` just to get them into templates.
+
+## Rules for providers
+
+- **Do not** mutate persistent `data` inside `setData` to inject derived fields. Override `patchForRendering` instead.
+- **Do not** bake derived fields into `getDefaultData()` — the default must match the persistent shape so reloads are round-trip stable.
+- `setData` may **normalize** incoming data (e.g. strip legacy keys from older persisted documents) — this is not "patching", it is bringing old payloads onto the current persistent schema. See `PointsPathFormDataProvider.setData` for the canonical example dropping legacy `coordinates`.
+- If the rendering shape differs from the persistent shape, declare it as `ContextProvider<S, EC, RenderingData>` and pair it with a dedicated ESSE schema (see next section).
+
+## ESSE schema pairing
+
+For the kpath/qpath/ipath providers the split is:
+
+- `schema/context_providers_directory/points_path_data_provider.json` — persistent: `{ point, steps }[]`. Used by RJSForm and embedded by `workflow/unit/context/item/path.json` into the workflow schema.
+- `schema/context_providers_directory/points_path_data_provider_rendering.json` — rendering: `{ point, steps, coordinates }[]`. Not referenced by the workflow schema. Only types/examples.
+
+If you add a new provider whose rendering-time shape differs from its persisted shape, follow this pattern — do **not** widen the persistent schema with optional derived fields.
+
+## Canonical files
+
+- Base class with the three hooks: [src/js/context/providers/base/ContextProvider.ts](src/js/context/providers/base/ContextProvider.ts)
+- Routing: `render` + `saveContext` in [src/js/units/ExecutionUnit.ts](src/js/units/ExecutionUnit.ts)
+- Reference provider (non-identity `patchForRendering`): [src/js/context/providers/PointsPath/PointsPathFormDataProvider.ts](src/js/context/providers/PointsPath/PointsPathFormDataProvider.ts)
+- Paired ESSE schemas: [../esse/schema/context_providers_directory/points_path_data_provider.json](../esse/schema/context_providers_directory/points_path_data_provider.json) and `..._rendering.json`
+
+## When in doubt
+
+If you find yourself reaching for `as any`, `as unknown as Schema`, or making a persisted field optional just to satisfy types, stop — that usually means persistent and rendering shapes are being collapsed. Split them as above.

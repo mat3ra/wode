@@ -1,5 +1,4 @@
-/* eslint-disable class-methods-use-this */
-// import { JSONSchemaDataProvider } from "@mat3ra/ade";
+import type { ContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import type { UiSchema } from "react-jsonschema-form";
 
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./JSONSchemaDataProvider";
@@ -15,11 +14,10 @@ import JSONSchemaDataProvider, { type JinjaExternalContext } from "./JSONSchemaD
  * ```
  */
 abstract class JSONSchemaFormDataProvider<
-    N extends string = string,
-    D extends object = object,
-    ED extends object = object,
+    S extends ContextItemSchema = ContextItemSchema,
     EC extends JinjaExternalContext = JinjaExternalContext,
-> extends JSONSchemaDataProvider<N, D, ED, EC> {
+    DataForRendering = S["data"],
+> extends JSONSchemaDataProvider<S, EC, DataForRendering> {
     fields: object = {};
 
     protected abstract uiSchema: UiSchema;

@@ -11,7 +11,7 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
     // @ts-expect-error
     const properties: InMemoryEntity & SubworkflowSchemaMixin = {
         get properties() {
-            return this.prop<SubworkflowMixinSchema["properties"]>("properties");
+            return this.requiredProp<SubworkflowMixinSchema["properties"]>("properties");
         },
         set properties(value: SubworkflowMixinSchema["properties"]) {
             this.setProp("properties", value);
@@ -39,6 +39,12 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         },
         set application(value: SubworkflowMixinSchema["application"]) {
             this.setProp("application", value);
+        },
+        get isMultiMaterial() {
+            return this.prop<SubworkflowMixinSchema["isMultiMaterial"]>("isMultiMaterial");
+        },
+        set isMultiMaterial(value: SubworkflowMixinSchema["isMultiMaterial"]) {
+            this.setProp("isMultiMaterial", value);
         },
         get isDraft() {
             return this.prop<SubworkflowMixinSchema["isDraft"]>("isDraft");

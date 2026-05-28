@@ -5,7 +5,7 @@ function executionUnitSchemaMixin(item) {
     // @ts-expect-error
     const properties = {
         get type() {
-            return this.prop("type");
+            return this.requiredProp("type");
         },
         set type(value) {
             this.setProp("type", value);
@@ -17,13 +17,13 @@ function executionUnitSchemaMixin(item) {
             this.setProp("application", value);
         },
         get executable() {
-            return this.prop("executable");
+            return this.requiredProp("executable");
         },
         set executable(value) {
             this.setProp("executable", value);
         },
         get flavor() {
-            return this.prop("flavor");
+            return this.requiredProp("flavor");
         },
         set flavor(value) {
             this.setProp("flavor", value);
@@ -35,7 +35,7 @@ function executionUnitSchemaMixin(item) {
             this.setProp("input", value);
         },
         get context() {
-            return this.prop("context");
+            return this.requiredProp("context");
         },
         set context(value) {
             this.setProp("context", value);

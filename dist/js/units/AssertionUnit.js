@@ -1,22 +1,33 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssertionUnit = void 0;
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const enums_1 = require("../enums");
 const AssertionUnitSchemaMixin_1 = require("../generated/AssertionUnitSchemaMixin");
-const BaseUnit_1 = require("./BaseUnit");
-class AssertionUnit extends BaseUnit_1.BaseUnit {
+const BaseUnit_1 = __importDefault(require("./BaseUnit"));
+class AssertionUnit extends BaseUnit_1.default {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/assertion");
+    }
     constructor(config) {
-        super({
+        const schema = {
             name: enums_1.UnitType.assertion,
-            type: enums_1.UnitType.assertion,
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             statement: "true",
             errorMessage: "assertion failed",
             ...config,
-        });
+            type: enums_1.UnitType.assertion,
+        };
+        super(schema);
     }
     getHashObject() {
         return { statement: this.statement, errorMessage: this.errorMessage };
     }
 }
-exports.AssertionUnit = AssertionUnit;
 (0, AssertionUnitSchemaMixin_1.assertionUnitSchemaMixin)(AssertionUnit.prototype);
+exports.default = AssertionUnit;

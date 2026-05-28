@@ -9,5 +9,9 @@ class IPathFormDataManager extends PointsPathFormDataProvider_1.default {
         super(...arguments);
         this.name = "ipath";
     }
+    static createFromUnitContext(unitContext, externalContext) {
+        const contextItem = this.findContextItem(unitContext, "ipath");
+        return new IPathFormDataManager(contextItem, externalContext);
+    }
 }
 exports.default = IPathFormDataManager;

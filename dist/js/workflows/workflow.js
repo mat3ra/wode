@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Workflow = void 0;
 /* eslint-disable max-classes-per-file */
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const hash_1 = require("@mat3ra/code/dist/js/entity/mixins/hash");
 const workflow_json_1 = __importDefault(require("@mat3ra/esse/dist/js/schema/workflow.json"));
 const ide_1 = require("@mat3ra/ide");
 const mode_1 = require("@mat3ra/mode");
@@ -22,7 +23,7 @@ const utils_2 = require("../utils");
 const default_1 = __importDefault(require("./default"));
 const relaxation_1 = require("./relaxation");
 const { MODEL_NAMES } = mode_1.tree;
-class BaseWorkflow extends (0, mixwith_1.mix)(entity_1.NamedDefaultableRepetitionContextAndRenderInMemoryEntity).with(ide_1.ComputedEntityMixin, relaxation_1.RelaxationLogicMixin) {
+class BaseWorkflow extends (0, mixwith_1.mix)(entity_1.NamedDefaultableRepetitionContextAndRenderInMemoryEntity).with(ide_1.ComputedEntityMixin, relaxation_1.RelaxationLogicMixin, hash_1.HashedEntityMixin) {
 }
 class Workflow extends BaseWorkflow {
     constructor(config, _Subworkflow = subworkflow_1.Subworkflow, _UnitFactory = factory_1.UnitFactory, _Workflow = Workflow, _MapUnit = units_1.MapUnit) {
@@ -296,16 +297,16 @@ class Workflow extends BaseWorkflow {
         return subworkflowsList;
     }
     /**
-     * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units and subworkflows.
      * units and subworkflows must be sorted topologically before hashing (already sorted).
      */
-    calculateHash() {
-        const meaningfulFields = {
+    getHashObject() {
+        return {
             units: underscore_1.default.map(this.units, (u) => u.calculateHash()).join(),
             subworkflows: underscore_1.default.map(this.subworkflows, (sw) => sw.calculateHash()).join(),
             workflows: underscore_1.default.map(this.workflows, (w) => w.calculateHash()).join(),
         };
-        return utils_1.Utils.hash.calculateHashFromObject(meaningfulFields);
     }
 }
 exports.Workflow = Workflow;

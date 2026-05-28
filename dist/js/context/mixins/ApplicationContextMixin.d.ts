@@ -1,10 +1,10 @@
-import type { Application } from "@mat3ra/ade";
+import type { ApplicationSchema } from "@mat3ra/esse/dist/js/types";
 import type ContextProvider from "../providers/base/ContextProvider";
 export type ApplicationContextMixin = {
-    readonly application: Application;
+    application: ApplicationSchema;
     initApplicationContextMixin(externalContext: ApplicationExternalContext): void;
 };
 export type ApplicationExternalContext = {
-    application?: Application;
+    application: ApplicationSchema;
 };
-export declare function applicationContextMixin(item: ContextProvider): void;
+export default function applicationContextMixin(item: ContextProvider): void;

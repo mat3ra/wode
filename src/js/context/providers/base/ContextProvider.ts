@@ -1,106 +1,149 @@
-/*
- * @summary This is a standalone class that contains "data" for a property with "name". Helps facilitate UI logic.
- *          Can be initialized from context when user edits are present:
- *          - user edits the corresponding property, eg. "kpath"
- *          - isKpathEdited is set to `true`
- *          - context property is updated for the parent entity (eg. Unit) in a way that persists in Redux state
- *          - new entity inherits the "data" through "context" field in config
- *          - `extraData` field is used to store any other data that should be passed from one instance of provider
- *             to next one, for example data about material to track when it is changed.
- * @notes   Should hold static data only (see `setData` method), no classes or functions
- */
-import { ContextProviderSchema } from "@mat3ra/esse/dist/js/types";
+import { type ContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
-export interface ContextProviderInstance {
-    constructor: typeof ContextProvider;
-    config: ContextProviderSchema;
-}
+export type UnitContext = ContextItemSchema[];
+export type ContextName = ContextItemSchema["name"];
+export type ContextExtraData = ContextItemSchema["extraData"];
+export type ContextData = ContextItemSchema["data"];
 
-export type ContextProviderConfig<
-    N extends string = string,
-    D extends object = object,
-    ED extends object = object,
+export type ContextItem<
+    D extends ContextData = ContextData,
+    ED extends ContextExtraData = ContextExtraData,
 > = {
-    name: N;
-    data?: D;
-    extraData?: ED;
-    domain?: string;
-    entityName?: EntityName;
-    isEdited?: boolean;
-};
-
-export type ContextItem<D extends object = object, ED extends object = object> = {
     data?: D;
     extraData?: ED;
     isEdited?: boolean;
 };
 
-export type ExtendedContextItem<
-    N extends string = string,
-    D extends object = object,
-    ED extends object = object,
-> = ContextItem<D, ED> & {
-    name: N;
-    isEdited: boolean;
-};
+/** Context item with template-facing `data` (may be a superset of persisted `S["data"]`). */
+export type ContextItemForRendering<
+    S extends ContextItemSchema = ContextItemSchema,
+    R = S["data"],
+> = Omit<S, "data"> & { data: R };
 
 export type Domain = "executable" | "important";
 
 export type EntityName = "unit" | "subworkflow";
 
-export type ExternalContext = object;
+/** Minimal bound for provider external context; the full contract is ExternalContext in context/providers/index.ts */
+export type BaseExternalContext = object;
 
+/**
+ * Context providers expose three data layers. Keep them separate.
+ *
+ *   1. Persistent data — user input / defaults. Stored in the DB as the context item's `data`,
+ *      and bound to RJSForm as `formData`.
+ *        API: `getData()` / `setData(data)` / `getContextItemData()`
+ *
+ *   2. Patched persistent (rendering) data — persistent data plus fields derived from external
+ *      context (material, application, …) that must NOT be stored or shown in the form.
+ *      Default = identity, override `patchForRendering` when the template needs extra fields.
+ *        API: `getDataForRendering()` / `getContextItemDataForRendering()`
+ *      If the rendering shape is a proper superset of the persistent shape, declare it via the
+ *      third generic `DataForRendering` and pair with a dedicated ESSE schema (see
+ *      `PointsPathFormDataProvider` + `points_path_data_provider_rendering.json`).
+ *
+ *   3. Full rendering context — `{ ...patchedItemByName, ...externalContext }` fed to Jinja.
+ *      Built by `ExecutionUnit.render` from `getContextItemDataForRendering()` results.
+ *
+ * Rules:
+ *   - Never bake derived fields into `setData`/`getDefaultData` just to reach templates.
+ *   - `setData` may normalize legacy payloads to the current persistent schema.
+ *   - `ExecutionUnit.render` MUST call `getContextItemData()` for `this.context` (DB) and
+ *     `getContextItemDataForRendering()` for `this.renderingContext` (Jinja) separately.
+ *
+ * See `.cursor/rules/context-provider-data-layers.mdc` for the full guidance.
+ */
 abstract class ContextProvider<
-    N extends string = string,
-    D extends object = object,
-    ED extends object = object,
-    EC extends ExternalContext = ExternalContext,
-    // eslint-disable-next-line prettier/prettier
-> implements ContextProviderConfig<N, D, ED> {
-    abstract name: N;
+    S extends ContextItemSchema = ContextItemSchema,
+    EC extends BaseExternalContext = BaseExternalContext,
+    /** Data passed to templates; defaults to persisted `S["data"]` (identity `patchForRendering`). */
+    DataForRendering = S["data"],
+> {
+    abstract name: S["name"];
 
     abstract readonly domain: Domain;
 
     abstract readonly entityName: EntityName;
 
-    protected abstract getDefaultData(): D;
+    protected abstract getDefaultData(): S["data"];
 
-    data?: D;
+    protected data?: S["data"];
 
-    readonly extraData?: ED;
+    /** Seeded from persisted context; material providers refresh via `updateMaterialHash()`. */
+    extraData?: S["extraData"];
 
     readonly externalContext: EC;
 
     isEdited: boolean;
 
-    constructor(contextItem: ContextItem<D, ED>, externalContext: EC) {
+    constructor(contextItem: Partial<S>, externalContext: EC) {
         this.externalContext = externalContext;
-        this.extraData = contextItem.extraData;
         this.isEdited = contextItem.isEdited || false;
 
-        this.setData(contextItem.data);
+        if (contextItem.data !== undefined) {
+            this.data = Utils.clone.deepClone(contextItem.data);
+        }
+
+        if (contextItem.extraData !== undefined) {
+            this.extraData = Utils.clone.deepClone(contextItem.extraData);
+        }
     }
 
     setIsEdited(isEdited: boolean) {
         this.isEdited = isEdited;
     }
 
-    getData() {
-        return this.isEdited && this.data ? this.data : this.getDefaultData();
+    getData(): S["data"] {
+        if (this.data !== undefined) {
+            return Utils.clone.deepClone(this.data);
+        }
+        return this.getDefaultData();
     }
 
-    setData(data?: D) {
-        this.data = data ? Utils.clone.deepClone(data) : undefined;
+    setData(data: S["data"]) {
+        this.data = Utils.clone.deepClone(data);
     }
 
-    getContextItem(): ExtendedContextItem<N, D, ED> {
+    /**
+     * Derive template-facing `data` from persisted `data`. Override when the template needs fields
+     * that must not be stored (e.g. coordinates from symmetry point names + lattice).
+     */
+    // eslint-disable-next-line class-methods-use-this
+    protected patchForRendering(data: S["data"]): DataForRendering {
+        return data as DataForRendering;
+    }
+
+    getDataForRendering(): DataForRendering {
+        return this.patchForRendering(this.getData());
+    }
+
+    getContextItemData(): S {
         return {
             name: this.name,
             isEdited: this.isEdited,
             data: this.getData(),
             extraData: this.extraData,
+        } as S;
+    }
+
+    getContextItemDataForRendering(): ContextItemForRendering<S, DataForRendering> {
+        return {
+            ...this.getContextItemData(),
+            data: this.getDataForRendering(),
         };
+    }
+
+    /**
+     * Helper method to find a context item from a unit context array by name.
+     * Returns a partial schema object that can be safely passed to constructors.
+     */
+    protected static findContextItem<S extends ContextItemSchema>(
+        unitContext: UnitContext,
+        contextName: ContextName,
+    ): Partial<S> {
+        const item = unitContext.find((item): item is S => item.name === contextName);
+        return item || {};
     }
 }
 

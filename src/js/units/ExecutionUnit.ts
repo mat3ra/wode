@@ -1,203 +1,274 @@
-import { Application, ApplicationRegistry as AdeRegistry, Executable, Flavor } from "@mat3ra/ade";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ExecutableSchema,
-    ExecutionUnitInputItemSchema,
-    ExecutionUnitSchemaBase,
-    FlavorSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { ExecutionUnitInputItemSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import { ApplicationRegistry, applicationVersionSatisfiesSupportedRange } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
-import { contextMixin } from "../context/mixins/ContextAndRenderFieldsMixin";
 import {
-    type ImportantSettingsProvider,
-    importantSettingsProviderMixin,
-} from "../context/mixins/ImportantSettingsProviderMixin";
-import type { ContextItem } from "../context/providers/base/ContextProvider";
-import ExecutionUnitInput from "../ExecutionUnitInput";
+    type AnyContextProvider,
+    type ExternalContext,
+    createProvider,
+} from "../context/providers";
+import type ConvergenceParameter from "../convergence/ConvergenceParameter";
+import { UnitType } from "../enums";
 import {
     type ExecutionUnitSchemaMixin,
     executionUnitSchemaMixin,
 } from "../generated/ExecutionUnitSchemaMixin";
-import { BaseUnit } from "./BaseUnit";
+import BaseUnit from "./BaseUnit";
+import ExecutionUnitInput from "./ExecutionUnitInput";
 
-type Schema = ExecutionUnitSchemaBase;
-type Base = typeof BaseUnit &
-    Constructor<ExecutionUnitSchemaMixin> &
-    Constructor<ImportantSettingsProvider>;
+type Schema = ExecutionUnitSchema;
 
-interface SetApplicationProps {
-    application: Application;
-    executable?: Executable | ExecutableSchema;
-    flavor?: Flavor | FlavorSchema;
-}
+type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 
-interface SetExecutableProps {
-    executable?: Executable | ExecutableSchema;
-    flavor?: Flavor | FlavorSchema;
-}
+export type ExecutionUnitConfig = Omit<Partial<Schema>, "application"> & SetApplicationProps;
 
-export type ExecutionUnitSchema = Schema;
+type SetApplicationProps = Pick<Schema, "application"> &
+    Pick<Partial<Schema>, "executable" | "flavor"> &
+    SetExecutableProps;
 
-export class ExecutionUnit extends (BaseUnit as Base) implements Schema {
-    applicationInstance!: Application;
+type SetExecutableProps = {
+    executableName?: string;
+    flavorName?: string;
+};
 
-    executableInstance!: Executable;
-
-    flavorInstance!: Flavor;
-
+class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
 
-    renderingContext: ContextItem[] = [];
+    renderingContext: Partial<ExternalContext> = {};
 
-    constructor(config: Schema) {
-        super(config);
+    contextProvidersInstances: AnyContextProvider[] = [];
 
-        const { application, executable, flavor } = config;
-        const applicationInstance = AdeRegistry.createApplication(application);
-        const executableInstance = AdeRegistry.getExecutableByConfig(application.name, executable);
-        const flavorInstance = AdeRegistry.getFlavorByConfig(executableInstance, flavor);
+    declare toJSON: () => Schema & AnyObject;
 
-        if (!flavorInstance) {
-            throw new Error("Flavor is not set");
-        }
+    declare _json: Schema & AnyObject;
 
-        this.setApplication({
-            application: applicationInstance,
-            executable: executableInstance,
-            flavor: flavorInstance,
+    static get jsonSchema() {
+        return JSONSchemasInterface.getSchemaById("workflow/unit/execution");
+    }
+
+    constructor(config: ExecutionUnitConfig) {
+        const schema = {
+            name: UnitType.execution,
+            type: UnitType.execution as Schema["type"],
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            context: [],
+            ...config,
+        };
+        super(schema);
+
+        this.setApplication(config);
+
+        this.name = this.name || this.flavor.name || "";
+    }
+
+    setApplication({
+        application,
+        executable,
+        flavor,
+        executableName,
+        flavorName,
+    }: SetApplicationProps) {
+        const currentExecutable = this.prop<Schema["executable"]>("executable");
+        const currentFlavor = this.prop<Schema["flavor"]>("flavor");
+
+        this.setProp("application", application);
+        this.setExecutable({
+            executableName: executableName ?? executable?.name ?? currentExecutable?.name,
+            flavorName: flavorName ?? flavor?.name ?? currentFlavor?.name,
         });
-
-        this.name = this.name || this.flavor?.name || "";
     }
 
-    setApplication({ application, executable, flavor }: SetApplicationProps) {
-        this.applicationInstance = application;
-        this.setProp("application", application.toJSON());
-        this.setExecutable({ executable, flavor });
-    }
+    setExecutable({ executableName, flavorName }: SetExecutableProps) {
+        const executable = new ApplicationRegistry()
+            .getExecutablesByApplication(this.application)
+            .find((executable) => {
+                return executableName ? executable.name === executableName : executable.isDefault;
+            });
 
-    setExecutable({ executable, flavor }: SetExecutableProps) {
-        const defaultExecutable = AdeRegistry.getExecutableByName(this.application.name);
-        const instance =
-            executable instanceof Executable
-                ? executable
-                : new Executable(executable ?? defaultExecutable.toJSON());
-
-        this.allowedResults = instance.results;
-        this.allowedMonitors = instance.monitors;
-        this.allowedPostProcessors = instance.postProcessors;
-
-        this.setProp("executable", instance.toJSON());
-        this.setFlavor(flavor);
-    }
-
-    setFlavor(flavor?: Flavor | FlavorSchema) {
-        const defaultFlavor = AdeRegistry.getFlavorByConfig(this.executableInstance);
-        const instance =
-            flavor instanceof Flavor ? flavor : new Flavor(flavor ?? defaultFlavor?.toJSON());
-
-        if (!instance) {
-            throw new Error("Flavor is not found for executable");
+        if (!executable) {
+            throw new Error(`Executable ${executableName} not found`);
         }
 
-        this.flavorInstance = instance;
-        this.defaultMonitors = instance.monitors;
-        this.defaultResults = instance.results;
-        this.defaultPostProcessors = instance.postProcessors;
+        this.setProp("executable", executable);
+        this.setFlavor(flavorName);
+    }
 
-        this.setProp("flavor", instance.toJSON());
-        this.setRuntimeItemsToDefaultValues();
+    setFlavor(flavorName?: string) {
+        const flavor = new ApplicationRegistry()
+            .getFlavorsByApplicationExecutable(this.application, this.executable)
+            .find((flavor) => (flavorName ? flavor.name === flavorName : flavor.isDefault));
+
+        if (!flavor) {
+            throw new Error(`Flavor ${flavorName} not found`);
+        }
+
+        this.defaultResults = flavor.results;
+        this.defaultMonitors = flavor.monitors;
+        this.defaultPreProcessors = flavor.preProcessors;
+        this.defaultPostProcessors = flavor.postProcessors;
+
+        // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
+        const previousFlavor = this.prop<Schema["flavor"]>("flavor");
+
+        if (previousFlavor?.name !== flavor.name) {
+            this.results = flavor.results;
+            this.monitors = flavor.monitors;
+            this.preProcessors = flavor.preProcessors;
+            this.postProcessors = flavor.postProcessors;
+        }
+
+        this.setProp("flavor", flavor);
         this.setDefaultInput();
     }
 
-    setDefaultInput() {
-        const inputs = AdeRegistry.getInput(this.flavorInstance);
-        this.inputInstances = inputs.map(ExecutionUnitInput.createFromTemplate);
-    }
-
-    get allContextProviders() {
-        return this.inputInstances.map((input) => input.contextProvidersInstances).flat();
-    }
-
-    get contextProviders() {
-        return this.allContextProviders.filter((p) => p.entityName === "unit");
-    }
-
-    /** Update rendering context and persistent context
-     * Note: this function is sometimes being called without passing a context!
+    /**
+     * Persisted `input[].template` must match the current application/executable (and optional
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from
+     * ApplicationRegistry.
      */
-    render(context: AnyObject = {}) {
-        this.renderingContext = { ...this.renderingContext, ...context };
+    private isPersistedInputItemCompatible(item: ExecutionUnitInputItemSchema): boolean {
+        const { template } = item;
 
-        const newInput: ExecutionUnitInputItemSchema[] = [];
-        const newPersistentContext: ContextItem[] = [];
-        const newRenderingContext: ContextItem[] = [];
+        if (
+            template.applicationName !== this.application.name ||
+            template.executableName !== this.executable.name
+        ) {
+            return false;
+        }
 
-        this.inputInstances.forEach((input) => {
-            input.setContext(this.renderingContext);
-            input.render();
+        if (
+            !applicationVersionSatisfiesSupportedRange(
+                this.application.version,
+                template.applicationVersion ?? "",
+            )
+        ) {
+            return false;
+        }
 
-            const inputJSON = input.toJSON();
-            const context = input.getFullContext();
-
-            newInput.push(inputJSON);
-            newRenderingContext.push(...context);
-            newPersistentContext.push(...context.filter((c) => c.isEdited));
-        });
-
-        this.input = newInput;
-        this.renderingContext = newRenderingContext;
-        this.context = newPersistentContext;
+        return true;
     }
 
     /**
-     * @summary Calculates hash on unit-specific fields.
-     * The meaningful fields of processing unit are operation, flavor and input at the moment.
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(application, flavor)`),
+     * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
+     * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
+     * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
+     * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
+    setDefaultInput() {
+        const driverTemplates = new ApplicationRegistry().getInput(this.application, this.flavor);
+        const persisted = Array.isArray(this.input) ? this.input : [];
+
+        this.inputInstances = driverTemplates.map((driverTemplate, index) => {
+            const persistedItem =
+                persisted.find((item) => item?.template?.name === driverTemplate.name) ??
+                persisted[index];
+
+            if (persistedItem && this.isPersistedInputItemCompatible(persistedItem)) {
+                return new ExecutionUnitInput(persistedItem);
+            }
+
+            return ExecutionUnitInput.createFromTemplate(driverTemplate);
+        });
+
+        this.input = this.inputInstances.map((input) => input.toJSON());
+    }
+
+    render(externalContext: ExternalContext, convergence?: ConvergenceParameter) {
+        this.contextProvidersInstances = this.getContextProvidersInstances(
+            externalContext,
+            convergence,
+        );
+
+        this.saveContext(externalContext);
+    }
+
+    private getContextProvidersInstances(
+        externalContext: ExternalContext,
+        convergence?: ConvergenceParameter,
+    ) {
+        const uniqueContextProviderNames = [
+            ...new Set(
+                this.input
+                    .map((input) => {
+                        return input.template.contextProviders.map((provider) => {
+                            return provider.name;
+                        });
+                    })
+                    .flat(),
+            ),
+        ];
+
+        // TODO: kgrid should be abstracted and selected by user
+        const parameterToContextProviderMap = {
+            N_k: "kgrid",
+            N_k_nonuniform: "kgrid",
+        } as const;
+
+        return uniqueContextProviderNames
+            .map((name) => {
+                return createProvider(name, this.context, externalContext);
+            })
+            .map((provider) => {
+                if (
+                    convergence &&
+                    provider.name === parameterToContextProviderMap[convergence.name]
+                ) {
+                    provider.applyConvergenceParameter(convergence);
+                }
+                return provider;
+            });
+    }
+
+    savePersistentContext() {
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
+        this.context = persistentItems.filter((c) => c.isEdited);
+    }
+
+    saveRenderingContext(externalContext: ExternalContext) {
+        const renderingItems = this.contextProvidersInstances.map((p) =>
+            p.getContextItemDataForRendering(),
+        );
+        this.renderingContext = {
+            ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
+            ...externalContext,
+        };
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
+    }
+
+    saveContext(externalContext: ExternalContext) {
+        this.savePersistentContext();
+        this.saveRenderingContext(externalContext);
+    }
+
     getHashObject() {
+        const { input, flavor, application, executable } = this.toJSON();
+
         return {
             ...super.getHashObject(),
-            application: Utils.specific.removeTimestampableKeysFromConfig(
-                this.applicationInstance.toJSON(),
-            ),
-            executable: Utils.specific.removeTimestampableKeysFromConfig(
-                this.executableInstance.toJSON(),
-            ),
-            flavor: this.flavorInstance
-                ? Utils.specific.removeTimestampableKeysFromConfig(this.flavorInstance.toJSON())
-                : undefined,
+            application,
+            executable,
+            flavor,
             input: Utils.hash.calculateHashFromObject(
-                this.input.map((i) => {
+                input.map(({ template }) => {
                     return Utils.str.removeEmptyLinesFromString(
-                        Utils.str.removeCommentsFromSourceCode(i.template.content),
+                        Utils.str.removeCommentsFromSourceCode(template.content),
                     );
                 }),
             ),
         };
     }
-
-    // toJSON() {
-    //     const json = super.toJSON() as ExecutionUnitSchemaBase & AnyObject;
-
-    //     // Remove results from executable; TODO: why do we need this?
-    //     if (json.executable) {
-    //         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    //         const { results: _, ...executable } = json.executable;
-
-    //         return {
-    //             ...json,
-    //             executable: {
-    //                 ...executable,
-    //             },
-    //         };
-    //     }
-
-    //     return json;
-    // }
 }
 
 executionUnitSchemaMixin(ExecutionUnit.prototype);
-contextMixin(ExecutionUnit.prototype);
-importantSettingsProviderMixin(ExecutionUnit.prototype);
+
+export default ExecutionUnit;

@@ -1,35 +1,47 @@
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { PointsPathDataProviderSchema } from "@mat3ra/esse/dist/js/types";
+import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
+import type {
+    PathContextItemSchema,
+    PointsPathDataProviderRenderingSchema,
+    PointsPathDataProviderSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { type ReciprocalLattice, Made } from "@mat3ra/made";
-import s from "underscore.string";
 
-import {
+import applicationContextMixin, {
     type ApplicationContextMixin,
-    applicationContextMixin,
+    type ApplicationExternalContext,
 } from "../../mixins/ApplicationContextMixin";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
 } from "../../mixins/MaterialContextMixin";
-import type { ContextItem, Domain } from "../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../base/JSONSchemaDataProvider";
 
 const defaultPoint = "Г" as const;
 const defaultSteps = 10 as const;
 
-type Data = PointsPathDataProviderSchema; // same as KPointCoordinates
-type DataItem = Data[0];
-type ExternalContext = JinjaExternalContext & MaterialExternalContext & ApplicationContextMixin;
-type Base = typeof JSONSchemaDataProvider<string, Data> &
-    Constructor<MaterialContextMixin> &
-    Constructor<ApplicationContextMixin>;
+export type PointsPathFormDataProviderData = PointsPathDataProviderSchema;
+export type PointsPathFormDataProviderRenderingData = PointsPathDataProviderRenderingSchema;
+export type PointsPathFormDataProviderExternalContext = JinjaExternalContext &
+    MaterialExternalContext &
+    ApplicationExternalContext;
+
+type Data = PointsPathFormDataProviderData;
+type RenderingData = PointsPathFormDataProviderRenderingData;
+type RenderingDataItem = RenderingData[0];
+type Schema = PathContextItemSchema;
+type ExternalContext = PointsPathFormDataProviderExternalContext;
 
 const jsonSchemaId = "context-providers-directory/points-path-data-provider";
 
+type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext, RenderingData> &
+    Constructor<MaterialContextMixin> &
+    Constructor<ApplicationContextMixin>;
+
 abstract class MixinsContextProvider extends (JSONSchemaDataProvider as Base) {
-    constructor(contextItem: ContextItem<Data>, externalContext: ExternalContext) {
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
         this.initApplicationContextMixin(externalContext);
@@ -39,10 +51,12 @@ abstract class MixinsContextProvider extends (JSONSchemaDataProvider as Base) {
 materialContextMixin(MixinsContextProvider.prototype);
 applicationContextMixin(MixinsContextProvider.prototype);
 
-abstract class PointsPathFormDataProvider<N extends string> extends MixinsContextProvider {
+abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends MixinsContextProvider {
     abstract name: N;
 
-    readonly domain: Domain = "important";
+    readonly domain = "important" as const;
+
+    readonly entityName = "unit" as const;
 
     private reciprocalLattice: ReciprocalLattice;
 
@@ -50,31 +64,31 @@ abstract class PointsPathFormDataProvider<N extends string> extends MixinsContex
 
     readonly is2PIBA: boolean = false;
 
-    constructor(config: ContextItem<Data>, externalContext: ExternalContext) {
+    constructor(config: Partial<Schema>, externalContext: ExternalContext) {
         super(config, externalContext);
         this.reciprocalLattice = new Made.ReciprocalLattice(this.material.lattice);
         this.useExplicitPath = this.application.name === "vasp";
     }
 
-    getDefaultData() {
+    getDefaultData(): Data {
         return this.reciprocalLattice.defaultKpointPath as Data;
     }
 
     updateMaterialHash() {
+        const previousMaterialHash = this.extraData?.materialHash;
+
         super.updateMaterialHash();
 
-        // Workaround: Material.createDefault() used to initiate workflow reducer and hence here too
-        //  does not have an id. Here we catch when such material is used and avoid resetting isEdited
-        const isMaterialCreatedDefault = !this.material.id;
-        const isMaterialUpdated = this.extraData?.materialHash !== this.material.hash;
-
-        if (isMaterialUpdated || isMaterialCreatedDefault) {
+        // Reset path only when the material actually changed (hash). Do not clear `isEdited` just
+        // because the material has no id (common default material in designers): that ran every
+        // render, wiped isEdited, and savePersistentContext dropped k-path/Q-path from `unit.context`.
+        if (previousMaterialHash && previousMaterialHash !== this.material.hash) {
             this.isEdited = false;
         }
     }
 
-    get jsonSchema() {
-        return JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
+    get jsonSchema(): JSONSchema {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             "items.properties.point": {
                 default: defaultPoint,
                 enum: this.reciprocalLattice.symmetryPoints.map((x) => x.point),
@@ -83,10 +97,27 @@ abstract class PointsPathFormDataProvider<N extends string> extends MixinsContex
                 default: defaultSteps,
             },
         });
+
+        if (!jsonSchema) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        return jsonSchema;
     }
 
-    setData(path: Data) {
-        const rawData: DataItem[] = path.map((pathItem) => {
+    readonly uiSchemaStyled = {
+        items: {
+            point: {},
+            steps: {},
+        },
+    };
+
+    protected patchForRendering(data: Data): RenderingData {
+        return this.addCoordinates(data);
+    }
+
+    private addCoordinates(path: Data): RenderingData {
+        const rawData: RenderingDataItem[] = path.map((pathItem) => {
             const point = this.reciprocalLattice.symmetryPoints.find((sp) => {
                 return sp.point === pathItem.point;
             });
@@ -98,25 +129,25 @@ abstract class PointsPathFormDataProvider<N extends string> extends MixinsContex
 
         const processedData = this.useExplicitPath ? this.convertToExplicitPath(rawData) : rawData;
 
-        const newData = processedData.map((p) => {
+        const mapped = processedData.map((p) => {
             const coordinates = this.is2PIBA
                 ? this.reciprocalLattice.getCartesianCoordinates(p.coordinates)
                 : p.coordinates;
 
             return {
                 ...p,
-                coordinates: coordinates.map((c) => +s.sprintf("%14.9f", c)),
+                coordinates: coordinates.map((c) => Number(c.toFixed(9))),
             };
-        }) as Data;
+        });
 
-        super.setData(newData);
+        return mapped as RenderingData;
     }
 
     // Initially, path contains symmetry points with steps counts.
     // This function explicitly calculates each point between symmetry points by step counts.
     // eslint-disable-next-line class-methods-use-this
-    private convertToExplicitPath(path: DataItem[]): DataItem[] {
-        return path.reduce<DataItem[]>((acc, startPoint, index) => {
+    private convertToExplicitPath(path: RenderingDataItem[]): RenderingDataItem[] {
+        return path.reduce<RenderingDataItem[]>((acc, startPoint, index) => {
             const nextPoint = path[index + 1];
 
             if (!nextPoint) {
@@ -131,7 +162,6 @@ abstract class PointsPathFormDataProvider<N extends string> extends MixinsContex
 
             const steps = 1;
 
-            // TODO-QUESTION: confirm that "point" property should be present after transformation; point was missing in original implementation
             acc.push(
                 {
                     steps,
@@ -141,7 +171,6 @@ abstract class PointsPathFormDataProvider<N extends string> extends MixinsContex
                 ...middlePoints.map((coordinates) => ({
                     steps,
                     coordinates,
-                    // TODO-QUESTION: is this correct?
                     point: startPoint.point,
                 })),
             );

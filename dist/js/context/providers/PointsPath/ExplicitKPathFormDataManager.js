@@ -10,5 +10,9 @@ class ExplicitKPathFormDataManager extends PointsPathFormDataProvider_1.default 
         this.name = "explicitKPath";
         this.useExplicitPath = true;
     }
+    static createFromUnitContext(unitContext, externalContext) {
+        const contextItem = this.findContextItem(unitContext, "explicitKPath");
+        return new ExplicitKPathFormDataManager(contextItem, externalContext);
+    }
 }
 exports.default = ExplicitKPathFormDataManager;

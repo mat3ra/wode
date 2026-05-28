@@ -34,11 +34,6 @@ export class Workflow extends BaseWorkflow {
                 description: string;
                 type: string;
             };
-            isDefault: {
-                description: string;
-                type: string;
-                default: boolean;
-            };
             metadata: {
                 type: string;
             };
@@ -51,6 +46,10 @@ export class Workflow extends BaseWorkflow {
                 };
             };
             isUsingDataset: {
+                description: string;
+                type: string;
+            };
+            isMultiMaterial: {
                 description: string;
                 type: string;
             };
@@ -394,6 +393,7 @@ export class Workflow extends BaseWorkflow {
                                         input: {
                                             type: string;
                                             items: {
+                                                type: string;
                                                 oneOf: ({
                                                     $schema: string;
                                                     title: string;
@@ -402,39 +402,18 @@ export class Workflow extends BaseWorkflow {
                                                         type: {
                                                             const: string;
                                                         };
-                                                        ids: {
-                                                            description: string;
-                                                            type: string;
-                                                            items: {
-                                                                type: string;
-                                                            };
-                                                        };
-                                                        collection?: undefined;
-                                                        draft?: undefined;
-                                                        objectData?: undefined;
-                                                        overwrite?: undefined;
-                                                        pathname?: undefined;
-                                                        basename?: undefined;
-                                                        filetype?: undefined;
-                                                    };
-                                                    required: string[];
-                                                } | {
-                                                    $schema: string;
-                                                    title: string;
-                                                    type: string;
-                                                    properties: {
-                                                        type: {
-                                                            const: string;
-                                                        };
-                                                        collection: {
+                                                        endpoint: {
                                                             description: string;
                                                             type: string;
                                                         };
-                                                        draft: {
+                                                        endpoint_options: {
                                                             description: string;
                                                             type: string;
                                                         };
-                                                        ids?: undefined;
+                                                        name: {
+                                                            description: string;
+                                                            type: string;
+                                                        };
                                                         objectData?: undefined;
                                                         overwrite?: undefined;
                                                         pathname?: undefined;
@@ -499,9 +478,9 @@ export class Workflow extends BaseWorkflow {
                                                             description: string;
                                                             type: string;
                                                         };
-                                                        ids?: undefined;
-                                                        collection?: undefined;
-                                                        draft?: undefined;
+                                                        endpoint?: undefined;
+                                                        endpoint_options?: undefined;
+                                                        name?: undefined;
                                                     };
                                                 })[];
                                                 discriminator: {
@@ -509,7 +488,6 @@ export class Workflow extends BaseWorkflow {
                                                 };
                                                 $schema?: undefined;
                                                 title?: undefined;
-                                                type?: undefined;
                                                 required?: undefined;
                                                 properties?: undefined;
                                             };
@@ -1102,11 +1080,19 @@ export class Workflow extends BaseWorkflow {
                                                     description: string;
                                                     type: string;
                                                 };
+                                                isDefaultVersion: {
+                                                    description: string;
+                                                    type: string;
+                                                };
                                                 hasAdvancedComputeOptions: {
                                                     description: string;
                                                     type: string;
                                                 };
                                                 isLicensed: {
+                                                    description: string;
+                                                    type: string;
+                                                };
+                                                isUsingMaterial: {
                                                     description: string;
                                                     type: string;
                                                 };
@@ -1143,76 +1129,13 @@ export class Workflow extends BaseWorkflow {
                                                     type: string;
                                                     default: boolean;
                                                 };
-                                                preProcessors: {
+                                                applicationName: {
                                                     description: string;
                                                     type: string;
-                                                    items: {
-                                                        $schema: string;
-                                                        title: string;
-                                                        type: string;
-                                                        required: string[];
-                                                        properties: {
-                                                            name: {
-                                                                description: string;
-                                                                type: string;
-                                                            };
-                                                        };
-                                                    };
                                                 };
-                                                postProcessors: {
+                                                applicationVersion: {
                                                     description: string;
                                                     type: string;
-                                                    items: {
-                                                        $schema: string;
-                                                        title: string;
-                                                        type: string;
-                                                        required: string[];
-                                                        properties: {
-                                                            name: {
-                                                                description: string;
-                                                                type: string;
-                                                            };
-                                                        };
-                                                    };
-                                                };
-                                                monitors: {
-                                                    description: string;
-                                                    type: string;
-                                                    items: {
-                                                        $schema: string;
-                                                        title: string;
-                                                        type: string;
-                                                        required: string[];
-                                                        properties: {
-                                                            name: {
-                                                                description: string;
-                                                                type: string;
-                                                            };
-                                                        };
-                                                    };
-                                                };
-                                                results: {
-                                                    description: string;
-                                                    type: string;
-                                                    items: {
-                                                        $schema: string;
-                                                        title: string;
-                                                        type: string;
-                                                        required: string[];
-                                                        properties: {
-                                                            name: {
-                                                                description: string;
-                                                                type: string;
-                                                            };
-                                                        };
-                                                    };
-                                                };
-                                                applicationId: {
-                                                    description: string;
-                                                    type: string;
-                                                    items: {
-                                                        type: string;
-                                                    };
                                                 };
                                                 hasAdvancedComputeOptions: {
                                                     description: string;
@@ -1315,15 +1238,15 @@ export class Workflow extends BaseWorkflow {
                                                         };
                                                     };
                                                 };
-                                                executableId: {
-                                                    description: string;
-                                                    type: string;
-                                                };
                                                 executableName: {
                                                     description: string;
                                                     type: string;
                                                 };
                                                 applicationName: {
+                                                    description: string;
+                                                    type: string;
+                                                };
+                                                applicationVersion: {
                                                     description: string;
                                                     type: string;
                                                 };
@@ -1334,7 +1257,7 @@ export class Workflow extends BaseWorkflow {
                                                         $schema: string;
                                                         title: string;
                                                         type: string;
-                                                        additionalProperties: boolean;
+                                                        required: string[];
                                                         properties: {
                                                             templateId: {
                                                                 type: string;
@@ -1347,13 +1270,6 @@ export class Workflow extends BaseWorkflow {
                                                                 type: string;
                                                             };
                                                         };
-                                                    };
-                                                };
-                                                supportedApplicationVersions: {
-                                                    description: string;
-                                                    type: string;
-                                                    items: {
-                                                        type: string;
                                                     };
                                                 };
                                             };
@@ -1392,13 +1308,13 @@ export class Workflow extends BaseWorkflow {
                                                                 description: string;
                                                                 type: string;
                                                             };
+                                                            executableName: {
+                                                                type: string;
+                                                            };
                                                             applicationName: {
                                                                 type: string;
                                                             };
                                                             applicationVersion: {
-                                                                type: string;
-                                                            };
-                                                            executableName: {
                                                                 type: string;
                                                             };
                                                             contextProviders: {
@@ -1454,6 +1370,7 @@ export class Workflow extends BaseWorkflow {
                                                             enum?: undefined;
                                                         };
                                                         data: {
+                                                            type: string;
                                                             oneOf: ({
                                                                 $schema: string;
                                                                 title: string;
@@ -2111,7 +2028,6 @@ export class Workflow extends BaseWorkflow {
                                                             $schema?: undefined;
                                                             title?: undefined;
                                                             description?: undefined;
-                                                            type?: undefined;
                                                             properties?: undefined;
                                                             required?: undefined;
                                                             minItems?: undefined;
@@ -2336,12 +2252,6 @@ export class Workflow extends BaseWorkflow {
                                                                     steps: {
                                                                         type: string;
                                                                     };
-                                                                    coordinates: {
-                                                                        type: string;
-                                                                        items: {
-                                                                            type: string;
-                                                                        };
-                                                                    };
                                                                     paramType?: undefined;
                                                                     atomicSpecies?: undefined;
                                                                     atomicOrbital?: undefined;
@@ -2415,7 +2325,6 @@ export class Workflow extends BaseWorkflow {
                                                                     };
                                                                     point?: undefined;
                                                                     steps?: undefined;
-                                                                    coordinates?: undefined;
                                                                     hubbardUValue?: undefined;
                                                                     siteIndex?: undefined;
                                                                     atomicSpecies2?: undefined;
@@ -2476,7 +2385,6 @@ export class Workflow extends BaseWorkflow {
                                                                     };
                                                                     point?: undefined;
                                                                     steps?: undefined;
-                                                                    coordinates?: undefined;
                                                                     paramType?: undefined;
                                                                     value?: undefined;
                                                                     siteIndex?: undefined;
@@ -2560,7 +2468,6 @@ export class Workflow extends BaseWorkflow {
                                                                     };
                                                                     point?: undefined;
                                                                     steps?: undefined;
-                                                                    coordinates?: undefined;
                                                                     paramType?: undefined;
                                                                     value?: undefined;
                                                                     hubbardUValue?: undefined;
@@ -2620,7 +2527,6 @@ export class Workflow extends BaseWorkflow {
                                                                     };
                                                                     point?: undefined;
                                                                     steps?: undefined;
-                                                                    coordinates?: undefined;
                                                                     paramType?: undefined;
                                                                     atomicOrbital?: undefined;
                                                                     value?: undefined;
@@ -3302,6 +3208,9 @@ export class Workflow extends BaseWorkflow {
                                                         };
                                                     };
                                                 })[];
+                                                discriminator: {
+                                                    propertyName: string;
+                                                };
                                             };
                                         };
                                         subtype?: undefined;
@@ -3565,6 +3474,12 @@ export class Workflow extends BaseWorkflow {
                                                     data: {
                                                         description: string;
                                                         type: string;
+                                                        additionalProperties: boolean;
+                                                        properties: {
+                                                            searchText: {
+                                                                type: string;
+                                                            };
+                                                        };
                                                     };
                                                 };
                                             };
@@ -3603,6 +3518,12 @@ export class Workflow extends BaseWorkflow {
                                                     data: {
                                                         description: string;
                                                         type: string;
+                                                        additionalProperties: boolean;
+                                                        properties: {
+                                                            searchText: {
+                                                                type: string;
+                                                            };
+                                                        };
                                                     };
                                                 };
                                             };
@@ -3641,6 +3562,12 @@ export class Workflow extends BaseWorkflow {
                                                     data: {
                                                         description: string;
                                                         type: string;
+                                                        additionalProperties: boolean;
+                                                        properties: {
+                                                            searchText: {
+                                                                type: string;
+                                                            };
+                                                        };
                                                     };
                                                 };
                                             };
@@ -3679,6 +3606,12 @@ export class Workflow extends BaseWorkflow {
                                                 data: {
                                                     description: string;
                                                     type: string;
+                                                    additionalProperties: boolean;
+                                                    properties: {
+                                                        searchText: {
+                                                            type: string;
+                                                        };
+                                                    };
                                                 };
                                             };
                                         };
@@ -3694,8 +3627,20 @@ export class Workflow extends BaseWorkflow {
                                         const: string;
                                         enum?: undefined;
                                     };
-                                    subtype?: undefined;
-                                    method?: undefined;
+                                    subtype: {
+                                        type: string;
+                                        enum?: undefined;
+                                    };
+                                    functional: {
+                                        type: string;
+                                    };
+                                    method: {
+                                        type: string;
+                                        $schema?: undefined;
+                                        title?: undefined;
+                                        required?: undefined;
+                                        properties?: undefined;
+                                    };
                                 };
                             } | {
                                 $schema: string;
@@ -3708,6 +3653,7 @@ export class Workflow extends BaseWorkflow {
                                     };
                                     subtype: {
                                         enum: string[];
+                                        type?: undefined;
                                     };
                                     method: {
                                         $schema: string;
@@ -3730,9 +3676,16 @@ export class Workflow extends BaseWorkflow {
                                             data: {
                                                 description: string;
                                                 type: string;
+                                                additionalProperties: boolean;
+                                                properties: {
+                                                    searchText: {
+                                                        type: string;
+                                                    };
+                                                };
                                             };
                                         };
                                     };
+                                    functional?: undefined;
                                 };
                                 required: string[];
                                 definitions?: undefined;
@@ -3790,6 +3743,10 @@ export class Workflow extends BaseWorkflow {
                                     description: string;
                                     type: string;
                                 };
+                                isDefaultVersion: {
+                                    description: string;
+                                    type: string;
+                                };
                                 hasAdvancedComputeOptions: {
                                     description: string;
                                     type: string;
@@ -3798,7 +3755,14 @@ export class Workflow extends BaseWorkflow {
                                     description: string;
                                     type: string;
                                 };
+                                isUsingMaterial: {
+                                    description: string;
+                                    type: string;
+                                };
                             };
+                        };
+                        isMultiMaterial: {
+                            type: string;
                         };
                         isDraft: {
                             description: string;
@@ -4340,49 +4304,32 @@ export class Workflow extends BaseWorkflow {
                     required: string[];
                 };
             };
+            application: {
+                description: string;
+                type: string;
+                properties: {
+                    name: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            tags: {
+                description: string;
+                type: string;
+                items: {
+                    type: string;
+                };
+            };
         };
     };
     static usePredefinedIds: boolean;
-    static get defaultConfig(): {
-        name: string;
-        properties: never[];
-        subworkflows: {
-            _id: string;
-            application: {
-                name: string;
-                summary: string;
-                version: string;
-            };
-            model: {
-                method: {
-                    subtype: string;
-                    type: string;
-                };
-                subtype: string;
-                type: string;
-            };
-            name: string;
-            properties: never[];
-            units: never[];
-        }[];
-        workflows: never[];
-        units: {
-            _id: string;
-            flowchartId: string;
-            head: boolean;
-            monitors: never[];
-            postProcessors: never[];
-            preProcessors: never[];
-            results: never[];
-            type: string;
-            name: string;
-        }[];
-    };
+    static get defaultConfig(): import("@mat3ra/esse/dist/js/types").WorkflowSchema;
     static generateWorkflowId(name: any, properties?: null, subworkflows?: null, applicationName?: null): any;
     static fromSubworkflow(subworkflow: any, ClsConstructor?: typeof Workflow): Workflow;
     static fromSubworkflows(name: any, ClsConstructor?: typeof Workflow, ...subworkflows: any[]): Workflow;
-    constructor(config: any, _Subworkflow?: typeof Subworkflow, _UnitFactory?: typeof UnitFactory, _Workflow?: typeof Workflow, _MapUnit?: typeof MapUnit);
-    _Subworkflow: typeof Subworkflow;
+    constructor(config: any, _Subworkflow?: any, _UnitFactory?: typeof UnitFactory, _Workflow?: typeof Workflow, _MapUnit?: typeof MapUnit);
+    _Subworkflow: any;
     _UnitFactory: typeof UnitFactory;
     _Workflow: typeof Workflow;
     _MapUnit: typeof MapUnit;
@@ -4439,14 +4386,18 @@ export class Workflow extends BaseWorkflow {
     findSubworkflowById(id: any): any;
     get allSubworkflows(): any[];
     /**
-     * @summary Calculates hash of the workflow. Meaningful fields are units and subworkflows.
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units and subworkflows.
      * units and subworkflows must be sorted topologically before hashing (already sorted).
      */
-    calculateHash(): string;
+    getHashObject(): {
+        units: string;
+        subworkflows: string;
+        workflows: string;
+    };
 }
 declare class BaseWorkflow {
 }
-import { Subworkflow } from "../subworkflows/subworkflow";
 import { UnitFactory } from "../units/factory";
 import { MapUnit } from "../units";
 import lodash from "lodash";

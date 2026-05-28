@@ -3,114 +3,179 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExecutionUnit = void 0;
-const ade_1 = require("@mat3ra/ade");
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
-const ContextAndRenderFieldsMixin_1 = require("../context/mixins/ContextAndRenderFieldsMixin");
-const ImportantSettingsProviderMixin_1 = require("../context/mixins/ImportantSettingsProviderMixin");
-const ExecutionUnitInput_1 = __importDefault(require("../ExecutionUnitInput"));
+const providers_1 = require("../context/providers");
+const enums_1 = require("../enums");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
-const BaseUnit_1 = require("./BaseUnit");
-class ExecutionUnit extends BaseUnit_1.BaseUnit {
+const BaseUnit_1 = __importDefault(require("./BaseUnit"));
+const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
+class ExecutionUnit extends BaseUnit_1.default {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/execution");
+    }
     constructor(config) {
-        var _a;
-        super(config);
+        const schema = {
+            name: enums_1.UnitType.execution,
+            type: enums_1.UnitType.execution,
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            context: [],
+            ...config,
+        };
+        super(schema);
         this.inputInstances = [];
-        this.renderingContext = [];
-        const { application, executable, flavor } = config;
-        const applicationInstance = ade_1.ApplicationRegistry.createApplication(application);
-        const executableInstance = ade_1.ApplicationRegistry.getExecutableByConfig(application.name, executable);
-        const flavorInstance = ade_1.ApplicationRegistry.getFlavorByConfig(executableInstance, flavor);
-        if (!flavorInstance) {
-            throw new Error("Flavor is not set");
-        }
-        this.setApplication({
-            application: applicationInstance,
-            executable: executableInstance,
-            flavor: flavorInstance,
+        this.renderingContext = {};
+        this.contextProvidersInstances = [];
+        this.setApplication(config);
+        this.name = this.name || this.flavor.name || "";
+    }
+    setApplication({ application, executable, flavor, executableName, flavorName, }) {
+        var _a, _b;
+        const currentExecutable = this.prop("executable");
+        const currentFlavor = this.prop("flavor");
+        this.setProp("application", application);
+        this.setExecutable({
+            executableName: (_a = executableName !== null && executableName !== void 0 ? executableName : executable === null || executable === void 0 ? void 0 : executable.name) !== null && _a !== void 0 ? _a : currentExecutable === null || currentExecutable === void 0 ? void 0 : currentExecutable.name,
+            flavorName: (_b = flavorName !== null && flavorName !== void 0 ? flavorName : flavor === null || flavor === void 0 ? void 0 : flavor.name) !== null && _b !== void 0 ? _b : currentFlavor === null || currentFlavor === void 0 ? void 0 : currentFlavor.name,
         });
-        this.name = this.name || ((_a = this.flavor) === null || _a === void 0 ? void 0 : _a.name) || "";
     }
-    setApplication({ application, executable, flavor }) {
-        this.applicationInstance = application;
-        this.setProp("application", application.toJSON());
-        this.setExecutable({ executable, flavor });
-    }
-    setExecutable({ executable, flavor }) {
-        const defaultExecutable = ade_1.ApplicationRegistry.getExecutableByName(this.application.name);
-        const instance = executable instanceof ade_1.Executable
-            ? executable
-            : new ade_1.Executable(executable !== null && executable !== void 0 ? executable : defaultExecutable.toJSON());
-        this.allowedResults = instance.results;
-        this.allowedMonitors = instance.monitors;
-        this.allowedPostProcessors = instance.postProcessors;
-        this.setProp("executable", instance.toJSON());
-        this.setFlavor(flavor);
-    }
-    setFlavor(flavor) {
-        const defaultFlavor = ade_1.ApplicationRegistry.getFlavorByConfig(this.executableInstance);
-        const instance = flavor instanceof ade_1.Flavor ? flavor : new ade_1.Flavor(flavor !== null && flavor !== void 0 ? flavor : defaultFlavor === null || defaultFlavor === void 0 ? void 0 : defaultFlavor.toJSON());
-        if (!instance) {
-            throw new Error("Flavor is not found for executable");
+    setExecutable({ executableName, flavorName }) {
+        const executable = new standata_1.ApplicationRegistry()
+            .getExecutablesByApplication(this.application)
+            .find((executable) => {
+            return executableName ? executable.name === executableName : executable.isDefault;
+        });
+        if (!executable) {
+            throw new Error(`Executable ${executableName} not found`);
         }
-        this.flavorInstance = instance;
-        this.defaultMonitors = instance.monitors;
-        this.defaultResults = instance.results;
-        this.defaultPostProcessors = instance.postProcessors;
-        this.setProp("flavor", instance.toJSON());
-        this.setRuntimeItemsToDefaultValues();
+        this.setProp("executable", executable);
+        this.setFlavor(flavorName);
+    }
+    setFlavor(flavorName) {
+        const flavor = new standata_1.ApplicationRegistry()
+            .getFlavorsByApplicationExecutable(this.application, this.executable)
+            .find((flavor) => (flavorName ? flavor.name === flavorName : flavor.isDefault));
+        if (!flavor) {
+            throw new Error(`Flavor ${flavorName} not found`);
+        }
+        this.defaultResults = flavor.results;
+        this.defaultMonitors = flavor.monitors;
+        this.defaultPreProcessors = flavor.preProcessors;
+        this.defaultPostProcessors = flavor.postProcessors;
+        // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
+        const previousFlavor = this.prop("flavor");
+        if ((previousFlavor === null || previousFlavor === void 0 ? void 0 : previousFlavor.name) !== flavor.name) {
+            this.results = flavor.results;
+            this.monitors = flavor.monitors;
+            this.preProcessors = flavor.preProcessors;
+            this.postProcessors = flavor.postProcessors;
+        }
+        this.setProp("flavor", flavor);
         this.setDefaultInput();
     }
-    setDefaultInput() {
-        const inputs = ade_1.ApplicationRegistry.getInput(this.flavorInstance);
-        this.inputInstances = inputs.map(ExecutionUnitInput_1.default.createFromTemplate);
-    }
-    get allContextProviders() {
-        return this.inputInstances.map((input) => input.contextProvidersInstances).flat();
-    }
-    get contextProviders() {
-        return this.allContextProviders.filter((p) => p.entityName === "unit");
-    }
-    /** Update rendering context and persistent context
-     * Note: this function is sometimes being called without passing a context!
+    /**
+     * Persisted `input[].template` must match the current application/executable (and optional
+     * applicationVersion). Otherwise the stored template is stale, and we take the default from
+     * ApplicationRegistry.
      */
-    render(context = {}) {
-        this.renderingContext = { ...this.renderingContext, ...context };
-        const newInput = [];
-        const newPersistentContext = [];
-        const newRenderingContext = [];
-        this.inputInstances.forEach((input) => {
-            input.setContext(this.renderingContext);
-            input.render();
-            const inputJSON = input.toJSON();
-            const context = input.getFullContext();
-            newInput.push(inputJSON);
-            newRenderingContext.push(...context);
-            newPersistentContext.push(...context.filter((c) => c.isEdited));
-        });
-        this.input = newInput;
-        this.renderingContext = newRenderingContext;
-        this.context = newPersistentContext;
+    isPersistedInputItemCompatible(item) {
+        var _a;
+        const { template } = item;
+        if (template.applicationName !== this.application.name ||
+            template.executableName !== this.executable.name) {
+            return false;
+        }
+        if (!(0, standata_1.applicationVersionSatisfiesSupportedRange)(this.application.version, (_a = template.applicationVersion) !== null && _a !== void 0 ? _a : "")) {
+            return false;
+        }
+        return true;
     }
     /**
-     * @summary Calculates hash on unit-specific fields.
-     * The meaningful fields of processing unit are operation, flavor and input at the moment.
+     * Build `inputInstances` from the current flavor’s defaults (`ApplicationRegistry#getInput(application, flavor)`),
+     * merged with persisted `this.input` from saved workflow JSON. For each input slot from the registry we
+     * prefer a compatible persisted row matched by `template.name`, else by index; incompatible or missing
+     * rows use the registry template. `render()` then serializes from these instances into `this.input`, so UI
+     * and saved JSON stay aligned when Subworkflow re-serializes units after render.
      */
+    setDefaultInput() {
+        const driverTemplates = new standata_1.ApplicationRegistry().getInput(this.application, this.flavor);
+        const persisted = Array.isArray(this.input) ? this.input : [];
+        this.inputInstances = driverTemplates.map((driverTemplate, index) => {
+            var _a;
+            const persistedItem = (_a = persisted.find((item) => { var _a; return ((_a = item === null || item === void 0 ? void 0 : item.template) === null || _a === void 0 ? void 0 : _a.name) === driverTemplate.name; })) !== null && _a !== void 0 ? _a : persisted[index];
+            if (persistedItem && this.isPersistedInputItemCompatible(persistedItem)) {
+                return new ExecutionUnitInput_1.default(persistedItem);
+            }
+            return ExecutionUnitInput_1.default.createFromTemplate(driverTemplate);
+        });
+        this.input = this.inputInstances.map((input) => input.toJSON());
+    }
+    render(externalContext, convergence) {
+        this.contextProvidersInstances = this.getContextProvidersInstances(externalContext, convergence);
+        this.saveContext(externalContext);
+    }
+    getContextProvidersInstances(externalContext, convergence) {
+        const uniqueContextProviderNames = [
+            ...new Set(this.input
+                .map((input) => {
+                return input.template.contextProviders.map((provider) => {
+                    return provider.name;
+                });
+            })
+                .flat()),
+        ];
+        // TODO: kgrid should be abstracted and selected by user
+        const parameterToContextProviderMap = {
+            N_k: "kgrid",
+            N_k_nonuniform: "kgrid",
+        };
+        return uniqueContextProviderNames
+            .map((name) => {
+            return (0, providers_1.createProvider)(name, this.context, externalContext);
+        })
+            .map((provider) => {
+            if (convergence &&
+                provider.name === parameterToContextProviderMap[convergence.name]) {
+                provider.applyConvergenceParameter(convergence);
+            }
+            return provider;
+        });
+    }
+    savePersistentContext() {
+        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
+        this.context = persistentItems.filter((c) => c.isEdited);
+    }
+    saveRenderingContext(externalContext) {
+        const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
+        this.renderingContext = {
+            ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
+            ...externalContext,
+        };
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
+    }
+    saveContext(externalContext) {
+        this.savePersistentContext();
+        this.saveRenderingContext(externalContext);
+    }
     getHashObject() {
+        const { input, flavor, application, executable } = this.toJSON();
         return {
             ...super.getHashObject(),
-            application: utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.applicationInstance.toJSON()),
-            executable: utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.executableInstance.toJSON()),
-            flavor: this.flavorInstance
-                ? utils_1.Utils.specific.removeTimestampableKeysFromConfig(this.flavorInstance.toJSON())
-                : undefined,
-            input: utils_1.Utils.hash.calculateHashFromObject(this.input.map((i) => {
-                return utils_1.Utils.str.removeEmptyLinesFromString(utils_1.Utils.str.removeCommentsFromSourceCode(i.template.content));
+            application,
+            executable,
+            flavor,
+            input: utils_1.Utils.hash.calculateHashFromObject(input.map(({ template }) => {
+                return utils_1.Utils.str.removeEmptyLinesFromString(utils_1.Utils.str.removeCommentsFromSourceCode(template.content));
             })),
         };
     }
 }
-exports.ExecutionUnit = ExecutionUnit;
 (0, ExecutionUnitSchemaMixin_1.executionUnitSchemaMixin)(ExecutionUnit.prototype);
-(0, ContextAndRenderFieldsMixin_1.contextMixin)(ExecutionUnit.prototype);
-(0, ImportantSettingsProviderMixin_1.importantSettingsProviderMixin)(ExecutionUnit.prototype);
+exports.default = ExecutionUnit;

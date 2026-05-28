@@ -1,29 +1,39 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import type {
+    HubbardJContextItemSchema,
+    HubbardLegacyContextItemSchema,
+    HubbardUContextItemSchema,
+    HubbardVContextItemSchema,
+} from "@mat3ra/esse/dist/js/types";
 
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
 } from "../../mixins/MaterialContextMixin";
-import type { ContextItem, Domain } from "../base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../base/JSONSchemaDataProvider";
 
-type HubbardName = "hubbard_u" | "hubbard_j" | "hubbard_v" | "hubbard_legacy";
+type Schema =
+    | HubbardJContextItemSchema
+    | HubbardUContextItemSchema
+    | HubbardVContextItemSchema
+    | HubbardLegacyContextItemSchema;
 
 export type HubbardExternalContext = JinjaExternalContext & MaterialExternalContext;
 
-type Base = typeof JSONSchemaDataProvider<HubbardName, object, object, HubbardExternalContext> &
+type Base = typeof JSONSchemaDataProvider<Schema, HubbardExternalContext> &
     Constructor<MaterialContextMixin>;
 
-export default abstract class HubbardContextProvider<
-    N extends HubbardName,
-    D extends object,
+abstract class HubbardContextProvider<
+    S extends Schema,
     EC extends HubbardExternalContext = HubbardExternalContext,
 > extends (JSONSchemaDataProvider as Base) {
-    abstract readonly name: N;
+    abstract readonly name: S["name"];
 
-    abstract getDefaultData(): D;
+    abstract getDefaultData(): S["data"];
 
-    readonly domain: Domain = "important";
+    readonly domain = "important" as const;
+
+    readonly entityName = "unit" as const;
 
     protected readonly uniqueElementsWithLabels: string[];
 
@@ -52,7 +62,7 @@ export default abstract class HubbardContextProvider<
         "7d",
     ];
 
-    constructor(contextItem: ContextItem<D>, externalContext: EC) {
+    constructor(contextItem: Partial<S>, externalContext: EC) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
@@ -71,3 +81,5 @@ export default abstract class HubbardContextProvider<
 }
 
 materialContextMixin(HubbardContextProvider.prototype);
+
+export default HubbardContextProvider;

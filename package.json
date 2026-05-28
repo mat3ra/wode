@@ -3,10 +3,14 @@
     "version": "0.0.0",
     "description": "WOrkflow DEfinitions",
     "scripts": {
-        "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/js/setup.js tests/js",
+        "test": "mocha --recursive --bail --require ts-node/register 'tests/js/**/*.ts'",
+        "test:coverage": "nyc --reporter=text --reporter=html --reporter=lcov mocha --recursive --bail tests/js/**/*.ts",
+        "test:coverage:html": "nyc --reporter=html mocha --recursive --bail tests/js/**/*.ts",
+        "test:coverage:check": "nyc --reporter=text --check-coverage mocha --recursive --bail tests/js/**/*.ts",
+        "test:coverage:view": "node scripts/view-coverage.js",
         "lint": "eslint src/js tests/js && prettier --write src/js tests/js",
         "lint:fix": "eslint --fix --cache src/js tests/js && prettier --write src/js tests/js",
-        "transpile": "tsc --project tsconfig.json",
+        "transpile": "tsc -p tsconfig-transpile.json",
         "prettier": "prettier --check src/js tests/js",
         "prepare": "husky install || exit 0",
         "generate-mixins": "ts-node scripts/generate-mixins.ts"
@@ -17,11 +21,9 @@
     },
     "main": "dist/js/index.js",
     "files": [
-        "/assets",
-        "/dist",
-        "/src/js",
-        ".babelrc",
-        "build_workflows.js"
+        "dist",
+        "src/js",
+        ".babelrc"
     ],
     "author": "Exabyte Inc.",
     "bugs": {
@@ -32,30 +34,23 @@
     "dependencies": {
         "@exabyte-io/periodic-table.js": "2022.6.8-0",
         "@types/json-schema": "^7.0.15",
-        "@types/nunjucks": "^3.2.6",
         "@types/react-jsonschema-form": "^1.7.13",
-        "crypto-js": "^4.2.0",
-        "js-yaml": "^4.1.0",
-        "lodash": "^4.17.21",
-        "mixwith": "^0.1.1",
         "nunjucks": "^3.2.4",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.6.6",
-        "underscore": "^1.13.3",
-        "underscore.string": "^3.3.4",
-        "v20": "^0.1.0"
+        "underscore.string": "^3.3.6"
     },
     "devDependencies": {
         "@exabyte-io/eslint-config": "2025.5.13-0",
-        "@mat3ra/ade": "git+https://github.com/Exabyte-io/ade#6d494337d83e1b22fe272ff74cc1b6842a7c6561",
-        "@mat3ra/code": "git+https://github.com/Exabyte-io/code.git#cb3fa59e2cc143d744f9019322208d928ff8de88",
-        "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse#b324747a87f4b3363936974f512e75fe255b52a9",
-        "@mat3ra/ide": "2025.11.19-0",
-        "@mat3ra/made": "git+https://github.com/Exabyte-io/made.git#47b3e12a859c45fa72079ed4ddd1675a6a32b4fe",
-        "@mat3ra/mode": "2025.11.13-0",
-        "@mat3ra/standata": "2026.1.12-0",
+        "@mat3ra/ade": "https://github.com/Exabyte-io/ade/archive/bb3c213d87266cbb3cffd9adadc4a4c284172c52.tar.gz",
+        "@mat3ra/code": "https://github.com/Exabyte-io/code/archive/d6df3bbe248ae76458d0254d2491f71a175c5f70.tar.gz",
+        "@mat3ra/esse": "https://github.com/Exabyte-io/esse/archive/8ed93ffede62a93b2e63d9397704dc552f9482ec.tar.gz",
+        "@mat3ra/ide": "https://github.com/Exabyte-io/ide/archive/9d2f11fabec9c26b3dc35113defa6b2bc0ce686d.tar.gz",
+        "@mat3ra/made": "https://github.com/Exabyte-io/made/archive/df3f92edadb0e4821240a2040819e54ea8f64be4.tar.gz",
+        "@mat3ra/mode": "https://github.com/Exabyte-io/mode/archive/22d05e7b25129edbd360045492199d58a7c4c241.tar.gz",
+        "@mat3ra/prode": "https://github.com/Exabyte-io/prode/archive/ca265ffa14b5a57247dc200bcd9e3d7d811ab8b2.tar.gz",
+        "@mat3ra/standata": "https://github.com/Exabyte-io/standata/archive/c1d538b55e7c5305ca98d23b353de24caff5a7a8.tar.gz",
         "@mat3ra/tsconfig": "^2024.6.3-0",
         "@mat3ra/utils": "2025.9.20-0",
+        "@types/nunjucks": "^3.2.6",
         "chai": "^4.3.4",
         "eslint": "^7.32.0",
         "eslint-config-airbnb": "^19.0.2",
@@ -74,7 +69,9 @@
         "lint-staged": "^12.1.2",
         "mocha": "^9.1.3",
         "nyc": "^15.1.0",
-        "prettier": "^2.7.1"
+        "prettier": "^2.7.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.6"
     },
     "peerDependencies": {
         "@mat3ra/ade": "*",
@@ -94,7 +91,19 @@
             "eslint --cache --fix",
             "prettier --write"
         ],
+        "src/js/**/*.ts": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ],
         "tests/js/**/*.js": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ],
+        "tests/js/**/*.ts": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ],
+        "scripts/**/*.ts": [
             "eslint --cache --fix",
             "prettier --write"
         ]

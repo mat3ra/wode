@@ -9,5 +9,9 @@ class KPathFormDataManager extends PointsPathFormDataProvider_1.default {
         super(...arguments);
         this.name = "kpath";
     }
+    static createFromUnitContext(unitContext, externalContext) {
+        const contextItem = this.findContextItem(unitContext, "kpath");
+        return new KPathFormDataManager(contextItem, externalContext);
+    }
 }
 exports.default = KPathFormDataManager;

@@ -2,8 +2,8 @@ build/
 node_modules/
 .eslintcache
 .nyc_output/
+coverage/
 .idea/
-src/workflows/workflows.js
 .DS_Store
 
 # Python

@@ -1,23 +1,35 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssignmentUnit = void 0;
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const enums_1 = require("../enums");
 const AssignmentUnitSchemaMixin_1 = require("../generated/AssignmentUnitSchemaMixin");
-const BaseUnit_1 = require("./BaseUnit");
-class AssignmentUnit extends BaseUnit_1.BaseUnit {
+const BaseUnit_1 = __importDefault(require("./BaseUnit"));
+class AssignmentUnit extends BaseUnit_1.default {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/unit/assignment");
+    }
     constructor(config) {
-        super({
-            name: enums_1.UnitType.assignment,
-            type: enums_1.UnitType.assignment,
+        var _a;
+        const schema = {
+            input: [],
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
             operand: "X",
             value: "1",
-            input: [],
             ...config,
-        });
+            name: (_a = config.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.assignment,
+            type: enums_1.UnitType.assignment,
+        };
+        super(schema);
     }
     getHashObject() {
         return { input: this.input, operand: this.operand, value: this.value };
     }
 }
-exports.AssignmentUnit = AssignmentUnit;
 (0, AssignmentUnitSchemaMixin_1.assignmentUnitSchemaMixin)(AssignmentUnit.prototype);
+exports.default = AssignmentUnit;

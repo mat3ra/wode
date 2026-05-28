@@ -1,0 +1,399 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const ade_1 = require("@mat3ra/ade");
+const entity_1 = require("@mat3ra/code/dist/js/entity");
+const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
+const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
+const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
+const compute_1 = require("@mat3ra/ide/dist/js/compute");
+const mode_1 = require("@mat3ra/mode");
+const standata_1 = require("@mat3ra/standata");
+const utils_1 = require("@mat3ra/utils");
+const factory_1 = require("./convergence/factory");
+const enums_1 = require("./enums");
+const SubworkflowSchemaMixin_1 = require("./generated/SubworkflowSchemaMixin");
+const units_1 = require("./units");
+class Subworkflow extends entity_1.InMemoryEntity {
+    static get jsonSchema() {
+        return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
+    }
+    constructor(config, _ModelFactory = mode_1.ModelFactory) {
+        super(config);
+        this.properties = [];
+        this.repetition = 0;
+        this.ModelFactory = _ModelFactory;
+        this.applicationInstance = new ade_1.Application(this.application);
+        this.modelInstance = this.ModelFactory.create({
+            ...this.model,
+            application: this.application,
+        });
+        this.setUnits(this.units.map((cfg) => units_1.UnitFactory.createInSubworkflow(cfg)));
+    }
+    static get defaultConfig() {
+        const defaultName = "New Subworkflow";
+        return {
+            _id: utils_1.Utils.uuid.getUUID(),
+            name: defaultName,
+            application: new standata_1.ApplicationRegistry().getDefaultApplication(),
+            // TODO: confirm if `functional` is required field. If not, update ESSE schema
+            // `Model.defaultConfig` from @mat3ra/mode may omit `functional`; ESSE subworkflow schema requires it once schemas are registered.
+            model: { ...mode_1.Model.defaultConfig, functional: "pbe" },
+            properties: [],
+            units: [],
+        };
+    }
+    setRepetition(repetition) {
+        this.repetition = repetition;
+        this.unitsInstances.forEach((u) => u.setRepetition(repetition));
+    }
+    getAsUnit() {
+        return new units_1.SubworkflowUnit({
+            type: enums_1.UnitType.subworkflow,
+            _id: this.id,
+            name: this.name,
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            results: [],
+            flowchartId: "",
+        });
+    }
+    setApplication(application) {
+        // TODO: adjust the logic above to take into account whether units need re-rendering after version change etc.
+        // reset units if application name changes
+        const previousApplicationName = this.application.name;
+        this.applicationInstance = application;
+        if (previousApplicationName !== application.name) {
+            // TODO: figure out how to set a default unit per new application instead of removing all
+            this.setUnits([]);
+        }
+        else {
+            // propagate new application version to all units
+            this.unitsInstances
+                .filter((unit) => unit.type === enums_1.UnitType.execution)
+                .forEach((unit) => {
+                unit.setApplication({ application });
+            });
+        }
+        this.application = application.toJSON();
+        // set model to the default one for the application selected
+        this.setModel(this.ModelFactory.createFromApplication({
+            application: this.application,
+        }));
+    }
+    setModel(model) {
+        this.modelInstance = model;
+        this.model = model.toJSON();
+    }
+    buildExternalContext(context) {
+        const subworkflowContext = this.units
+            .filter((u) => u.type === enums_1.UnitType.assignment)
+            .reduce((acc, u) => {
+            return {
+                ...acc,
+                [u.operand]: u.value,
+            };
+        }, {});
+        return {
+            ...context,
+            application: this.applicationInstance.toJSON(),
+            methodData: this.model.method.data,
+            subworkflowContext,
+        };
+    }
+    render(context) {
+        const ctx = this.buildExternalContext(context);
+        this.unitsInstances.forEach((u) => {
+            if (u.type === enums_1.UnitType.execution) {
+                u.render(ctx);
+            }
+        });
+        // Keep serialized `units` in sync with instances after execution units update `input`.
+        this.units = this.unitsInstances.map((u) => u.toJSON());
+    }
+    /**
+     * TODO: reuse workflow function instead
+     */
+    addUnit(unit, index = -1) {
+        const { unitsInstances } = this;
+        if (unitsInstances.length === 0) {
+            this.setUnits([unit]);
+        }
+        else {
+            if (index >= 0) {
+                unitsInstances.splice(index, 0, unit);
+            }
+            else {
+                unitsInstances.push(unit);
+            }
+            this.setUnits(unitsInstances);
+        }
+    }
+    setUnits(units) {
+        this.unitsInstances = (0, standata_1.setUnitLinks)(units);
+        this.units = units.map((x) => x.toJSON());
+        this.properties = units.map((x) => x.resultNames).flat();
+    }
+    removeUnit(flowchartId) {
+        const previousUnit = this.unitsInstances.find((x) => x.next === flowchartId);
+        if (previousUnit) {
+            previousUnit.unsetProp("next");
+        }
+        this.setUnits(this.unitsInstances.filter((x) => x.flowchartId !== flowchartId));
+    }
+    getUnit(flowchartId) {
+        return this.unitsInstances.find((x) => x.flowchartId === flowchartId);
+    }
+    unitIndex(flowchartId) {
+        return this.units.findIndex((unit) => {
+            return unit.flowchartId === flowchartId;
+        });
+    }
+    replaceUnit(index, unit) {
+        this.unitsInstances[index] = unit;
+        this.setUnits([...this.unitsInstances]);
+    }
+    setIsDraft(bool) {
+        this.isDraft = bool;
+    }
+    get methodData() {
+        return this.modelInstance.Method.data;
+    }
+    /**
+     * @summary
+     * Returns object for hashing of the workflow. Meaningful fields are units, app and model.
+     * units must be sorted topologically before hashing (already sorted).
+     */
+    getHashObject() {
+        const config = this.toJSON();
+        const meaningfulFields = {
+            application: new ade_1.Application(config.application).calculateHash(),
+            model: new mode_1.Model(config.model).calculateHash(),
+            units: this.unitsInstances.map((u) => u.calculateHash()).join(),
+        };
+        return meaningfulFields;
+    }
+    findUnitById(id) {
+        // TODO: come back and refactor after converting flowchartId to id
+        return this.units.find((u) => u.flowchartId === id);
+    }
+    findUnitKeyById(id) {
+        const index = this.units.findIndex((u) => u.flowchartId === id);
+        return `units.${index}`;
+    }
+    findUnitWithTag(tag) {
+        return this.units
+            .filter((unit) => unit.type === enums_1.UnitType.assignment)
+            .find((unit) => { var _a; return (_a = unit.tags) === null || _a === void 0 ? void 0 : _a.includes(tag); });
+    }
+    get hasConvergence() {
+        return !!this.convergenceParam && !!this.convergenceResult;
+    }
+    get convergenceParam() {
+        var _a;
+        return (_a = this.findUnitWithTag(enums_1.UnitTag.hasConvergenceParam)) === null || _a === void 0 ? void 0 : _a.operand;
+    }
+    get convergenceResult() {
+        var _a;
+        return (_a = this.findUnitWithTag(enums_1.UnitTag.hasConvergenceResult)) === null || _a === void 0 ? void 0 : _a.operand;
+    }
+    convergenceSeries(scopeTrack) {
+        if (!this.hasConvergence || !(scopeTrack === null || scopeTrack === void 0 ? void 0 : scopeTrack.length)) {
+            return [];
+        }
+        let prevResult;
+        return scopeTrack
+            .map((scopeItem, i) => {
+            var _a, _b;
+            return {
+                x: i,
+                // TODO: fix types
+                // @ts-ignore
+                param: (_a = scopeItem.scope) === null || _a === void 0 ? void 0 : _a.global[this.convergenceParam],
+                // @ts-ignore
+                y: (_b = scopeItem.scope) === null || _b === void 0 ? void 0 : _b.global[this.convergenceResult],
+            };
+        })
+            .filter(({ y }) => {
+            const changed = prevResult !== y;
+            prevResult = y;
+            return changed;
+        })
+            .map((item, i) => {
+            return {
+                x: i + 1,
+                param: item.param,
+                y: item.y,
+            };
+        });
+    }
+    updateMethodData(materials, metaProperties) {
+        const method = this.modelInstance.Method;
+        const { model } = this;
+        const uniqueElements = [...new Set(materials.map((m) => m.uniqueElements).flat())];
+        const appName = this.application.name;
+        const methodDataItems = metaProperties
+            .filter((metaProperty) => {
+            return (
+            // @ts-ignore TODO: fix types
+            uniqueElements.includes(metaProperty.data.element) &&
+                metaProperty.data.apps.includes(appName));
+        })
+            .map((metaProperty) => metaProperty.property);
+        if (method.type !== "pseudopotential" || !methodDataItems.length) {
+            return;
+        }
+        const filters = {
+            appName,
+            exchangeCorrelation: {
+                approximation: model.subtype,
+                functional: "functional" in model ? model.functional : undefined,
+            },
+        };
+        // We cycle materials in reverse order below b/c of render(),
+        // since the default state index is zero, the last material thus corresponds to index 0.
+        // Without reversing, context providers in workflow consider material as changed when any update to the workflow
+        // is triggered.
+        // TODO: figure out how to simplify or remove the need for the above
+        (materials || [])
+            .concat()
+            .reverse()
+            .forEach((material) => {
+            // updates methodData & overwrites method in subworkflow.model
+            method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                elements: material.uniqueElements,
+                ...filters,
+            });
+            this.modelInstance.setMethod(method);
+            this.model = this.modelInstance.toJSON();
+        });
+        // TODO: Try if/else instead of running both
+        if (materials.length > 1) {
+            method.updateMethodDataByApplicationAndMaterials(methodDataItems, {
+                elements: uniqueElements,
+                ...filters,
+            });
+            this.modelInstance.setMethod(method);
+            this.model = this.modelInstance.toJSON();
+        }
+    }
+    addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }) {
+        // Find unit to converge: should contain passed result in its results list
+        // TODO: make user to select unit for convergence explicitly
+        const unitForConvergence = this.unitsInstances
+            .filter((x) => x.type === enums_1.UnitType.execution)
+            .find((x) => {
+            return x.resultNames.find((name) => name === result);
+        });
+        if (!unitForConvergence) {
+            throw new Error(`Subworkflow does not contain unit with '${result}' as extracted property.`);
+        }
+        // initialize parameter
+        const convergenceParameter = (0, factory_1.createConvergenceParameter)({
+            name: parameter,
+            initialValue: parameterInitial,
+            increment: parameterIncrement,
+        });
+        const context = this.buildExternalContext(externalContext);
+        unitForConvergence.render(context, convergenceParameter);
+        const prevResult = "prev_result";
+        const iteration = "iteration";
+        // Assignment with result's initial value
+        const prevResultInit = new units_1.AssignmentUnit({
+            name: "init result",
+            head: true,
+            operand: prevResult,
+            value: resultInitial,
+        });
+        // Assignment with initial value of convergence parameter
+        const paramInit = new units_1.AssignmentUnit({
+            name: "init parameter",
+            operand: convergenceParameter.name,
+            value: convergenceParameter.initialValue,
+            tags: [enums_1.UnitTag.hasConvergenceParam],
+        });
+        // Assignment with initial value of iteration counter
+        const iterInit = new units_1.AssignmentUnit({
+            name: "init counter",
+            operand: iteration,
+            value: 1,
+        });
+        // Assignment for storing iteration result: extracts 'result' from convergence unit scope
+        const storePrevResult = new units_1.AssignmentUnit({
+            name: "store result",
+            input: [
+                {
+                    scope: unitForConvergence.flowchartId,
+                    name: result,
+                },
+            ],
+            operand: prevResult,
+            value: result,
+        });
+        // Assignment for convergence param increase
+        const nextStep = new units_1.AssignmentUnit({
+            name: "update parameter",
+            input: convergenceParameter.useVariablesFromUnitContext(unitForConvergence.flowchartId),
+            operand: convergenceParameter.name,
+            value: convergenceParameter.increment,
+            next: unitForConvergence.flowchartId,
+        });
+        // Final step of convergence
+        const exit = new units_1.AssignmentUnit({
+            name: "exit",
+            input: [],
+            operand: convergenceParameter.name,
+            value: convergenceParameter.finalValue,
+        });
+        // Final step of convergence
+        const storeResult = new units_1.AssignmentUnit({
+            name: "update result",
+            input: [
+                {
+                    scope: unitForConvergence.flowchartId,
+                    name: result,
+                },
+            ],
+            operand: result,
+            value: result,
+            tags: [enums_1.UnitTag.hasConvergenceResult],
+        });
+        // Assign next iteration value
+        const nextIter = new units_1.AssignmentUnit({
+            name: "update counter",
+            input: [],
+            operand: iteration,
+            value: `${iteration} + 1`,
+        });
+        // Convergence condition unit
+        const conditionUnit = new units_1.ConditionUnit({
+            name: "check convergence",
+            statement: `${condition} ${operator} ${tolerance}`,
+            then: exit.flowchartId,
+            else: storePrevResult.flowchartId,
+            maxOccurrences,
+            next: storePrevResult.flowchartId,
+        });
+        this.addUnit(paramInit, 0);
+        this.addUnit(prevResultInit, 1);
+        this.addUnit(iterInit, 2);
+        this.addUnit(storeResult);
+        this.addUnit(conditionUnit);
+        this.addUnit(storePrevResult);
+        this.addUnit(nextIter);
+        this.addUnit(nextStep);
+        this.addUnit(exit);
+        // `addUnit` adjusts the `next` field, hence the below.
+        nextStep.next = unitForConvergence.flowchartId;
+    }
+}
+(0, NamedEntityMixin_1.namedEntityMixin)(Subworkflow.prototype);
+(0, DefaultableMixin_1.defaultableEntityMixin)(Subworkflow);
+(0, compute_1.computedEntityMixin)(Subworkflow.prototype);
+(0, SubworkflowSchemaMixin_1.subworkflowSchemaMixin)(Subworkflow.prototype);
+(0, HashedEntityMixin_1.hashedEntityMixin)(Subworkflow.prototype);
+exports.default = Subworkflow;

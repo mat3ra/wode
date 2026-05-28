@@ -1,7 +1,8 @@
 {
-    "extends": "@mat3ra/tsconfig/tsconfig-js-py-transpile.json",
+    "extends": "@mat3ra/tsconfig/tsconfig-js-py-dev.json",
     "include": [
-        "src/js/**/*",
-        "types/**/*"
+        "src/js",
+        "tests/js",
+        "types"
     ]
 }
