@@ -38,7 +38,7 @@ class Subworkflow(
     application: Application = Field(
         default_factory=lambda: Application(name="", version="", build="", shortName="", summary="")
     )
-    properties: List[dict] = Field(default_factory=list)
+    properties: List[str] = Field(default_factory=list)
     model: Model = Field(default_factory=lambda: Model(type="", subtype="", method=Method(type="", subtype="")))
     units: List[Union[Unit, ExecutionUnit, SubworkflowUnit]] = Field(default_factory=list)
 

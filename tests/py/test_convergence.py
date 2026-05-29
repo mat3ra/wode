@@ -16,7 +16,7 @@ def test_add_uniform_energy_convergence():
     subworkflow = _build_total_energy_subworkflow()
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterNameEnum.N_k,
+        parameter=ConvergenceParameterNameEnum.N_k.value,
         parameter_initial=1,
         parameter_increment=1,
         result="total_energy",
