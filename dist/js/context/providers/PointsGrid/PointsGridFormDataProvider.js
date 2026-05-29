@@ -49,6 +49,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         this.dimensions = ((_e = this.data) === null || _e === void 0 ? void 0 : _e.dimensions) || this.defaultDimensions;
         this.reciprocalVectorRatios = this.reciprocalLattice.reciprocalVectorRatios.map((r) => Number(math_1.math.numberToPrecision(r, 3)));
     }
+    // TODO: move default values to be extracted from ESSE
     getDefaultGridMetricValue(metric) {
         switch (metric) {
             case "KPPRA":
@@ -60,7 +61,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
                 return 0.3;
             default:
                 console.error("Metric type not recognized!");
-                return 1;
+                return -1;
         }
     }
     resolveGridMetricValue(gridMetricType, gridMetricValue) {

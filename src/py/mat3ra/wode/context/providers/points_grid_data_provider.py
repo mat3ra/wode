@@ -24,7 +24,11 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     dimensions: List[int] = Field(default_factory=lambda: [1, 1, 1])
     shifts: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0])
     gridMetricType: GridMetricType = Field(default=GridMetricType.KPPRA)
+<<<<<<< HEAD
     gridMetricValue: float = Field(default=DEFAULT_KPPRA)
+=======
+    gridMetricValue: float = Field(default=-1)
+>>>>>>> d83d76d2b3f1dca6d862ab777140ff85069061ee
 
     @property
     def is_edited_key(self) -> str:
