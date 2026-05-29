@@ -18,11 +18,7 @@ KGRID_DATA = {
         "shifts": SHIFTS_DEFAULT,
         "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
-<<<<<<< HEAD
         "gridMetricValue": DEFAULT_KPPRA,
-=======
-        "gridMetricValue": -1
->>>>>>> d83d76d2b3f1dca6d862ab777140ff85069061ee
     },
     "isKgridEdited": True,
 }
@@ -33,11 +29,7 @@ KGRID_TEMPLATE_DATA = {
         "shifts": SHIFTS_DEFAULT,
         "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
-<<<<<<< HEAD
         "gridMetricValue": DEFAULT_KPPRA,
-=======
-        "gridMetricValue": -1,
->>>>>>> d83d76d2b3f1dca6d862ab777140ff85069061ee
         "reciprocalVectorRatios": [1.0, 0.667, 0.5],
     },
     "isKgridEdited": True,
