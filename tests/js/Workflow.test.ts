@@ -265,15 +265,23 @@ describe("Workflow", () => {
 
     describe("Workflow hashing", () => {
         const fixtureFiles = ["band_gap"] as const;
+        const bandGapWorkflowName = "Band Gap";
+
+        before(() => {
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+            ApplicationRegistry.setDriver(new StandataDriver());
+        });
 
         fixtureFiles.forEach((fixtureFile) => {
             it(`calculateHash matches stored hash for ${fixtureFile}`, function () {
                 const standata = new WorkflowStandata();
-                const [workflow] = standata.findEntitiesByTags(
+                const workflows = standata.findEntitiesByTags(
                     "espresso",
                     fixtureFile,
-                ) as unknown as [WorkflowSchema];
-                const wf = new Workflow(workflow);
+                ) as unknown as WorkflowSchema[];
+                const workflow = workflows.find((w) => w.name === bandGapWorkflowName);
+                expect(workflow).to.exist;
+                const wf = new Workflow(workflow as WorkflowSchema);
                 const expectedHash = workflowHashes.espresso[fixtureFile].hash;
                 if (!expectedHash) {
                     // eslint-disable-next-line no-console

@@ -4,11 +4,10 @@ from mat3ra.ade.application import Application
 from mat3ra.code.entity import InMemoryEntitySnakeCase
 from mat3ra.code.mixins import HashedEntityMixin
 from mat3ra.esse.models.workflow.subworkflow import SubworkflowSchema
-from mat3ra.mode import DFTModel, PseudopotentialMethod
+from mat3ra.mode import DFTModel
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
 from mat3ra.mode.models.factory import ModelFactory
-from mat3ra.utils.object import calculate_hash_from_object, remove_timestampable_keys
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field, field_validator
 
@@ -41,8 +40,17 @@ class Subworkflow(
         default_factory=lambda: Application(name="", version="", build="", shortName="", summary="")
     )
     properties: List[str] = Field(default_factory=list)
-    model: Model = Field(default_factory=lambda: DFTModel())
+    model: Model = Field(default_factory=DFTModel)
     units: List[Union[Unit, ExecutionUnit, SubworkflowUnit]] = Field(default_factory=list)
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def _instantiate_model(cls, value: Any) -> Any:
+        if isinstance(value, Model):
+            return value
+        if isinstance(value, dict):
+            return ModelFactory.create(value)
+        return value
 
     @field_validator("units", mode="before")
     @classmethod

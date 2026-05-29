@@ -257,13 +257,11 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
      * units must be sorted topologically before hashing (already sorted).
      */
     getHashObject() {
-        const config = this.toJSON();
-        const meaningfulFields = {
-            application: new Application(config.application).calculateHash(),
-            model: new Model(config.model).calculateHash(),
+        return {
+            application: this.applicationInstance.calculateHash(),
+            model: this.modelInstance.calculateHash(),
             units: this.unitsInstances.map((u) => u.calculateHash()).join(),
         };
-        return meaningfulFields;
     }
 
     findUnitById(id: string) {

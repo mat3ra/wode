@@ -10,6 +10,8 @@ from mat3ra.wode import Subworkflow, Unit, Workflow
 
 WORKFLOW_HASHES_PATH = os.path.join(os.path.dirname(__file__), "../fixtures/workflow_hashes.json")
 
+BAND_GAP_WORKFLOW_NAME = "Band Gap"
+
 WORKFLOW_STANDATA = WorkflowStandata()
 SUBWORKFLOW_STANDATA = SubworkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
@@ -192,6 +194,7 @@ def test_calculate_hash(workflow, app):
     workflow_data = expected_hashes.get(app, {}).get(workflow, {})
     expected_hash = workflow_data.get("hash")
 
-    fixture = WORKFLOW_STANDATA.get_by_categories(app, workflow)[0]
+    workflows = WORKFLOW_STANDATA.get_by_categories(app, workflow)
+    fixture = next(w for w in workflows if w["name"] == BAND_GAP_WORKFLOW_NAME)
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
