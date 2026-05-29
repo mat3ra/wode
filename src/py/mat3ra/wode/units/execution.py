@@ -42,6 +42,7 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
     def get_hash_object(self) -> Dict[str, Any]:
         data = self.to_dict()
         application = dict(data.get("application") or {})
+        application.pop("isLicensed", None)
         if application.get("isDefault") and "isDefaultVersion" not in application:
             application["isDefaultVersion"] = True
 
