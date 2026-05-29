@@ -169,13 +169,11 @@ class Subworkflow extends entity_1.InMemoryEntity {
      * units must be sorted topologically before hashing (already sorted).
      */
     getHashObject() {
-        const config = this.toJSON();
-        const meaningfulFields = {
-            application: new ade_1.Application(config.application).calculateHash(),
-            model: new mode_1.Model(config.model).calculateHash(),
+        return {
+            application: this.applicationInstance.calculateHash(),
+            model: this.modelInstance.calculateHash(),
             units: this.unitsInstances.map((u) => u.calculateHash()).join(),
         };
-        return meaningfulFields;
     }
     findUnitById(id) {
         // TODO: come back and refactor after converting flowchartId to id
