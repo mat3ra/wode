@@ -16,7 +16,7 @@ def test_add_uniform_energy_convergence():
     subworkflow = _build_total_energy_subworkflow()
 
     subworkflow.add_convergence(
-        parameter=ConvergenceParameterNameEnum.N_k,
+        parameter=ConvergenceParameterNameEnum.N_k.value,
         parameter_initial=1,
         parameter_increment=1,
         result="total_energy",
@@ -221,7 +221,7 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
     assert pw_scf.context[param_name] == param_initial
     input_item = pw_scf.input[0]
-    template_content = input_item["content"]
+    template_content = input_item.template.content
     assert f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}" in template_content
     assert original_pattern not in template_content
 
@@ -261,7 +261,7 @@ def test_add_template_param_convergence_multi_unit():
     for unit in [pw_scf, pw_bands]:
         assert unit.context["ecutwfc"] == 20
         input_item = unit.input[0]
-        template_content = input_item["content"]
+        template_content = input_item.template.content
         assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content
         assert "ecutwfc = {{ cutoffs.wavefunction }}" not in template_content
 

@@ -1,82 +1,26 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "AssertionUnit", {
-  enumerable: true,
-  get: function () {
-    return _assertion.AssertionUnit;
-  }
-});
-Object.defineProperty(exports, "AssignmentUnit", {
-  enumerable: true,
-  get: function () {
-    return _assignment.AssignmentUnit;
-  }
-});
-Object.defineProperty(exports, "BaseUnit", {
-  enumerable: true,
-  get: function () {
-    return _base.BaseUnit;
-  }
-});
-Object.defineProperty(exports, "ConditionUnit", {
-  enumerable: true,
-  get: function () {
-    return _condition.ConditionUnit;
-  }
-});
-Object.defineProperty(exports, "ExecutionUnit", {
-  enumerable: true,
-  get: function () {
-    return _execution.ExecutionUnit;
-  }
-});
-Object.defineProperty(exports, "IOUnit", {
-  enumerable: true,
-  get: function () {
-    return _io.IOUnit;
-  }
-});
-Object.defineProperty(exports, "MapUnit", {
-  enumerable: true,
-  get: function () {
-    return _map.MapUnit;
-  }
-});
-Object.defineProperty(exports, "ProcessingUnit", {
-  enumerable: true,
-  get: function () {
-    return _processing.ProcessingUnit;
-  }
-});
-Object.defineProperty(exports, "ReduceUnit", {
-  enumerable: true,
-  get: function () {
-    return _reduce.ReduceUnit;
-  }
-});
-Object.defineProperty(exports, "SubworkflowUnit", {
-  enumerable: true,
-  get: function () {
-    return _subworkflow.SubworkflowUnit;
-  }
-});
-Object.defineProperty(exports, "UnitFactory", {
-  enumerable: true,
-  get: function () {
-    return _factory.UnitFactory;
-  }
-});
-var _assertion = require("./assertion");
-var _assignment = require("./assignment");
-var _base = require("./base");
-var _condition = require("./condition");
-var _execution = require("./execution");
-var _factory = require("./factory");
-var _io = require("./io");
-var _map = require("./map");
-var _processing = require("./processing");
-var _reduce = require("./reduce");
-var _subworkflow = require("./subworkflow");
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UnitFactory = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ExecutionUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.BaseUnit = void 0;
+const AssertionUnit_1 = __importDefault(require("./AssertionUnit"));
+exports.AssertionUnit = AssertionUnit_1.default;
+const AssignmentUnit_1 = __importDefault(require("./AssignmentUnit"));
+exports.AssignmentUnit = AssignmentUnit_1.default;
+const BaseUnit_1 = __importDefault(require("./BaseUnit"));
+exports.BaseUnit = BaseUnit_1.default;
+const ConditionUnit_1 = __importDefault(require("./ConditionUnit"));
+exports.ConditionUnit = ConditionUnit_1.default;
+const ExecutionUnit_1 = __importDefault(require("./ExecutionUnit"));
+exports.ExecutionUnit = ExecutionUnit_1.default;
+const factory_1 = require("./factory");
+Object.defineProperty(exports, "UnitFactory", { enumerable: true, get: function () { return factory_1.UnitFactory; } });
+const IOUnit_1 = __importDefault(require("./IOUnit"));
+exports.IOUnit = IOUnit_1.default;
+const MapUnit_1 = __importDefault(require("./MapUnit"));
+exports.MapUnit = MapUnit_1.default;
+const ReduceUnit_1 = __importDefault(require("./ReduceUnit"));
+exports.ReduceUnit = ReduceUnit_1.default;
+const SubworkflowUnit_1 = __importDefault(require("./SubworkflowUnit"));
+exports.SubworkflowUnit = SubworkflowUnit_1.default;

@@ -8,6 +8,9 @@ from mat3ra.esse.models.context_providers_directory.points_grid_data_provider im
 from pydantic import Field
 
 
+DEFAULT_KPPRA = -1
+
+
 # TODO: GlobalSetting for default KPPRA value
 class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     """
@@ -21,6 +24,7 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     dimensions: List[int] = Field(default_factory=lambda: [1, 1, 1])
     shifts: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0])
     gridMetricType: GridMetricType = Field(default=GridMetricType.KPPRA)
+    gridMetricValue: float = Field(default=DEFAULT_KPPRA)
 
     @property
     def is_edited_key(self) -> str:

@@ -24,6 +24,8 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
     """
 
     id: str = Field(default_factory=get_uuid, alias="_id")
+    workflows: List[Dict[str, Any]] = Field(default_factory=list)
+    properties: List[str] = Field(default_factory=list)
     subworkflows: List[Subworkflow] = Field(default_factory=list)
     units: List[Unit] = Field(default_factory=list)
     isMultiMaterial: bool = Field(default=False)

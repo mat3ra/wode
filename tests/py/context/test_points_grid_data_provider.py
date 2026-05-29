@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import GridMetricType
 from mat3ra.wode.context.providers import PointsGridDataProvider
-
+from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPRA
 # Test data constants
 DIMENSIONS_DEFAULT = [1, 1, 1]
 DIMENSIONS_CUSTOM = [1, 2, 3]
@@ -18,6 +18,7 @@ KGRID_DATA = {
         "shifts": SHIFTS_DEFAULT,
         "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
+        "gridMetricValue": DEFAULT_KPPRA,
     },
     "isKgridEdited": True,
 }
@@ -28,6 +29,7 @@ KGRID_TEMPLATE_DATA = {
         "shifts": SHIFTS_DEFAULT,
         "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
+        "gridMetricValue": DEFAULT_KPPRA,
         "reciprocalVectorRatios": [1.0, 0.667, 0.5],
     },
     "isKgridEdited": True,

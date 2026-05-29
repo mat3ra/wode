@@ -3,8 +3,7 @@
         "@exabyte-io/eslint-config"
     ],
     "ignorePatterns": [
-        "dist/",
-        "src/workflows/workflows.js"
+        "dist/"
     ],
     "settings": {
         "import/resolver": {

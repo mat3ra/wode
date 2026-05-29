@@ -90,7 +90,7 @@ def test_set_unit_keeps_rendered_input_for_context_only_update(method):
     unit_to_modify = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
     assert unit_to_modify is not None
 
-    original_rendered = unit_to_modify.input[0]["rendered"]
+    original_rendered = unit_to_modify.input[0].rendered
 
     unit_to_modify.add_context({"test_key": "test_value", "another_key": 42})
     unit_to_modify.add_context(
@@ -112,4 +112,4 @@ def test_set_unit_keeps_rendered_input_for_context_only_update(method):
     assert updated_unit.context["test_key"] == "test_value"
     assert updated_unit.context["another_key"] == 42
     assert updated_unit.context["kgrid"]["dimensions"] == [2, 2, 1]
-    assert updated_unit.input[0]["rendered"] == original_rendered
+    assert updated_unit.input[0].rendered == original_rendered

@@ -3,10 +3,11 @@ from typing import Any, List, Optional, Union
 from mat3ra.ade.application import Application
 from mat3ra.code.entity import InMemoryEntitySnakeCase
 from mat3ra.code.mixins import HashedEntityMixin
-from mat3ra.esse.models.workflow.subworkflow import Subworkflow as SubworkflowSchema
+from mat3ra.esse.models.workflow.subworkflow import SubworkflowSchema
+from mat3ra.mode import DFTModel
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
-from mat3ra.utils.object import calculate_hash_from_object, remove_timestampable_keys
+from mat3ra.mode.models.factory import ModelFactory
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field, field_validator
 
@@ -38,8 +39,18 @@ class Subworkflow(
     application: Application = Field(
         default_factory=lambda: Application(name="", version="", build="", shortName="", summary="")
     )
-    model: Model = Field(default_factory=lambda: Model(type="", subtype="", method=Method(type="", subtype="")))
+    properties: List[str] = Field(default_factory=list)
+    model: Model = Field(default_factory=DFTModel)
     units: List[Union[Unit, ExecutionUnit, SubworkflowUnit]] = Field(default_factory=list)
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def _instantiate_model(cls, value: Any) -> Any:
+        if isinstance(value, Model):
+            return value
+        if isinstance(value, dict):
+            return ModelFactory.create(value)
+        return value
 
     @field_validator("units", mode="before")
     @classmethod
@@ -84,15 +95,9 @@ class Subworkflow(
         return self.model.method.data
 
     def get_hash_object(self) -> dict:
-        app_dict = self.application.to_dict() if self.application else {}
-        # Exclude isUsingMaterial from hash calculation to match JavaScript behavior
-        app_dict.pop("isUsingMaterial", None)
-        app_hash = calculate_hash_from_object(remove_timestampable_keys(app_dict))
-        
-        model_dict = self.model.to_dict() if self.model else {}
         return {
-            "application": app_hash,
-            "model": Model.create(model_dict).calculate_hash(),
+            "application": self.application.calculate_hash(),
+            "model": self.model.calculate_hash(),
             "units": ",".join(u.calculate_hash() for u in self.units),
         }
 
