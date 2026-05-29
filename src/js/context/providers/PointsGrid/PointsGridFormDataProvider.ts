@@ -112,6 +112,7 @@ abstract class PointsGridFormDataProvider<
         ) as Vector3DSchema;
     }
 
+    // TODO: move default values to be extracted from ESSE
     private getDefaultGridMetricValue(metric: GridMetricType) {
         switch (metric) {
             case "KPPRA":
@@ -123,7 +124,7 @@ abstract class PointsGridFormDataProvider<
                 return 0.3;
             default:
                 console.error("Metric type not recognized!");
-                return 1;
+                return -1;
         }
     }
 
