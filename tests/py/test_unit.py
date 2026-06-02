@@ -59,10 +59,13 @@ def test_add_context():
 
     assert unit is not None
     assert "relax" in unit.name.lower()
+    assert unit.context == []
 
     unit.add_context(NEW_CONTEXT_RELAX)
 
-    assert "kgrid" in unit.context
-    assert "convergence" in unit.context
-    assert unit.context["kgrid"] == NEW_CONTEXT_RELAX["kgrid"]
-    assert unit.context["convergence"] == NEW_CONTEXT_RELAX["convergence"]
+    assert unit.get_context("kgrid") == NEW_CONTEXT_RELAX["kgrid"]
+    assert unit.get_context("convergence") == NEW_CONTEXT_RELAX["convergence"]
+    assert unit.to_dict()["context"] == [
+        {"name": "kgrid", "isEdited": False, "data": NEW_CONTEXT_RELAX["kgrid"]},
+        {"name": "convergence", "isEdited": False, "data": NEW_CONTEXT_RELAX["convergence"]},
+    ]

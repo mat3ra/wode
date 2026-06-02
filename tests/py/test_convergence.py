@@ -41,10 +41,9 @@ def test_add_uniform_energy_convergence():
     ]
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
-    assert pw_scf.context["kgrid"]["dimensions"] == ["{{N_k}}", "{{N_k}}", "{{N_k}}"]
-    assert pw_scf.context["kgrid"]["shifts"] == [0, 0, 0]
-    assert pw_scf.context["isKgridEdited"] is True
-    assert pw_scf.context["isUsingJinjaVariables"] is True
+    assert pw_scf.get_context("kgrid")["dimensions"] == ["{{N_k}}", "{{N_k}}", "{{N_k}}"]
+    assert pw_scf.get_context("kgrid")["shifts"] == [0, 0, 0]
+    assert any(item.get("name") == "kgrid" and item.get("isEdited") for item in pw_scf.context)
 
     assert subworkflow.convergence_parameter == ConvergenceParameterNameEnum.N_k.value
     assert subworkflow.convergence_result == "total_energy"
@@ -82,12 +81,12 @@ def test_add_non_uniform_energy_convergence():
     )
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
-    assert pw_scf.context["kgrid"]["dimensions"] == [
+    assert pw_scf.get_context("kgrid")["dimensions"] == [
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[0]}}}}",
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[1]}}}}",
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform.value}[2]}}}}",
     ]
-    assert pw_scf.context["kgrid"]["reciprocalVectorRatios"] == reciprocal_vector_ratios
+    assert pw_scf.get_context("kgrid")["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform.value
@@ -117,12 +116,12 @@ def test_add_non_uniform_2d_energy_convergence():
     )
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
-    assert pw_scf.context["kgrid"]["dimensions"] == [
+    assert pw_scf.get_context("kgrid")["dimensions"] == [
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[0]}}}}",
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[1]}}}}",
         f"{{{{{ConvergenceParameterNameEnum.N_k_nonuniform_2D.value}[2]}}}}",
     ]
-    assert pw_scf.context["kgrid"]["reciprocalVectorRatios"] == reciprocal_vector_ratios
+    assert pw_scf.get_context("kgrid")["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform_2D.value
@@ -219,7 +218,7 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     ]
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
-    assert pw_scf.context[param_name] == param_initial
+    assert pw_scf.get_context(param_name) == param_initial
     input_item = pw_scf.input[0]
     template_content = input_item.template.content
     assert f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}" in template_content
@@ -259,7 +258,7 @@ def test_add_template_param_convergence_multi_unit():
     pw_bands = subworkflow.get_unit_by_name("pw_bands")
 
     for unit in [pw_scf, pw_bands]:
-        assert unit.context["ecutwfc"] == 20
+        assert unit.get_context("ecutwfc") == 20
         input_item = unit.input[0]
         template_content = input_item.template.content
         assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content

@@ -180,10 +180,8 @@ def test_set_unit(method):
     assert success is True
 
     updated_unit = wf.get_unit_by_name(name_regex="relax")
-    assert "test_key" in updated_unit.context
-    assert "another_key" in updated_unit.context
-    assert updated_unit.context["test_key"] == "test_value"
-    assert updated_unit.context["another_key"] == 42
+    assert updated_unit.get_context("test_key") == "test_value"
+    assert updated_unit.get_context("another_key") == 42
 
 
 @pytest.mark.parametrize("workflow, app", [("band_gap", "espresso")])
