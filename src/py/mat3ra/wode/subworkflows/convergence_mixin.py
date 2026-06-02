@@ -186,7 +186,7 @@ class ConvergenceMixin:
             and reciprocal_vector_ratios is None
         ):
             reciprocal_vector_ratios = PointsGridDataProvider(
-                context=unit_for_convergence.context
+                context={item["name"]: item["data"] for item in unit_for_convergence.context}
             ).get_reciprocal_vector_ratios()
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
@@ -199,7 +199,7 @@ class ConvergenceMixin:
         )
 
         merged_context = self._merge_convergence_context(
-            unit_for_convergence.context,
+            {item["name"]: item["data"] for item in unit_for_convergence.context},
             parameter.unit_context,
         )
         unit_for_convergence.set_context(merged_context)
