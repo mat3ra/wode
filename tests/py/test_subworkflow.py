@@ -2,6 +2,7 @@ import pytest
 from mat3ra.ade.application import Application
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
+from mat3ra.mode.models.dft import DFTModel
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
 
@@ -23,6 +24,8 @@ UNIT_CONFIG = {
     "flowchartId": "unit-flowchart-id",
     "head": True,
 }
+DFT_METHOD_CONFIG = {"type": "pseudopotential", "subtype": "us"}
+DFT_MODEL_CONFIG_WITHOUT_FUNCTIONAL = {"type": "dft", "subtype": "gga", "method": DFT_METHOD_CONFIG}
 
 
 def test_creation():
@@ -52,6 +55,14 @@ def test_model(model_type, model_subtype):
     sw = Subworkflow(name=SUBWORKFLOW_NAME, model=model)
     assert sw.model.type == model_type
     assert sw.model.subtype == model_subtype
+
+
+@pytest.mark.parametrize("config", [DFT_MODEL_CONFIG_WITHOUT_FUNCTIONAL])
+def test_model_assignment_is_coerced_to_dft_model_with_default_functional(config):
+    subworkflow = Subworkflow(name=SUBWORKFLOW_NAME)
+    subworkflow.model = Model(**config)
+    assert isinstance(subworkflow.model, DFTModel)
+    assert subworkflow.model.to_dict().get("functional") == "pbe"
 
 
 def test_with_units():

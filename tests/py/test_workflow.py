@@ -2,6 +2,8 @@ import json
 import os
 
 import pytest
+from mat3ra.mode.methods.factory import MethodFactory
+from mat3ra.mode.model import Model
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.subworkflows import SubworkflowStandata
 from mat3ra.standata.workflows import WorkflowStandata
@@ -31,6 +33,20 @@ UNIT_CONFIG = {
     "flowchartId": "unit-flowchart-id",
     "head": True,
 }
+
+BAND_STRUCTURE_SEARCH_NAME = "band_structure"
+BAND_GAP_SEARCH_NAME = "espresso/band_gap\\.json$"
+TOTAL_ENERGY_SEARCH_NAME = "total_energy"
+
+EXPECTED_MODEL_FUNCTIONAL = "pbe"
+EXECUTION_UNIT_TYPE = "execution"
+CONTEXT_ITEM_REQUIRED_KEYS = ("name", "isEdited", "data", "extraData")
+
+WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES = [
+    BAND_STRUCTURE_SEARCH_NAME,
+    BAND_GAP_SEARCH_NAME,
+    TOTAL_ENERGY_SEARCH_NAME,
+]
 
 
 def test_creation():
@@ -196,3 +212,56 @@ def test_calculate_hash(workflow, app):
     fixture = next(w for w in workflows if w["name"] == BAND_GAP_WORKFLOW_NAME)
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
+
+
+def _execution_units_from_payload(workflow_payload):
+    for subworkflow in workflow_payload.get("subworkflows", []):
+        for unit in subworkflow.get("units", []):
+            if unit.get("type") == EXECUTION_UNIT_TYPE:
+                yield unit
+
+
+def _assert_subworkflow_models_have_functional(workflow_payload, expected_functional):
+    for subworkflow in workflow_payload.get("subworkflows", []):
+        model = subworkflow.get("model", {})
+        assert model.get("functional") == expected_functional
+
+
+def _assert_execution_unit_context_is_webapp_shaped(unit):
+    context = unit.get("context")
+    assert isinstance(context, list)
+    for item in context:
+        for key in CONTEXT_ITEM_REQUIRED_KEYS:
+            assert key in item
+
+
+@pytest.mark.parametrize(
+    "workflow_search_name,expected_functional",
+    [(name, EXPECTED_MODEL_FUNCTIONAL) for name in WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES],
+    ids=WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES,
+)
+def test_workflow_to_dict_is_webapp_compatible(workflow_search_name, expected_functional):
+    workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(workflow_search_name)
+    workflow = Workflow.create(workflow_config)
+    payload = workflow.to_dict()
+
+    _assert_subworkflow_models_have_functional(payload, expected_functional)
+
+    execution_units = list(_execution_units_from_payload(payload))
+    assert execution_units
+
+    for unit in execution_units:
+        _assert_execution_unit_context_is_webapp_shaped(unit)
+
+
+def test_workflow_to_dict_is_json_serializable_after_model_assignment():
+    workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(BAND_STRUCTURE_SEARCH_NAME)
+    workflow = Workflow.create(workflow_config)
+    method = MethodFactory.create(
+        {"type": "pseudopotential", "subtype": "us", "data": {}},
+    )
+    assigned_model = Model(type="dft", subtype="gga", method=method, functional=EXPECTED_MODEL_FUNCTIONAL)
+    for subworkflow in workflow.subworkflows:
+        subworkflow.model = assigned_model
+
+    json.dumps(workflow.to_dict())

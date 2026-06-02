@@ -66,6 +66,16 @@ def test_add_context():
     assert unit.get_context("kgrid") == NEW_CONTEXT_RELAX["kgrid"]
     assert unit.get_context("convergence") == NEW_CONTEXT_RELAX["convergence"]
     assert unit.to_dict()["context"] == [
-        {"name": "kgrid", "isEdited": False, "data": NEW_CONTEXT_RELAX["kgrid"]},
-        {"name": "convergence", "isEdited": False, "data": NEW_CONTEXT_RELAX["convergence"]},
+        {
+            "name": "kgrid",
+            "isEdited": False,
+            "data": NEW_CONTEXT_RELAX["kgrid"],
+            "extraData": {},
+        },
+        {
+            "name": "convergence",
+            "isEdited": False,
+            "data": NEW_CONTEXT_RELAX["convergence"],
+            "extraData": {},
+        },
     ]
