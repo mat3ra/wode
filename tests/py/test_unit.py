@@ -1,9 +1,8 @@
 import pytest
+from fixtures import execution_unit_config
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode import ExecutionUnit, Unit
-
-from fixtures import execution_unit_config
 
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
@@ -83,3 +82,26 @@ def test_add_context():
             "extraData": {},
         },
     ]
+
+
+def test_add_context_from_provider_yield_wraps_scalar_data():
+    config = execution_unit_config(APPLICATION_ESPRESSO, "band_gap", "pw_scf")
+    unit = ExecutionUnit(**{**config, "name": "relaxation step"})
+
+    unit.add_context(
+        {
+            "degauss": 0.001,
+            "isDegaussEdited": False,
+            "degaussExtraData": {"units": "Ry"},
+            "isUsingJinjaVariables": True,
+        }
+    )
+
+    assert unit.get_context("degauss") == 0.001
+    assert unit.get_context_item("degauss") == {
+        "name": "degauss",
+        "isEdited": False,
+        "data": {"value": 0.001},
+        "extraData": {"units": "Ry"},
+    }
+    assert any(item.get("name") == "degauss" for item in unit.context)
