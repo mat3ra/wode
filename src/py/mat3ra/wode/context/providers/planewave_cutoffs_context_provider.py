@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from mat3ra.ade.context.context_provider import ContextProvider
+from .base.context_provider import ContextProvider
 from mat3ra.esse.models.context_providers_directory.planewave_cutoffs_context_provider import (
     PlanewaveCutoffsContextProviderSchema,
 )
