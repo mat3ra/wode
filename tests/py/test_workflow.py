@@ -199,8 +199,8 @@ def test_set_unit(method):
     assert success is True
 
     updated_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
-    assert updated_unit.get_context("test_key") == "test_value"
-    assert updated_unit.get_context("another_key") == 42
+    assert updated_unit.get_context_item_data("test_key") == "test_value"
+    assert updated_unit.get_context_item_data("another_key") == 42
 
 
 @pytest.mark.parametrize("workflow, app", [("band_gap", "espresso")])

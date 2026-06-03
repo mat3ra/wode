@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional
 
 from mat3ra.ade import Application, Executable, Flavor
 from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema, ContextItemSchema
@@ -49,16 +49,18 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
                 return item
         return None
 
+    def get_context_item_data(self, name: str, default: Any = None) -> Any:
+        if default is None:
+            default = {}
+        item = self.get_context_item(name)
+        return item.get("data", default) if item else default
+
     def add_context(self, item: Dict[str, Any]) -> None:
         existing_item = self.get_context_item(item["name"])
         if existing_item:
             existing_item.update(item)
         else:
             self.context.append(item)
-
-    def get_context(self, name: str, default: Any = None) -> Any:
-        item = self.get_context_item(name)
-        return item.get("data", default) if item else default
 
     def remove_context(self, name: str) -> None:
         self.context = [item for item in self.context if self._context_item_name(item) != name]
