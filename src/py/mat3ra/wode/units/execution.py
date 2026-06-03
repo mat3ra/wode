@@ -1,19 +1,17 @@
 from typing import Any, Dict, List, Literal, Optional
 
 from mat3ra.ade import Application, Executable, Flavor
-from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema, ContextItemSchema
+from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema
 from mat3ra.utils import (
     calculate_hash_from_object,
     remove_comments_from_source_code,
     remove_empty_lines_from_string,
 )
 from mat3ra.utils.extra.jinja import replace_in_text
-from pydantic import Field, field_validator
+from pydantic import Field, SerializeAsAny, field_validator
 
 from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
-
-Context = List[ContextItemSchema]
 
 class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
@@ -21,7 +19,7 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
     executable: Executable
     flavor: Flavor
     input: List[ExecutionUnitInput] = Field(default_factory=list)
-    context: Context = Field(default_factory=list)
+    context: List[SerializeAsAny[Dict[str, Any]]] = Field(default_factory=list)
 
     @field_validator("input", mode="before")
     @classmethod

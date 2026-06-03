@@ -43,7 +43,7 @@ class Subworkflow(
     )
     properties: List[str] = Field(default_factory=list)
     model: SerializeAsAny[Model] = Field(default_factory=DFTModel)
-    units: List[Union[Unit, ExecutionUnit, SubworkflowUnit]] = Field(default_factory=list)
+    units: List[SerializeAsAny[Union[Unit, ExecutionUnit, SubworkflowUnit]]] = Field(default_factory=list)
 
     @field_validator("model", mode="before")
     @classmethod
