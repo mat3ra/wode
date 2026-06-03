@@ -67,16 +67,6 @@ class ConvergenceMixin:
                     return unit
         return None
 
-    @staticmethod
-    def _merge_convergence_context(unit_context: Dict[str, Any], convergence_context: Dict[str, Any]) -> Dict[str, Any]:
-        merged_context = dict(unit_context)
-        merged_kgrid_context = dict(unit_context.get("kgrid") or {})
-        merged_kgrid_context.update(convergence_context.get("kgrid") or {})
-        merged_context.update(convergence_context)
-        if merged_kgrid_context:
-            merged_context["kgrid"] = merged_kgrid_context
-        return merged_context
-
     def _build_convergence_units(
         self,
         parameter_name: str,
@@ -185,9 +175,11 @@ class ConvergenceMixin:
             )
             and reciprocal_vector_ratios is None
         ):
-            reciprocal_vector_ratios = PointsGridDataProvider(
-                context={item["name"]: item["data"] for item in unit_for_convergence.context}
-            ).get_reciprocal_vector_ratios()
+            kgrid_item = unit_for_convergence.get_context_item("kgrid")
+            provider_context = {"kgrid": kgrid_item["data"]} if kgrid_item else None
+            reciprocal_vector_ratios = PointsGridDataProvider().get_reciprocal_vector_ratios(
+                context=provider_context,
+            )
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 
@@ -198,11 +190,7 @@ class ConvergenceMixin:
             reciprocal_vector_ratios=reciprocal_vector_ratios,
         )
 
-        merged_context = self._merge_convergence_context(
-            {item["name"]: item["data"] for item in unit_for_convergence.context},
-            parameter.unit_context,
-        )
-        unit_for_convergence.set_context(merged_context)
+        unit_for_convergence.add_context(parameter.unit_context)
 
         self._build_convergence_units(
             parameter_name=parameter.name,
@@ -266,7 +254,7 @@ class ConvergenceMixin:
             execution_unit.replace_in_input_content(
                 pattern, f"{parameter_name} = {scope_reference}", input_name=input_name
             )
-            execution_unit.add_context({parameter_name: parameter_initial})
+            execution_unit.add_context(parameter_name, parameter_initial, is_edited=True)
 
         self._build_convergence_units(
             parameter_name=parameter_name,
