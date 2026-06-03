@@ -18,9 +18,9 @@ Context = List[ContextItemSchema]
 
 class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
-    executable: Executable = None
-    flavor: Flavor = None
-    application: Application = None
+    application: Application
+    executable: Executable
+    flavor: Flavor
     input: List[ExecutionUnitInput] = Field(default_factory=list)
     context: Context = Field(default_factory=list)
 
