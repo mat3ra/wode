@@ -106,7 +106,7 @@ def test_set_unit_keeps_rendered_input_for_context_only_update(method):
 
     unit_to_modify.add_context({"name": "test_key", "data": "test_value"})
     unit_to_modify.add_context({"name": "another_key", "data": 42})
-    unit_to_modify.add_context_provider(PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True))
+    unit_to_modify.add_context(PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True).yield_data())
 
     if method == "only_new_unit":
         success = relaxation_subworkflow.set_unit(unit_to_modify)

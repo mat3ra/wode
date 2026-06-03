@@ -61,8 +61,8 @@ def test_add_context():
     assert "relax" in unit.name.lower()
     assert unit.context == []
 
-    unit.add_context("kgrid", NEW_CONTEXT_RELAX["kgrid"], is_edited=False)
-    unit.add_context("convergence", NEW_CONTEXT_RELAX["convergence"], is_edited=False)
+    unit.add_context({"name": "kgrid", "data": NEW_CONTEXT_RELAX["kgrid"], "isEdited": False})
+    unit.add_context({"name": "convergence", "data": NEW_CONTEXT_RELAX["convergence"], "isEdited": False})
 
     assert unit.get_context("kgrid") == NEW_CONTEXT_RELAX["kgrid"]
     assert unit.get_context("convergence") == NEW_CONTEXT_RELAX["convergence"]
