@@ -184,8 +184,8 @@ def test_set_unit(method):
     unit_to_modify = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
     assert unit_to_modify is not None
 
-    unit_to_modify.add_context("test_key", "test_value")
-    unit_to_modify.add_context("another_key", 42)
+    unit_to_modify.add_context({"name": "test_key", "data": "test_value"})
+    unit_to_modify.add_context({"name": "another_key", "data": 42})
 
     if method == "only_new_unit":
         success = relaxation_subworkflow.set_unit(unit_to_modify)

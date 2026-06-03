@@ -33,6 +33,7 @@ class NonUniformKGridConvergence(UniformKGridConvergence):
         )
         return {
             "name": "kgrid",
+            "isEdited": bool(yielded.get("isKgridEdited", True)),
             "data": yielded["kgrid"],
             "extraData": yielded.get("kgridExtraData") or {},
         }

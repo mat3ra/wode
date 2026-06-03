@@ -39,18 +39,10 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
 
     @field_validator("context", mode="before")
     @classmethod
-    def _validate_context(cls, value: Any) -> List[Dict[str, Any]]:
+    def _coerce_context(cls, value: Any) -> Any:
         if value is None:
             return []
-        if not isinstance(value, list):
-            return value
-        validated_items: List[Dict[str, Any]] = []
-        for item in value:
-            if not isinstance(item, dict):
-                continue
-            validated_item = ContextItemSchema(**item)
-            validated_items.append(validated_item.model_dump(exclude_none=True))
-        return validated_items
+        return value
 
     @staticmethod
     def _context_item_name(item: Any) -> Optional[str]:
@@ -65,13 +57,8 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
                 return item if isinstance(item, dict) else item.model_dump()
         return None
 
-    @staticmethod
-    def create_context_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        return ContextItemSchema(**item).model_dump(exclude_none=True)
-
     def add_context(self, item: Dict[str, Any]) -> None:
-        item = self.create_context_item(item)
-        existing_item = self.get_context_item(item.get("name"))
+        existing_item = self.get_context_item(item["name"])
         if existing_item:
             existing_item.update(item)
         else:
