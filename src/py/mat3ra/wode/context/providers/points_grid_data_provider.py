@@ -1,12 +1,12 @@
 from typing import Any, Dict, List, Optional
 
-from mat3ra.ade.context.context_provider import ContextProvider
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import (
     GridMetricType,
     PointsGridDataProviderSchema,
 )
 from pydantic import Field
 
+from .base.context_provider import ContextProvider
 
 DEFAULT_KPPRA = -1
 
@@ -53,15 +53,15 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         return self.reciprocal_vector_ratios
 
     def build_data(
-        self,
-        *,
-        dimensions: Optional[List[Any]] = None,
-        shifts: Optional[List[float]] = None,
-        reciprocal_vector_ratios: Optional[List[float]] = None,
-        grid_metric_type: Optional[str] = None,
-        grid_metric_value: Optional[float] = None,
-        prefer_grid_metric: Optional[bool] = None,
-        divisor: Optional[int] = None,
+            self,
+            *,
+            dimensions: Optional[List[Any]] = None,
+            shifts: Optional[List[float]] = None,
+            reciprocal_vector_ratios: Optional[List[float]] = None,
+            grid_metric_type: Optional[str] = None,
+            grid_metric_value: Optional[float] = None,
+            prefer_grid_metric: Optional[bool] = None,
+            divisor: Optional[int] = None,
     ) -> Dict[str, Any]:
         data = dict(self.default_data)
         overrides = {
@@ -77,16 +77,16 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         return data
 
     def yield_data_with_overrides(
-        self,
-        *,
-        dimensions: Optional[List[Any]] = None,
-        shifts: Optional[List[float]] = None,
-        reciprocal_vector_ratios: Optional[List[float]] = None,
-        grid_metric_type: Optional[str] = None,
-        grid_metric_value: Optional[float] = None,
-        prefer_grid_metric: Optional[bool] = None,
-        divisor: Optional[int] = None,
-        is_using_jinja_variables: bool = False,
+            self,
+            *,
+            dimensions: Optional[List[Any]] = None,
+            shifts: Optional[List[float]] = None,
+            reciprocal_vector_ratios: Optional[List[float]] = None,
+            grid_metric_type: Optional[str] = None,
+            grid_metric_value: Optional[float] = None,
+            prefer_grid_metric: Optional[bool] = None,
+            divisor: Optional[int] = None,
+            is_using_jinja_variables: bool = False,
     ) -> Dict[str, Any]:
         context = self.yield_data(
             context={

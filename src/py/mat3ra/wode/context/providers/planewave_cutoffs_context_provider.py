@@ -6,6 +6,8 @@ from mat3ra.esse.models.context_providers_directory.planewave_cutoffs_context_pr
 )
 from pydantic import Field
 
+from .base.context_provider import ContextProvider
+
 
 class PlanewaveCutoffsContextProvider(PlanewaveCutoffsContextProviderSchema, ContextProvider):
     name: str = Field(default="cutoffs")
