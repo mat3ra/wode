@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
-from mat3ra.wode import Unit
+from mat3ra.wode import ExecutionUnit, Unit
 
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
@@ -55,13 +55,14 @@ def test_next_property():
 
 
 def test_add_context():
-    unit = Unit(**{**UNIT_CONFIG_EXECUTION, "name": "relaxation step"})
+    unit = ExecutionUnit(**{**UNIT_CONFIG_EXECUTION, "name": "relaxation step"})
 
     assert unit is not None
     assert "relax" in unit.name.lower()
     assert unit.context == []
 
-    unit.add_context(NEW_CONTEXT_RELAX)
+    unit.add_context("kgrid", NEW_CONTEXT_RELAX["kgrid"], is_edited=False)
+    unit.add_context("convergence", NEW_CONTEXT_RELAX["convergence"], is_edited=False)
 
     assert unit.get_context("kgrid") == NEW_CONTEXT_RELAX["kgrid"]
     assert unit.get_context("convergence") == NEW_CONTEXT_RELAX["convergence"]
