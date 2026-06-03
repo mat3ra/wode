@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional
 
 from ...context.providers import PointsGridDataProvider
-from ...units.execution import ExecutionUnit
 from .parameter import ConvergenceParameter
 
 
@@ -24,12 +23,11 @@ class UniformKGridConvergence(ConvergenceParameter):
         yielded = self._points_grid_context(
             dimensions=[f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}"],
         )
-        return ExecutionUnit.context_item(
-            "kgrid",
-            yielded["kgrid"],
-            is_edited=True,
-            extra_data=yielded.get("kgridExtraData") or {},
-        )
+        return {
+            "name": "kgrid",
+            "data": yielded["kgrid"],
+            "extraData": yielded.get("kgridExtraData") or {},
+        }
 
     @property
     def final_value(self) -> str:

@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from ...units.execution import ExecutionUnit
 from .uniform_kgrid import UniformKGridConvergence
 
 
@@ -32,12 +31,11 @@ class NonUniformKGridConvergence(UniformKGridConvergence):
             ],
             reciprocal_vector_ratios=self._reciprocal_vector_ratios,
         )
-        return ExecutionUnit.context_item(
-            "kgrid",
-            yielded["kgrid"],
-            is_edited=True,
-            extra_data=yielded.get("kgridExtraData") or {},
-        )
+        return {
+            "name": "kgrid",
+            "data": yielded["kgrid"],
+            "extraData": yielded.get("kgridExtraData") or {},
+        }
 
     def use_variables_from_unit_context(self, flowchart_id: str) -> List[Dict[str, str]]:
         return [{"scope": flowchart_id, "name": "context"}]

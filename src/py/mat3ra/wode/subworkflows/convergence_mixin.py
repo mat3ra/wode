@@ -254,7 +254,7 @@ class ConvergenceMixin:
             execution_unit.replace_in_input_content(
                 pattern, f"{parameter_name} = {scope_reference}", input_name=input_name
             )
-            execution_unit.add_context(parameter_name, parameter_initial, is_edited=True)
+            execution_unit.add_context({"name": parameter_name, "data": parameter_initial})
 
         self._build_convergence_units(
             parameter_name=parameter_name,
