@@ -238,6 +238,19 @@ def _assert_execution_unit_context_is_webapp_shaped(unit):
             assert key in item
 
 
+def _assert_execution_units_have_application(workflow_payload):
+    for subworkflow in workflow_payload.get("subworkflows", []):
+        subworkflow_application = subworkflow.get("application")
+        for unit in subworkflow.get("units", []):
+            if unit.get("type") != EXECUTION_UNIT_TYPE:
+                continue
+            assert unit.get("application"), (
+                f"execution unit {unit.get('name')!r} must include application for web-app ExecutionUnit"
+            )
+            if subworkflow_application:
+                assert unit["application"].get("name") == subworkflow_application.get("name")
+
+
 @pytest.mark.parametrize(
     "workflow_search_name,expected_functional",
     [(name, EXPECTED_MODEL_FUNCTIONAL) for name in WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES],
@@ -253,8 +266,26 @@ def test_workflow_to_dict_is_webapp_compatible(workflow_search_name, expected_fu
     execution_units = list(_execution_units_from_payload(payload))
     assert execution_units
 
+    _assert_execution_units_have_application(payload)
+
     for unit in execution_units:
         _assert_execution_unit_context_is_webapp_shaped(unit)
+
+
+def test_execution_unit_context_survives_set_unit():
+    workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(BAND_STRUCTURE_SEARCH_NAME)
+    workflow = Workflow(**workflow_config)
+    subworkflow = workflow.subworkflows[0]
+    unit = subworkflow.get_unit_by_name(name="pw_scf")
+    assert isinstance(unit, ExecutionUnit)
+
+    from mat3ra.wode.context.providers import PointsGridDataProvider
+
+    unit.add_context(PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True).yield_data())
+    subworkflow.set_unit(unit)
+
+    payload = workflow.to_dict()
+    _assert_execution_units_have_application(payload)
 
 
 def test_workflow_to_dict_is_json_serializable_after_model_assignment():

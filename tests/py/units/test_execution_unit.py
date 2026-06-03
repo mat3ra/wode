@@ -3,12 +3,9 @@ import copy
 import pytest
 from mat3ra.wode.units.execution import ExecutionUnit
 
-UNIT_CONFIG = {
-    "type": "execution",
-    "name": "pw_scf",
-    "flowchartId": "abc-123",
-    "head": True,
-}
+from ..fixtures import execution_unit_config
+
+UNIT_CONFIG = execution_unit_config("vasp", "total_energy", "vasp")
 
 CONTENT_INCAR = "ENCUT = 500\nISMEAR = 1\n"
 CONTENT_POTCAR = "PAW_PBE Fe\n"

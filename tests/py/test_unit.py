@@ -3,6 +3,8 @@ from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode import ExecutionUnit, Unit
 
+from fixtures import execution_unit_config
+
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
 
@@ -55,7 +57,8 @@ def test_next_property():
 
 
 def test_add_context():
-    unit = ExecutionUnit(**{**UNIT_CONFIG_EXECUTION, "name": "relaxation step"})
+    config = execution_unit_config(APPLICATION_ESPRESSO, "band_gap", "pw_scf")
+    unit = ExecutionUnit(**{**config, "name": "relaxation step"})
 
     assert unit is not None
     assert "relax" in unit.name.lower()
