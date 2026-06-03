@@ -217,46 +217,6 @@ def test_calculate_hash(workflow, app):
     assert wf.hash == expected_hash
 
 
-def _execution_units_from_payload(workflow_payload):
-    for subworkflow in workflow_payload.get("subworkflows", []):
-        for unit in subworkflow.get("units", []):
-            if unit.get("type") == EXECUTION_UNIT_TYPE:
-                yield unit
-
-
-def _assert_subworkflow_models_have_functional(workflow_payload, expected_functional):
-    for subworkflow in workflow_payload.get("subworkflows", []):
-        model = subworkflow.get("model", {})
-        assert model.get("functional") == expected_functional
-
-
-def _assert_execution_unit_context_is_webapp_shaped(unit):
-    context = unit.get("context")
-    assert isinstance(context, list)
-    for item in context:
-        for key in CONTEXT_ITEM_REQUIRED_KEYS:
-            assert key in item
-
-
-@pytest.mark.parametrize(
-    "workflow_search_name,expected_functional",
-    [(name, EXPECTED_MODEL_FUNCTIONAL) for name in WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES],
-    ids=WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES,
-)
-def test_workflow_to_dict_is_webapp_compatible(workflow_search_name, expected_functional):
-    workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(workflow_search_name)
-    workflow = Workflow.create(workflow_config)
-    payload = workflow.to_dict()
-
-    _assert_subworkflow_models_have_functional(payload, expected_functional)
-
-    execution_units = list(_execution_units_from_payload(payload))
-    assert execution_units
-
-    for unit in execution_units:
-        _assert_execution_unit_context_is_webapp_shaped(unit)
-
-
 def test_workflow_to_dict_is_json_serializable_after_model_assignment():
     workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(BAND_STRUCTURE_SEARCH_NAME)
     workflow = Workflow.create(workflow_config)

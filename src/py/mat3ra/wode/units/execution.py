@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from mat3ra.ade import Application, Executable, Flavor
 from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema, ContextItemSchema
@@ -37,24 +37,16 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
         return instantiated
 
 
-    @field_validator("context", mode="before")
-    @classmethod
-    def _coerce_context(cls, value: Any) -> Any:
-        if value is None:
-            return []
-        return value
-
     @staticmethod
     def _context_item_name(item: Any) -> Optional[str]:
         if isinstance(item, dict):
             return item.get("name")
-        name = getattr(item, "name", None)
-        return str(name) if name is not None else None
+        return str(item.name)
 
     def get_context_item(self, name: str) -> Optional[Dict[str, Any]]:
         for item in self.context:
             if self._context_item_name(item) == name:
-                return item if isinstance(item, dict) else item.model_dump()
+                return item
         return None
 
     def add_context(self, item: Dict[str, Any]) -> None:
