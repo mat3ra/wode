@@ -1,42 +1,43 @@
-from typing import List, Optional, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
 from mat3ra.utils import find_by_key_or_regex
 
 from ..units import Unit
 
+UnitT = TypeVar("UnitT", bound=Unit)
 T = TypeVar("T")
 
 
-class FlowchartUnitsManager:
+class FlowchartUnitsManager(Generic[UnitT]):
     """
     Mixin class providing common unit operations for flowchart units.
 
-    This mixin expects the class to have a `units: List[Unit]` attribute.
+    This mixin expects the class to have a `units: List[UnitT]` attribute.
     It provides common methods for managing units in both Workflow and Subworkflow classes.
     """
 
-    units: List[Unit]
+    units: List[UnitT]
 
-    def set_units(self, units: List[Unit]) -> None:
+    def set_units(self, units: List[UnitT]) -> None:
         self.units = units
 
     def _set_units_order_in_place(self) -> None:
         self.set_units_head(self.units)
         self.set_next_links(self.units)
 
-    def get_unit(self, flowchart_id: str) -> Optional[Unit]:
+    def get_unit(self, flowchart_id: str) -> Optional[UnitT]:
         for unit in self.units:
             if unit.flowchartId == flowchart_id:
                 return unit
         return None
 
-    def find_unit_by_id(self, id: str) -> Optional[Unit]:
+    def find_unit_by_id(self, id: str) -> Optional[UnitT]:
         for unit in self.units:
             if getattr(unit, "id", None) == id:
                 return unit
         return None
 
-    def find_unit_with_tag(self, tag: str) -> Optional[Unit]:
+    def find_unit_with_tag(self, tag: str) -> Optional[UnitT]:
         for unit in self.units:
             if hasattr(unit, "tags") and unit.tags is not None and tag in unit.tags:
                 return unit
@@ -46,7 +47,7 @@ class FlowchartUnitsManager:
         self,
         name: Optional[str] = None,
         name_regex: Optional[str] = None,
-    ) -> Optional[Unit]:
+    ) -> Optional[UnitT]:
         return find_by_key_or_regex(self.units, key="name", value=name, value_regex=name_regex)
 
     @staticmethod
@@ -68,7 +69,7 @@ class FlowchartUnitsManager:
         else:
             items.append(item)
 
-    def set_units_head(self, units: List[Unit]) -> List[Unit]:
+    def set_units_head(self, units: List[UnitT]) -> List[UnitT]:
         """
         Set the head flag on the first unit and unset it on all others.
 
@@ -84,7 +85,7 @@ class FlowchartUnitsManager:
                 unit.head = False
         return units
 
-    def set_next_links(self, units: List[Unit]) -> List[Unit]:
+    def set_next_links(self, units: List[UnitT]) -> List[UnitT]:
         """
         Re-establishes the linked next => flowchartId logic in an array of units.
 
@@ -118,7 +119,7 @@ class FlowchartUnitsManager:
                 unit.next = None
                 break
 
-    def add_unit(self, unit: Unit, head: bool = False, index: int = -1) -> None:
+    def add_unit(self, unit: UnitT, head: bool = False, index: int = -1) -> None:
         """
         Add a unit to the units list.
 
@@ -175,8 +176,8 @@ class FlowchartUnitsManager:
 
     def set_unit(
         self,
-        new_unit: Unit,
-        unit: Optional[Unit] = None,
+        new_unit: UnitT,
+        unit: Optional[UnitT] = None,
         unit_flowchart_id: Optional[str] = None,
     ) -> bool:
         """

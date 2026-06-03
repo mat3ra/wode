@@ -12,7 +12,7 @@ from ..subworkflows import Subworkflow
 from ..units import Unit
 
 
-class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, FlowchartUnitsManager):
+class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, FlowchartUnitsManager[Unit]):
     """
     Workflow class representing a complete workflow configuration.
 

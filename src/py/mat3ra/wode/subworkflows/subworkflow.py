@@ -22,7 +22,7 @@ class Subworkflow(
     SubworkflowSchema,
     HashedEntityMixin,
     InMemoryEntitySnakeCase,
-    FlowchartUnitsManager,
+    FlowchartUnitsManager[Unit],
 ):
     """
     Subworkflow class representing a logical collection of workflow units.
