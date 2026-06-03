@@ -88,22 +88,9 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
             "extraData": extra_data or {},
         }
 
-    def _upsert_context_item(self, item: Dict[str, Any]) -> Context:
-        name = item["name"]
-        existing = self.get_context_item(name)
-        data = dict(item.get("data") or {})
-        if existing:
-            merged = dict(existing.get("data") or {})
-            merged.update(data)
-            data = merged
-        normalized: Dict[str, Any] = {
-            "name": name,
-            "isEdited": bool(item.get("isEdited", existing.get("isEdited", True) if existing else True)),
-            "data": data,
-            "extraData": item.get("extraData") or (existing.get("extraData") if existing else {}) or {},
-        }
+    def _replace_context_item(self, name: str, item: Dict[str, Any]) -> None:
         rest = [entry for entry in self.context if self._context_item_name(entry) != name]
-        return rest + [normalized]
+        self.context = rest + [item]
 
     def add_context(
         self,
@@ -115,9 +102,14 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
     ) -> None:
         if isinstance(name_or_item, dict):
             item = name_or_item
+            name = item["name"]
+            data = item.get("data")
+            is_edited = bool(item.get("isEdited", True))
+            extra_data = item.get("extraData") or {}
         else:
-            item = self.context_item(name_or_item, data, is_edited=is_edited, extra_data=extra_data)
-        self.context = self._upsert_context_item(item)
+            name = name_or_item
+        item = self.context_item(name, data, is_edited=is_edited, extra_data=extra_data)
+        self._replace_context_item(name, item)
 
     def add_context_provider(self, provider: ContextProvider) -> None:
         yielded = provider.yield_data()
