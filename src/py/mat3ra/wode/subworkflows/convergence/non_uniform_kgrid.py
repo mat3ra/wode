@@ -23,7 +23,7 @@ class NonUniformKGridConvergence(UniformKGridConvergence):
 
     @property
     def unit_context(self) -> Dict[str, Any]:
-        yielded = self._points_grid_context(
+        return self._points_grid_context(
             dimensions=[
                 f"{{{{{self.name}[0]}}}}",
                 f"{{{{{self.name}[1]}}}}",
@@ -31,12 +31,6 @@ class NonUniformKGridConvergence(UniformKGridConvergence):
             ],
             reciprocal_vector_ratios=self._reciprocal_vector_ratios,
         )
-        return {
-            "name": "kgrid",
-            "isEdited": bool(yielded.get("isKgridEdited", True)),
-            "data": yielded["kgrid"],
-            "extraData": yielded.get("kgridExtraData") or {},
-        }
 
     def use_variables_from_unit_context(self, flowchart_id: str) -> List[Dict[str, str]]:
         return [{"scope": flowchart_id, "name": "context"}]

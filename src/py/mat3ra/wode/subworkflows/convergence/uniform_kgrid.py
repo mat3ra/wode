@@ -8,11 +8,12 @@ class UniformKGridConvergence(ConvergenceParameter):
     def _points_grid_context(
         self, dimensions: List[str], reciprocal_vector_ratios: Optional[List[float]] = None
     ) -> Dict[str, Any]:
-        return PointsGridDataProvider().yield_data_with_overrides(
+        provider = PointsGridDataProvider(isEdited=True)
+        provider.data = provider.build_data(
             dimensions=dimensions,
             reciprocal_vector_ratios=reciprocal_vector_ratios,
-            is_using_jinja_variables=True,
         )
+        return provider.get_context_item_data()
 
     @property
     def increment(self) -> str:
@@ -20,15 +21,9 @@ class UniformKGridConvergence(ConvergenceParameter):
 
     @property
     def unit_context(self) -> Dict[str, Any]:
-        yielded = self._points_grid_context(
+        return self._points_grid_context(
             dimensions=[f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}", f"{{{{{self.name}}}}}"],
         )
-        return {
-            "name": "kgrid",
-            "isEdited": bool(yielded.get("isKgridEdited", True)),
-            "data": yielded["kgrid"],
-            "extraData": yielded.get("kgridExtraData") or {},
-        }
 
     @property
     def final_value(self) -> str:
