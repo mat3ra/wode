@@ -1,7 +1,8 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from mat3ra.ade import Application, Executable, Flavor
-from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema
+from mat3ra.ade.context.context_provider import ContextProvider
+from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema, ContextItemSchema
 from mat3ra.utils import (
     calculate_hash_from_object,
     remove_comments_from_source_code,
@@ -13,6 +14,7 @@ from pydantic import Field, field_validator
 from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
 
+Context = List[ContextItemSchema]
 
 class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
@@ -20,6 +22,7 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
     flavor: Flavor = None
     application: Application = None
     input: List[ExecutionUnitInput] = Field(default_factory=list)
+    context: Context = Field(default_factory=list)
 
     @field_validator("input", mode="before")
     @classmethod
@@ -33,6 +36,111 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
             elif isinstance(item, dict):
                 instantiated.append(ExecutionUnitInput(**item))
         return instantiated
+
+
+    @field_validator("context", mode="before")
+    @classmethod
+    def _validate_context(cls, value: Any) -> List[Dict[str, Any]]:
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            return value
+        return [{
+            "name": item["name"],
+            "isEdited": bool(item.get("isEdited", False)),
+            "data": item.get("data", {}),
+            "extraData": item.get("extraData") or {},
+        } for item in value if isinstance(item, dict) and item.get("name")]
+
+    @staticmethod
+    def _context_item_name(item: Any) -> Optional[str]:
+        if isinstance(item, dict):
+            return item.get("name")
+        name = getattr(item, "name", None)
+        return str(name) if name is not None else None
+
+    def get_context_item(self, name: str) -> Optional[Dict[str, Any]]:
+        for item in self.context:
+            if self._context_item_name(item) == name:
+                return item if isinstance(item, dict) else item.model_dump()
+        return None
+
+    @staticmethod
+    def _read_context_data(item: Dict[str, Any], default: Any = None) -> Any:
+        data = item.get("data", default)
+        if isinstance(data, dict) and set(data) == {"value"}:
+            return data["value"]
+        return data
+
+    @staticmethod
+    def context_item(
+        name: str,
+        data: Any,
+        *,
+        is_edited: bool = True,
+        extra_data: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        payload = data if isinstance(data, dict) else {"value": data}
+        return {
+            "name": name,
+            "isEdited": is_edited,
+            "data": payload,
+            "extraData": extra_data or {},
+        }
+
+    def _upsert_context_item(self, item: Dict[str, Any]) -> Context:
+        name = item["name"]
+        existing = self.get_context_item(name)
+        data = dict(item.get("data") or {})
+        if existing:
+            merged = dict(existing.get("data") or {})
+            merged.update(data)
+            data = merged
+        normalized: Dict[str, Any] = {
+            "name": name,
+            "isEdited": bool(item.get("isEdited", existing.get("isEdited", True) if existing else True)),
+            "data": data,
+            "extraData": item.get("extraData") or (existing.get("extraData") if existing else {}) or {},
+        }
+        rest = [entry for entry in self.context if self._context_item_name(entry) != name]
+        return rest + [normalized]
+
+    def add_context(
+        self,
+        name_or_item: Union[str, Dict[str, Any]],
+        data: Any = None,
+        *,
+        is_edited: bool = True,
+        extra_data: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        if isinstance(name_or_item, dict):
+            item = name_or_item
+        else:
+            item = self.context_item(name_or_item, data, is_edited=is_edited, extra_data=extra_data)
+        self.context = self._upsert_context_item(item)
+
+    def add_context_provider(self, provider: ContextProvider) -> None:
+        yielded = provider.yield_data()
+        name = provider.name_str
+        self.add_context(
+            name,
+            yielded[name],
+            is_edited=bool(yielded.get(provider.is_edited_key, False)),
+            extra_data=yielded.get(provider.extra_data_key) or {},
+        )
+
+    def set_context(self, items: Context) -> None:
+        self.context = items
+
+    def get_context(self, name: str, default: Any = None) -> Any:
+        item = self.get_context_item(name)
+        return self._read_context_data(item, default) if item else default
+
+    def remove_context(self, name: str) -> None:
+        self.context = [item for item in self.context if self._context_item_name(item) != name]
+
+    def clear_context(self) -> None:
+        self.context = []
 
     def replace_in_input_content(self, pattern: str, replacement: str, input_name=None) -> None:
         for item in self.input:
