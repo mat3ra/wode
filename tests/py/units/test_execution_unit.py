@@ -2,8 +2,7 @@ import copy
 
 import pytest
 from mat3ra.wode.units.execution import ExecutionUnit
-
-from ..fixtures import execution_unit_config
+from fixtures import execution_unit_config
 
 UNIT_CONFIG = execution_unit_config("vasp", "total_energy", "vasp")
 
