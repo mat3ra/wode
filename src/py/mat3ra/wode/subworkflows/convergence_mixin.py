@@ -5,7 +5,7 @@ from mat3ra.utils.extra.jinja import JINJA_EXPRESSION_PATTERN, NUMERIC_VALUE_PAT
 
 from .convergence.factory import create_convergence_parameter
 from ..context.providers import PointsGridDataProvider
-from ..units import Unit
+from ..units import ExecutionUnit, Unit
 
 CONVERGENCE_PARAMETER_TAG = "hasConvergenceParam"
 CONVERGENCE_RESULT_TAG = "hasConvergenceResult"
@@ -190,7 +190,10 @@ class ConvergenceMixin:
             reciprocal_vector_ratios=reciprocal_vector_ratios,
         )
 
-        unit_for_convergence.add_context(parameter.unit_context)
+        if isinstance(unit_for_convergence, ExecutionUnit):
+            context_name = parameter.unit_context.get("name")
+            current_context = [item for item in unit_for_convergence.context if item.get("name") != context_name]
+            unit_for_convergence.set_context(current_context + [parameter.unit_context])
 
         self._build_convergence_units(
             parameter_name=parameter.name,
@@ -254,7 +257,10 @@ class ConvergenceMixin:
             execution_unit.replace_in_input_content(
                 pattern, f"{parameter_name} = {scope_reference}", input_name=input_name
             )
-            execution_unit.add_context({"name": parameter_name, "data": parameter_initial})
+            if isinstance(execution_unit, ExecutionUnit):
+                context_item = {"name": parameter_name, "data": parameter_initial}
+                current_context = [item for item in execution_unit.context if item.get("name") != parameter_name]
+                execution_unit.set_context(current_context + [context_item])
 
         self._build_convergence_units(
             parameter_name=parameter_name,

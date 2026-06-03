@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Literal, Optional
 
 from mat3ra.ade import Application, Executable, Flavor
-from mat3ra.ade.context.context_provider import ContextProvider
 from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema, ContextItemSchema
 from mat3ra.utils import (
     calculate_hash_from_object,
@@ -67,74 +66,22 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
 
     @staticmethod
     def _read_context_data(item: Dict[str, Any], default: Any = None) -> Any:
-        data = item.get("data", default)
-        if isinstance(data, dict) and set(data) == {"value"}:
-            return data["value"]
-        return data
-
-    @staticmethod
-    def context_item(
-        name: str,
-        data: Any,
-        *,
-        is_edited: bool = True,
-        extra_data: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
-        payload = data if isinstance(data, dict) else {"value": data}
-        return {
-            "name": name,
-            "isEdited": is_edited,
-            "data": payload,
-            "extraData": extra_data or {},
-        }
-
-    def _replace_context_item(self, name: str, item: Dict[str, Any]) -> None:
-        rest = [entry for entry in self.context if self._context_item_name(entry) != name]
-        self.context = rest + [item]
-
-    @staticmethod
-    def _normalized_context_item(item: Dict[str, Any]) -> Dict[str, Any]:
-        if "name" in item:
-            return ExecutionUnit.context_item(
-                item["name"],
-                item.get("data"),
-                is_edited=bool(item.get("isEdited", True)),
-                extra_data=item.get("extraData") or {},
-            )
-        return ExecutionUnit._context_item_from_provider_yield(item)
-
-    @staticmethod
-    def _context_item_from_provider_yield(yielded: Dict[str, Any]) -> Dict[str, Any]:
-        name = None
-        data = None
-        is_edited = True
-        extra_data: Dict[str, Any] = {}
-        for key, value in yielded.items():
-            if key == "isUsingJinjaVariables":
-                continue
-            if key.startswith("is") and key.endswith("Edited"):
-                is_edited = bool(value)
-                continue
-            if key.endswith("ExtraData"):
-                extra_data = value or {}
-                continue
-            if name is not None:
-                raise ValueError("yield_data() must contain a single provider data key")
-            name = key
-            data = value
-        if name is None:
-            raise ValueError("yield_data() must contain a provider data key")
-        return ExecutionUnit.context_item(name, data, is_edited=is_edited, extra_data=extra_data)
-
-    def add_context(self, item: Dict[str, Any]) -> None:
-        normalized = self._normalized_context_item(item)
-        self._replace_context_item(normalized["name"], normalized)
-
-    def add_context_provider(self, provider: ContextProvider) -> None:
-        self.add_context(provider.yield_data())
+        return item.get("data", default)
 
     def set_context(self, items: Context) -> None:
-        self.context = items
+        normalized = []
+        for item in items or []:
+            if not isinstance(item, dict) or not item.get("name"):
+                continue
+            normalized.append(
+                {
+                    "name": item["name"],
+                    "isEdited": bool(item.get("isEdited", True)),
+                    "data": item.get("data", {}),
+                    "extraData": item.get("extraData") or {},
+                }
+            )
+        self.context = normalized
 
     def get_context(self, name: str, default: Any = None) -> Any:
         item = self.get_context_item(name)
