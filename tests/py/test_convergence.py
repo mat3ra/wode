@@ -218,7 +218,9 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     ]
 
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
-    assert pw_scf.get_context_item_data(param_name) == param_initial
+    init_parameter = subworkflow.get_unit_by_name(name="init parameter")
+    assert init_parameter.operand == param_name
+    assert init_parameter.value == param_initial
     input_item = pw_scf.input[0]
     template_content = input_item.template.content
     assert f"{param_name} = {{% raw %}}{{{{ {param_name} }}}}{{% endraw %}}" in template_content
@@ -257,8 +259,11 @@ def test_add_template_param_convergence_multi_unit():
     pw_scf = subworkflow.get_unit_by_name("pw_scf")
     pw_bands = subworkflow.get_unit_by_name("pw_bands")
 
+    init_parameter = subworkflow.get_unit_by_name(name="init parameter")
+    assert init_parameter.operand == "ecutwfc"
+    assert init_parameter.value == 20
+
     for unit in [pw_scf, pw_bands]:
-        assert unit.get_context_item_data("ecutwfc") == 20
         input_item = unit.input[0]
         template_content = input_item.template.content
         assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content
