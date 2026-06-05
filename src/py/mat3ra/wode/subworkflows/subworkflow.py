@@ -49,7 +49,7 @@ class Subworkflow(
     @classmethod
     def _instantiate_model(cls, value: Any) -> Any:
         if isinstance(value, Model):
-            return ModelFactory.create(value.to_dict())
+            value = value.to_dict()
         if isinstance(value, dict):
             return ModelFactory.create(value)
         return value
