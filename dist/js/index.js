@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utils = exports.globalSettings = exports.PointsPathFormDataProvider = exports.defaultMapConfig = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.ExecutionUnit = exports.BaseUnit = exports.WORKFLOW_STATUSES = exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.UnitFactory = exports.Workflow = exports.Subworkflow = void 0;
+exports.utils = exports.globalSettings = exports.PointsPathFormDataProvider = exports.defaultMapConfig = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ErrorUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.ExecutionUnit = exports.BaseUnit = exports.WORKFLOW_STATUSES = exports.UNIT_NAME_INVALID_CHARS = exports.TAB_NAVIGATION_CONFIG = exports.UnitFactory = exports.Workflow = exports.Subworkflow = void 0;
 const PointsPathFormDataProvider_1 = __importDefault(require("./context/providers/PointsPath/PointsPathFormDataProvider"));
 exports.PointsPathFormDataProvider = PointsPathFormDataProvider_1.default;
 const settings_1 = require("./context/providers/settings");
@@ -52,6 +52,7 @@ Object.defineProperty(exports, "AssertionUnit", { enumerable: true, get: functio
 Object.defineProperty(exports, "AssignmentUnit", { enumerable: true, get: function () { return units_1.AssignmentUnit; } });
 Object.defineProperty(exports, "BaseUnit", { enumerable: true, get: function () { return units_1.BaseUnit; } });
 Object.defineProperty(exports, "ConditionUnit", { enumerable: true, get: function () { return units_1.ConditionUnit; } });
+Object.defineProperty(exports, "ErrorUnit", { enumerable: true, get: function () { return units_1.ErrorUnit; } });
 Object.defineProperty(exports, "ExecutionUnit", { enumerable: true, get: function () { return units_1.ExecutionUnit; } });
 Object.defineProperty(exports, "IOUnit", { enumerable: true, get: function () { return units_1.IOUnit; } });
 Object.defineProperty(exports, "MapUnit", { enumerable: true, get: function () { return units_1.MapUnit; } });

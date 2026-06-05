@@ -9,6 +9,7 @@ export declare const UNIT_TYPES: {
     readonly subworkflow: "subworkflow";
     readonly io: "io";
     readonly assertion: "assertion";
+    readonly error: "error";
 };
 export declare enum UnitType {
     convergence = "convergence",
@@ -20,7 +21,8 @@ export declare enum UnitType {
     condition = "condition",
     subworkflow = "subworkflow",
     io = "io",
-    assertion = "assertion"
+    assertion = "assertion",
+    error = "error"
 }
 export declare enum UnitTag {
     hasConvergenceParam = "hasConvergenceParam",

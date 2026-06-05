@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UnitFactory = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ExecutionUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.BaseUnit = void 0;
+exports.UnitFactory = exports.SubworkflowUnit = exports.ReduceUnit = exports.MapUnit = exports.IOUnit = exports.ExecutionUnit = exports.ErrorUnit = exports.ConditionUnit = exports.AssignmentUnit = exports.AssertionUnit = exports.BaseUnit = void 0;
 const AssertionUnit_1 = __importDefault(require("./AssertionUnit"));
 exports.AssertionUnit = AssertionUnit_1.default;
 const AssignmentUnit_1 = __importDefault(require("./AssignmentUnit"));
@@ -12,6 +12,8 @@ const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 exports.BaseUnit = BaseUnit_1.default;
 const ConditionUnit_1 = __importDefault(require("./ConditionUnit"));
 exports.ConditionUnit = ConditionUnit_1.default;
+const ErrorUnit_1 = __importDefault(require("./ErrorUnit"));
+exports.ErrorUnit = ErrorUnit_1.default;
 const ExecutionUnit_1 = __importDefault(require("./ExecutionUnit"));
 exports.ExecutionUnit = ExecutionUnit_1.default;
 const factory_1 = require("./factory");

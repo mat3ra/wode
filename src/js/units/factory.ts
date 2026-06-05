@@ -3,6 +3,7 @@ import type {
     AssignmentUnitSchema,
     ConditionUnitSchema,
     DataIOUnitSchema,
+    ErrorUnitSchema,
     ExecutionUnitSchema,
     MapUnitSchema,
     ReduceUnitSchema,
@@ -14,6 +15,7 @@ import { UnitType } from "../enums";
 import AssertionUnit, { type AssertionUnitConfig } from "./AssertionUnit";
 import AssignmentUnit, { type AssignmentUnitConfig } from "./AssignmentUnit";
 import ConditionUnit, { type ConditionUnitConfig } from "./ConditionUnit";
+import ErrorUnit, { type ErrorUnitConfig } from "./ErrorUnit";
 import ExecutionUnit, { type ExecutionUnitConfig } from "./ExecutionUnit";
 import IOUnit, { type IOUnitConfig } from "./IOUnit";
 import MapUnit from "./MapUnit";
@@ -29,20 +31,23 @@ export type AnySubworkflowUnit =
     | AssignmentUnit
     | ConditionUnit
     | IOUnit
-    | AssertionUnit;
+    | AssertionUnit
+    | ErrorUnit;
 
 export type AnySubworkflowUnitSchema =
     | ExecutionUnitSchema
     | AssertionUnitSchema
     | AssignmentUnitSchema
     | ConditionUnitSchema
-    | DataIOUnitSchema;
+    | DataIOUnitSchema
+    | ErrorUnitSchema;
 
 type ExcutionConfig = ExecutionUnitConfig & Pick<ExecutionUnitSchema, "type">;
 type AssignmentConfig = AssignmentUnitConfig & Pick<AssignmentUnitSchema, "type">;
 type ConditionConfig = ConditionUnitConfig & Pick<ConditionUnitSchema, "type">;
 type IOConfig = IOUnitConfig & Pick<DataIOUnitSchema, "type">;
 type AssertionConfig = AssertionUnitConfig & Pick<AssertionUnitSchema, "type">;
+type ErrorConfig = ErrorUnitConfig & Pick<ErrorUnitSchema, "type">;
 
 /** Subworkflow unit kinds supported by {@link UnitFactory.createDefaultSubworkflowUnit}. */
 export type DefaultSubworkflowUnitType =
@@ -111,7 +116,13 @@ export class UnitFactory {
     }
 
     static createInSubworkflow(
-        config: ExcutionConfig | AssignmentConfig | ConditionConfig | IOConfig | AssertionConfig,
+        config:
+            | ExcutionConfig
+            | AssignmentConfig
+            | ConditionConfig
+            | IOConfig
+            | AssertionConfig
+            | ErrorConfig,
     ): AnySubworkflowUnit {
         switch (config.type) {
             case UnitType.execution:
@@ -124,6 +135,8 @@ export class UnitFactory {
                 return new IOUnit(config);
             case UnitType.assertion:
                 return new AssertionUnit(config);
+            case UnitType.error:
+                return new ErrorUnit(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }
