@@ -94,6 +94,7 @@ extend_skip_glob = ["dist/*"]
 [tool.pytest.ini_options]
 pythonpath = [
     "src/py",
+    "tests/py",
 ]
 testpaths = [
     "tests/py"

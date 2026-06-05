@@ -2,10 +2,11 @@ import pytest
 from mat3ra.ade.application import Application
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
+from mat3ra.mode.models.dft import DFTModel
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
 
-from mat3ra.wode import Subworkflow, Unit, Workflow
+from mat3ra.wode import Subworkflow, Unit, Workflow, ExecutionUnit
 from mat3ra.wode.context.providers import PointsGridDataProvider
 
 SUBWORKFLOW_NAME = "Total Energy"
@@ -23,6 +24,8 @@ UNIT_CONFIG = {
     "flowchartId": "unit-flowchart-id",
     "head": True,
 }
+DFT_METHOD_CONFIG = {"type": "pseudopotential", "subtype": "us"}
+DFT_MODEL_CONFIG_WITHOUT_FUNCTIONAL = {"type": "dft", "subtype": "gga", "method": DFT_METHOD_CONFIG}
 
 
 def test_creation():
@@ -52,6 +55,14 @@ def test_model(model_type, model_subtype):
     sw = Subworkflow(name=SUBWORKFLOW_NAME, model=model)
     assert sw.model.type == model_type
     assert sw.model.subtype == model_subtype
+
+
+@pytest.mark.parametrize("config", [DFT_MODEL_CONFIG_WITHOUT_FUNCTIONAL])
+def test_model_assignment_is_coerced_to_dft_model_with_default_functional(config):
+    subworkflow = Subworkflow(name=SUBWORKFLOW_NAME)
+    subworkflow.model = Model(**config)
+    assert isinstance(subworkflow.model, DFTModel)
+    assert subworkflow.model.to_dict().get("functional") == "pbe"
 
 
 def test_with_units():
@@ -89,13 +100,14 @@ def test_set_unit_keeps_rendered_input_for_context_only_update(method):
     relaxation_subworkflow = wf.subworkflows[0]
     unit_to_modify = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
     assert unit_to_modify is not None
+    assert isinstance(unit_to_modify, ExecutionUnit)
 
     original_rendered = unit_to_modify.input[0].rendered
 
-    unit_to_modify.add_context({"test_key": "test_value", "another_key": 42})
-    unit_to_modify.add_context(
-        PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True).yield_data()
-    )
+    unit_to_modify.add_context({"name": "test_key", "data": "test_value"})
+    unit_to_modify.add_context({"name": "another_key", "data": 42})
+    points_grid_provider = PointsGridDataProvider(dimensions=[2, 2, 1], isEdited=True)
+    unit_to_modify.add_context(points_grid_provider.get_context_item_data())
 
     if method == "only_new_unit":
         success = relaxation_subworkflow.set_unit(unit_to_modify)
@@ -109,7 +121,7 @@ def test_set_unit_keeps_rendered_input_for_context_only_update(method):
     assert success is True
 
     updated_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
-    assert updated_unit.context["test_key"] == "test_value"
-    assert updated_unit.context["another_key"] == 42
-    assert updated_unit.context["kgrid"]["dimensions"] == [2, 2, 1]
+    assert updated_unit.get_context_item_data("test_key") == "test_value"
+    assert updated_unit.get_context_item_data("another_key") == 42
+    assert updated_unit.get_context_item_data("kgrid")["dimensions"] == [2, 2, 1]
     assert updated_unit.input[0].rendered == original_rendered

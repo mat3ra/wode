@@ -32,6 +32,20 @@ UNIT_CONFIG = {
     "head": True,
 }
 
+BAND_STRUCTURE_SEARCH_NAME = "band_structure"
+BAND_GAP_SEARCH_NAME = "espresso/band_gap\\.json$"
+TOTAL_ENERGY_SEARCH_NAME = "total_energy"
+
+EXPECTED_MODEL_FUNCTIONAL = "pbe"
+EXECUTION_UNIT_TYPE = "execution"
+CONTEXT_ITEM_REQUIRED_KEYS = ("name", "isEdited", "data", "extraData")
+
+WEBAPP_COMPATIBLE_WORKFLOW_SEARCH_NAMES = [
+    BAND_STRUCTURE_SEARCH_NAME,
+    BAND_GAP_SEARCH_NAME,
+    TOTAL_ENERGY_SEARCH_NAME,
+]
+
 
 def test_creation():
     wf = Workflow(name=WORKFLOW_NAME)
@@ -162,28 +176,29 @@ def test_set_unit(method):
 
     wf.add_relaxation()
 
-    unit_to_modify = wf.get_unit_by_name(name_regex="relax")
+    relaxation_subworkflow = wf._find_relaxation_subworkflow()
+    assert relaxation_subworkflow is not None
+
+    unit_to_modify = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
     assert unit_to_modify is not None
 
-    new_context = {"test_key": "test_value", "another_key": 42}
-    unit_to_modify.add_context(new_context)
+    unit_to_modify.add_context({"name": "test_key", "data": "test_value"})
+    unit_to_modify.add_context({"name": "another_key", "data": 42})
 
     if method == "only_new_unit":
-        success = wf.set_unit(unit_to_modify)
+        success = relaxation_subworkflow.set_unit(unit_to_modify)
     elif method == "with_unit_instance":
-        original_unit = wf.get_unit_by_name(name_regex="relax")
-        success = wf.set_unit(unit_to_modify, unit=original_unit)
+        original_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
+        success = relaxation_subworkflow.set_unit(unit_to_modify, unit=original_unit)
     elif method == "with_flowchart_id":
         flowchart_id = unit_to_modify.flowchartId
-        success = wf.set_unit(unit_to_modify, unit_flowchart_id=flowchart_id)
+        success = relaxation_subworkflow.set_unit(unit_to_modify, unit_flowchart_id=flowchart_id)
 
     assert success is True
 
-    updated_unit = wf.get_unit_by_name(name_regex="relax")
-    assert "test_key" in updated_unit.context
-    assert "another_key" in updated_unit.context
-    assert updated_unit.context["test_key"] == "test_value"
-    assert updated_unit.context["another_key"] == 42
+    updated_unit = relaxation_subworkflow.get_unit_by_name(name_regex="relax")
+    assert updated_unit.get_context_item_data("test_key") == "test_value"
+    assert updated_unit.get_context_item_data("another_key") == 42
 
 
 @pytest.mark.parametrize("workflow, app", [("band_gap", "espresso")])
@@ -198,3 +213,4 @@ def test_calculate_hash(workflow, app):
     fixture = next(w for w in workflows if w["name"] == BAND_GAP_WORKFLOW_NAME)
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
+

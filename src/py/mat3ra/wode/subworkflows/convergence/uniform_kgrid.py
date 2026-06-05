@@ -8,11 +8,12 @@ class UniformKGridConvergence(ConvergenceParameter):
     def _points_grid_context(
         self, dimensions: List[str], reciprocal_vector_ratios: Optional[List[float]] = None
     ) -> Dict[str, Any]:
-        return PointsGridDataProvider().yield_data_with_overrides(
+        provider = PointsGridDataProvider(isEdited=True)
+        provider.data = provider.build_data(
             dimensions=dimensions,
             reciprocal_vector_ratios=reciprocal_vector_ratios,
-            is_using_jinja_variables=True,
         )
+        return provider.get_context_item_data()
 
     @property
     def increment(self) -> str:

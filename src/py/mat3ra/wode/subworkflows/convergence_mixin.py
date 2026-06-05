@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Protocol, cast
 
 from mat3ra.esse.models.workflow.subworkflow.convergence.enum_options import ConvergenceParameterNameEnum
 from mat3ra.utils.extra.jinja import JINJA_EXPRESSION_PATTERN, NUMERIC_VALUE_PATTERN, wrap_text_in_raw_block
-
 from .convergence.factory import create_convergence_parameter
 from ..context.providers import PointsGridDataProvider
 from ..units import Unit
@@ -67,15 +66,6 @@ class ConvergenceMixin:
                     return unit
         return None
 
-    @staticmethod
-    def _merge_convergence_context(unit_context: Dict[str, Any], convergence_context: Dict[str, Any]) -> Dict[str, Any]:
-        merged_context = dict(unit_context)
-        merged_kgrid_context = dict(unit_context.get("kgrid") or {})
-        merged_kgrid_context.update(convergence_context.get("kgrid") or {})
-        merged_context.update(convergence_context)
-        if merged_kgrid_context:
-            merged_context["kgrid"] = merged_kgrid_context
-        return merged_context
 
     def _build_convergence_units(
         self,
@@ -153,6 +143,17 @@ class ConvergenceMixin:
         host.add_unit(next_step)
         host.add_unit(exit_unit)
 
+        param_init.next = prev_result_init.flowchartId
+        prev_result_init.next = iter_init.flowchartId
+        iter_init.next = execution_unit_flowchart_id
+
+        execution_unit = host.get_unit(execution_unit_flowchart_id)
+        if execution_unit is not None:
+            execution_unit.next = store_result.flowchartId
+
+        store_result.next = condition_unit.flowchartId
+        store_prev_result.next = next_iter.flowchartId
+        next_iter.next = next_step.flowchartId
         next_step.next = execution_unit_flowchart_id
 
     def add_convergence(
@@ -185,9 +186,12 @@ class ConvergenceMixin:
             )
             and reciprocal_vector_ratios is None
         ):
-            reciprocal_vector_ratios = PointsGridDataProvider(
-                context=unit_for_convergence.context
-            ).get_reciprocal_vector_ratios()
+            kgrid_item = unit_for_convergence.get_context_item("kgrid")
+            provider = PointsGridDataProvider(
+                data=kgrid_item.get("data"),
+                is_edited=kgrid_item.get("isEdited"),
+            )
+            reciprocal_vector_ratios = provider.get_reciprocal_vector_ratios()
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 
@@ -198,11 +202,7 @@ class ConvergenceMixin:
             reciprocal_vector_ratios=reciprocal_vector_ratios,
         )
 
-        merged_context = self._merge_convergence_context(
-            unit_for_convergence.context,
-            parameter.unit_context,
-        )
-        unit_for_convergence.set_context(merged_context)
+        unit_for_convergence.add_context(parameter.unit_context)
 
         self._build_convergence_units(
             parameter_name=parameter.name,
@@ -266,7 +266,6 @@ class ConvergenceMixin:
             execution_unit.replace_in_input_content(
                 pattern, f"{parameter_name} = {scope_reference}", input_name=input_name
             )
-            execution_unit.add_context({parameter_name: parameter_initial})
 
         self._build_convergence_units(
             parameter_name=parameter_name,

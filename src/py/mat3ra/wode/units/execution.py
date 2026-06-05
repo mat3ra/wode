@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 from mat3ra.ade import Application, Executable, Flavor
 from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema
@@ -8,7 +8,7 @@ from mat3ra.utils import (
     remove_empty_lines_from_string,
 )
 from mat3ra.utils.extra.jinja import replace_in_text
-from pydantic import Field, field_validator
+from pydantic import Field, SerializeAsAny, field_validator
 
 from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
@@ -16,10 +16,11 @@ from .unit import Unit
 
 class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
-    executable: Executable = None
-    flavor: Flavor = None
-    application: Application = None
+    application: Application
+    executable: Executable
+    flavor: Flavor
     input: List[ExecutionUnitInput] = Field(default_factory=list)
+    context: List[SerializeAsAny[Dict[str, Any]]] = Field(default_factory=list)
 
     @field_validator("input", mode="before")
     @classmethod
@@ -33,6 +34,38 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
             elif isinstance(item, dict):
                 instantiated.append(ExecutionUnitInput(**item))
         return instantiated
+
+
+    @staticmethod
+    def _context_item_name(item: Any) -> Optional[str]:
+        if isinstance(item, dict):
+            return item.get("name")
+        return str(item.name)
+
+    def get_context_item(self, name: str) -> Optional[Dict[str, Any]]:
+        for item in self.context:
+            if self._context_item_name(item) == name:
+                return item
+        return None
+
+    def get_context_item_data(self, name: str, default: Any = None) -> Any:
+        if default is None:
+            default = {}
+        item = self.get_context_item(name)
+        return item.get("data", default) if item else default
+
+    def add_context(self, item: Dict[str, Any]) -> None:
+        existing_item = self.get_context_item(item["name"])
+        if existing_item:
+            existing_item.update(item)
+        else:
+            self.context.append(item)
+
+    def remove_context(self, name: str) -> None:
+        self.context = [item for item in self.context if self._context_item_name(item) != name]
+
+    def clear_context(self) -> None:
+        self.context = []
 
     def replace_in_input_content(self, pattern: str, replacement: str, input_name=None) -> None:
         for item in self.input:

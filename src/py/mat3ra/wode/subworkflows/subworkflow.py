@@ -9,7 +9,7 @@ from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
 from mat3ra.mode.models.factory import ModelFactory
 from mat3ra.utils.uuid import get_uuid
-from pydantic import Field, field_validator
+from pydantic import ConfigDict, Field, SerializeAsAny, field_validator
 
 from .convergence_mixin import ConvergenceMixin
 from ..mixins import FlowchartUnitsManager
@@ -22,7 +22,7 @@ class Subworkflow(
     SubworkflowSchema,
     HashedEntityMixin,
     InMemoryEntitySnakeCase,
-    FlowchartUnitsManager,
+    FlowchartUnitsManager[Unit],
 ):
     """
     Subworkflow class representing a logical collection of workflow units.
@@ -35,19 +35,21 @@ class Subworkflow(
         properties: List of properties extracted by the subworkflow
     """
 
+    model_config = ConfigDict(validate_assignment=True)
+
     id: str = Field(default_factory=get_uuid, alias="_id")
     application: Application = Field(
         default_factory=lambda: Application(name="", version="", build="", shortName="", summary="")
     )
     properties: List[str] = Field(default_factory=list)
-    model: Model = Field(default_factory=DFTModel)
-    units: List[Union[Unit, ExecutionUnit, SubworkflowUnit]] = Field(default_factory=list)
+    model: SerializeAsAny[Model] = Field(default_factory=DFTModel)
+    units: List[SerializeAsAny[Union[Unit, ExecutionUnit, SubworkflowUnit]]] = Field(default_factory=list)
 
     @field_validator("model", mode="before")
     @classmethod
     def _instantiate_model(cls, value: Any) -> Any:
         if isinstance(value, Model):
-            return value
+            value = value.to_dict()
         if isinstance(value, dict):
             return ModelFactory.create(value)
         return value

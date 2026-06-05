@@ -1,7 +1,9 @@
 import pytest
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
-from mat3ra.wode import Unit
+
+from fixtures import get_execution_unit_config_by_application_workflow_unit
+from mat3ra.wode import ExecutionUnit, Unit
 
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
@@ -15,8 +17,7 @@ UNIT_NEXT_ID = "next-456"
 NEW_CONTEXT_RELAX = {"kgrid": {"density": 0.5}, "convergence": {"threshold": 1e-6}}
 
 UNIT_CONFIG_EXECUTION = {
-    "type": "execution",
-    "name": "pw_scf",
+    **get_execution_unit_config_by_application_workflow_unit(APPLICATION_ESPRESSO, "total_energy", "pw_scf"),
     "flowchartId": UNIT_FLOWCHART_ID,
     "head": True,
 }
@@ -55,14 +56,18 @@ def test_next_property():
 
 
 def test_add_context():
-    unit = Unit(**{**UNIT_CONFIG_EXECUTION, "name": "relaxation step"})
+    unit = ExecutionUnit(**{**UNIT_CONFIG_EXECUTION, "name": "relaxation step"})
 
     assert unit is not None
     assert "relax" in unit.name.lower()
+    assert unit.context == []
 
-    unit.add_context(NEW_CONTEXT_RELAX)
+    unit.add_context({"name": "kgrid", "data": NEW_CONTEXT_RELAX["kgrid"], "isEdited": False})
+    unit.add_context({"name": "convergence", "data": NEW_CONTEXT_RELAX["convergence"], "isEdited": False})
 
-    assert "kgrid" in unit.context
-    assert "convergence" in unit.context
-    assert unit.context["kgrid"] == NEW_CONTEXT_RELAX["kgrid"]
-    assert unit.context["convergence"] == NEW_CONTEXT_RELAX["convergence"]
+    assert unit.get_context_item_data("kgrid") == NEW_CONTEXT_RELAX["kgrid"]
+    assert unit.get_context_item_data("convergence") == NEW_CONTEXT_RELAX["convergence"]
+    assert unit.to_dict()["context"] == [
+        {"name": "kgrid", "isEdited": False, "data": NEW_CONTEXT_RELAX["kgrid"]},
+        {"name": "convergence", "isEdited": False, "data": NEW_CONTEXT_RELAX["convergence"]},
+    ]

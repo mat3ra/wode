@@ -12,7 +12,7 @@ from ..subworkflows import Subworkflow
 from ..units import Unit
 
 
-class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, FlowchartUnitsManager):
+class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, FlowchartUnitsManager[Unit]):
     """
     Workflow class representing a complete workflow configuration.
 
@@ -62,7 +62,7 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
         new_context: Optional[Dict[str, Any]] = None,
     ):
         target_unit = self.get_unit_by_name(name=unit_name, name_regex=unit_name_regex)
-        target_unit.context = new_context
+        target_unit.set_context(new_context or [])
 
     def _find_relaxation_subworkflow(self) -> Optional[Subworkflow]:
         target_name = self.relaxation_subworkflow.name
@@ -99,5 +99,5 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
             for unit in swf.get("units", []):
                 for key in special_keys:
                     if key in unit:
-                        unit[key] = {}
+                        unit[key] = []
         return workflow_dict
