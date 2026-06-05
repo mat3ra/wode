@@ -2,10 +2,10 @@ import copy
 
 import pytest
 from mat3ra.wode.units.execution import ExecutionUnit
-from fixtures import execution_unit_config
+from fixtures import get_execution_unit_config_by_application_workflow_unit
 
 UNIT_CONFIG = {
-    **execution_unit_config("espresso", "total_energy", "pw_scf"),
+    **get_execution_unit_config_by_application_workflow_unit("espresso", "total_energy", "pw_scf"),
     "flowchartId": "abc-123",
     "head": True,
 }

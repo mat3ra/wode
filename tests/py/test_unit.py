@@ -2,7 +2,7 @@ import pytest
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode import ExecutionUnit, Unit
-from fixtures import execution_unit_config
+from fixtures import get_execution_unit_config_by_application_workflow_unit
 
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
@@ -16,7 +16,7 @@ UNIT_NEXT_ID = "next-456"
 NEW_CONTEXT_RELAX = {"kgrid": {"density": 0.5}, "convergence": {"threshold": 1e-6}}
 
 UNIT_CONFIG_EXECUTION = {
-    **execution_unit_config(APPLICATION_ESPRESSO, "total_energy", "pw_scf"),
+    **get_execution_unit_config_by_application_workflow_unit(APPLICATION_ESPRESSO, "total_energy", "pw_scf"),
     "flowchartId": UNIT_FLOWCHART_ID,
     "head": True,
 }

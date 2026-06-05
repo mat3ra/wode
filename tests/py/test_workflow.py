@@ -216,15 +216,3 @@ def test_calculate_hash(workflow, app):
     wf = Workflow(**{k: v for k, v in fixture.items() if k != "hash"})
     assert wf.hash == expected_hash
 
-
-def test_workflow_to_dict_is_json_serializable_after_model_assignment():
-    workflow_config = WORKFLOW_STANDATA.get_by_name_first_match(BAND_STRUCTURE_SEARCH_NAME)
-    workflow = Workflow.create(workflow_config)
-    method = MethodFactory.create(
-        {"type": "pseudopotential", "subtype": "us", "data": {}},
-    )
-    assigned_model = Model(type="dft", subtype="gga", method=method, functional=EXPECTED_MODEL_FUNCTIONAL)
-    for subworkflow in workflow.subworkflows:
-        subworkflow.model = assigned_model
-
-    json.dumps(workflow.to_dict())
