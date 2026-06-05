@@ -12,6 +12,29 @@ def _build_total_energy_subworkflow():
     return workflow.subworkflows[0]
 
 
+def _assert_convergence_flowchart_links(subworkflow, execution_unit_name):
+    def unit(name):
+        return subworkflow.get_unit_by_name(name=name)
+
+    next_links = [
+        ("init parameter", "init result"),
+        ("init result", "init counter"),
+        ("init counter", execution_unit_name),
+        (execution_unit_name, "update result"),
+        ("update result", "check convergence"),
+        ("check convergence", "store result"),
+        ("store result", "update counter"),
+        ("update counter", "update parameter"),
+        ("update parameter", execution_unit_name),
+    ]
+    for from_name, to_name in next_links:
+        assert unit(from_name).next == unit(to_name).flowchartId
+
+    check_convergence = unit("check convergence")
+    assert check_convergence.then == unit("exit").flowchartId
+    assert getattr(check_convergence, "else") == unit("store result").flowchartId
+
+
 def test_add_uniform_energy_convergence():
     subworkflow = _build_total_energy_subworkflow()
 
@@ -49,10 +72,11 @@ def test_add_uniform_energy_convergence():
     assert subworkflow.convergence_result == "total_energy"
     assert subworkflow.has_convergence is True
 
+    _assert_convergence_flowchart_links(subworkflow, execution_unit_name="pw_scf")
+
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == ConvergenceParameterNameEnum.N_k.value
     assert update_parameter.value == f"{ConvergenceParameterNameEnum.N_k.value} + 1"
-    assert update_parameter.next == pw_scf.flowchartId
 
     check_convergence = subworkflow.get_unit_by_name(name="check convergence")
     assert check_convergence.input == []
@@ -88,13 +112,15 @@ def test_add_non_uniform_energy_convergence():
     ]
     assert pw_scf.get_context_item_data("kgrid")["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
+    _assert_convergence_flowchart_links(subworkflow, execution_unit_name="pw_scf")
+
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform.value
     assert update_parameter.input == [{"scope": pw_scf.flowchartId, "name": "context"}]
     assert (
-        update_parameter.value
-        == "[[2,2,1][i] + math.floor(iteration * 2 * float(context['kgrid']['reciprocalVectorRatios'][i])) "
-        "for i in range(3)]"
+            update_parameter.value
+            == "[[2,2,1][i] + math.floor(iteration * 2 * float(context['kgrid']['reciprocalVectorRatios'][i])) "
+               "for i in range(3)]"
     )
 
 
@@ -123,13 +149,15 @@ def test_add_non_uniform_2d_energy_convergence():
     ]
     assert pw_scf.get_context_item_data("kgrid")["reciprocalVectorRatios"] == reciprocal_vector_ratios
 
+    _assert_convergence_flowchart_links(subworkflow, execution_unit_name="pw_scf")
+
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == ConvergenceParameterNameEnum.N_k_nonuniform_2D.value
     assert update_parameter.input == [{"scope": pw_scf.flowchartId, "name": "context"}]
     assert (
-        update_parameter.value
-        == "[[2,2,1][i] + math.floor(iteration * 2 * float(context['kgrid']['reciprocalVectorRatios'][i])) "
-        "for i in range(2)] + [1]"
+            update_parameter.value
+            == "[[2,2,1][i] + math.floor(iteration * 2 * float(context['kgrid']['reciprocalVectorRatios'][i])) "
+               "for i in range(2)] + [1]"
     )
 
 
@@ -230,11 +258,12 @@ def test_add_template_param_convergence(param_name, param_initial, param_increme
     assert subworkflow.convergence_result == result_name
     assert subworkflow.has_convergence is True
 
+    _assert_convergence_flowchart_links(subworkflow, execution_unit_name="pw_scf")
+
     update_parameter = subworkflow.get_unit_by_name(name="update parameter")
     assert update_parameter.operand == param_name
     assert update_parameter.value == f"{param_name} + {param_increment}"
     assert update_parameter.input == []
-    assert update_parameter.next == pw_scf.flowchartId
 
     exit_unit = subworkflow.get_unit_by_name(name="exit")
     assert exit_unit.operand == param_name
@@ -268,6 +297,8 @@ def test_add_template_param_convergence_multi_unit():
         template_content = input_item.template.content
         assert "ecutwfc = {% raw %}{{ ecutwfc }}{% endraw %}" in template_content
         assert "ecutwfc = {{ cutoffs.wavefunction }}" not in template_content
+
+    _assert_convergence_flowchart_links(subworkflow, execution_unit_name="pw_scf")
 
     assert subworkflow.convergence_parameter == "ecutwfc"
     assert subworkflow.convergence_result == "total_energy"
