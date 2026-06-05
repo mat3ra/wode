@@ -2,8 +2,6 @@ import json
 import os
 
 import pytest
-from mat3ra.mode.methods.factory import MethodFactory
-from mat3ra.mode.model import Model
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.subworkflows import SubworkflowStandata
 from mat3ra.standata.workflows import WorkflowStandata
