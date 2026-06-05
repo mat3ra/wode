@@ -187,9 +187,11 @@ class ConvergenceMixin:
             and reciprocal_vector_ratios is None
         ):
             kgrid_item = unit_for_convergence.get_context_item("kgrid")
-            reciprocal_vector_ratios = PointsGridDataProvider().get_reciprocal_vector_ratios(
-                context=kgrid_item,
+            provider = PointsGridDataProvider(
+                data=kgrid_item.get("data"),
+                is_edited=kgrid_item.get("isEdited"),
             )
+            reciprocal_vector_ratios = provider.get_reciprocal_vector_ratios()
             if reciprocal_vector_ratios is None:
                 raise ValueError("Non-uniform k-grid convergence requires reciprocal_vector_ratios to be provided.")
 

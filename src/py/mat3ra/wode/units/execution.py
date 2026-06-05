@@ -13,6 +13,7 @@ from pydantic import Field, SerializeAsAny, field_validator
 from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
 
+
 class ExecutionUnit(Unit, ExecutionUnitSchema):
     type: Literal["execution"] = "execution"
     application: Application

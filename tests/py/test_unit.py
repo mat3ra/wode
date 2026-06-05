@@ -1,8 +1,9 @@
 import pytest
 from mat3ra.standata.applications import ApplicationStandata
 from mat3ra.standata.workflows import WorkflowStandata
-from mat3ra.wode import ExecutionUnit, Unit
+
 from fixtures import get_execution_unit_config_by_application_workflow_unit
+from mat3ra.wode import ExecutionUnit, Unit
 
 WORKFLOW_STANDATA = WorkflowStandata()
 APPLICATION_STANDATA = ApplicationStandata()
