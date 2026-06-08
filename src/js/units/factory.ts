@@ -1,4 +1,5 @@
 import type {
+    ApplicationSchema,
     AssertionUnitSchema,
     AssignmentUnitSchema,
     ConditionUnitSchema,
@@ -64,16 +65,20 @@ export class UnitFactory {
      */
     static createDefaultSubworkflowUnit(
         type: "execution",
-        application: ExecutionUnitSchema["application"],
-    ): AnySubworkflowUnit;
+        application: ApplicationSchema,
+    ): ExecutionUnit;
 
-    static createDefaultSubworkflowUnit(
-        type: "assignment" | "condition" | "io" | "assertion",
-    ): AnySubworkflowUnit;
+    static createDefaultSubworkflowUnit(type: "assignment"): AssignmentUnit;
+
+    static createDefaultSubworkflowUnit(type: "condition"): ConditionUnit;
+
+    static createDefaultSubworkflowUnit(type: "io"): IOUnit;
+
+    static createDefaultSubworkflowUnit(type: "assertion"): AssertionUnit;
 
     static createDefaultSubworkflowUnit(
         type: DefaultSubworkflowUnitType,
-        application?: ExecutionUnitSchema["application"],
+        application?: ApplicationSchema,
     ): AnySubworkflowUnit {
         if (type === "execution") {
             if (application === undefined) {

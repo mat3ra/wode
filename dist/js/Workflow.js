@@ -24,6 +24,19 @@ class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
     }
+    static repair(workflowData) {
+        const subworkflows = workflowData.subworkflows.map((subworkflow) => {
+            return Subworkflow_1.default.repair(subworkflow);
+        });
+        const workflows = workflowData.workflows.map((nested) => {
+            return Workflow.repair(nested);
+        });
+        return {
+            ...workflowData,
+            subworkflows,
+            workflows,
+        };
+    }
     setTotalRepetitions(totalRepetition) {
         this.totalRepetitions = totalRepetition;
     }

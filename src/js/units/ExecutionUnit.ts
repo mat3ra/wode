@@ -1,7 +1,11 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ExecutionUnitInputItemSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    ErrorUnitSchema,
+    ExecutionUnitInputItemSchema,
+    ExecutionUnitSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { ApplicationRegistry, applicationVersionSatisfiesSupportedRange } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -11,7 +15,7 @@ import {
     createProvider,
 } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
-import { UnitType } from "../enums";
+import { UnitStatus, UnitType } from "../enums";
 import {
     type ExecutionUnitSchemaMixin,
     executionUnitSchemaMixin,
@@ -66,6 +70,27 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.setApplication(config);
 
         this.name = this.name || this.flavor.name || "";
+    }
+
+    static repair(unitData: Partial<Schema>): ExecutionUnitSchema | ErrorUnitSchema {
+        try {
+            return new ExecutionUnit(unitData as Schema).toJSON();
+        } catch (error: unknown) {
+            return {
+                results: [],
+                preProcessors: [],
+                postProcessors: [],
+                monitors: [],
+                name: unitData.name ?? UnitType.error,
+                type: UnitType.error,
+                status: UnitStatus.error,
+                flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
+                reason: JSON.stringify(error),
+                next: unitData.next ?? "",
+                head: unitData.head ?? false,
+                originalUnit: unitData,
+            };
+        }
     }
 
     setApplication({

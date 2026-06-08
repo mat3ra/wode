@@ -1,4 +1,4 @@
-import type { AssertionUnitSchema, AssignmentUnitSchema, ConditionUnitSchema, DataIOUnitSchema, ErrorUnitSchema, ExecutionUnitSchema, MapUnitSchema, ReduceUnitSchema, SubworkflowUnitSchema, WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { ApplicationSchema, AssertionUnitSchema, AssignmentUnitSchema, ConditionUnitSchema, DataIOUnitSchema, ErrorUnitSchema, ExecutionUnitSchema, MapUnitSchema, ReduceUnitSchema, SubworkflowUnitSchema, WorkflowUnitSchema } from "@mat3ra/esse/dist/js/types";
 import AssertionUnit, { type AssertionUnitConfig } from "./AssertionUnit";
 import AssignmentUnit, { type AssignmentUnitConfig } from "./AssignmentUnit";
 import ConditionUnit, { type ConditionUnitConfig } from "./ConditionUnit";
@@ -25,8 +25,11 @@ export declare class UnitFactory {
      * Create a new subworkflow unit with fresh `flowchartId` and constructor defaults.
      * For execution units, pass the subworkflow (or parent) `application` JSON.
      */
-    static createDefaultSubworkflowUnit(type: "execution", application: ExecutionUnitSchema["application"]): AnySubworkflowUnit;
-    static createDefaultSubworkflowUnit(type: "assignment" | "condition" | "io" | "assertion"): AnySubworkflowUnit;
+    static createDefaultSubworkflowUnit(type: "execution", application: ApplicationSchema): ExecutionUnit;
+    static createDefaultSubworkflowUnit(type: "assignment"): AssignmentUnit;
+    static createDefaultSubworkflowUnit(type: "condition"): ConditionUnit;
+    static createDefaultSubworkflowUnit(type: "io"): IOUnit;
+    static createDefaultSubworkflowUnit(type: "assertion"): AssertionUnit;
     static createInWorkflow(config: WorkflowUnitSchema): AnyWorkflowUnit;
     static createInSubworkflow(config: ExcutionConfig | AssignmentConfig | ConditionConfig | IOConfig | AssertionConfig | ErrorConfig): AnySubworkflowUnit;
 }

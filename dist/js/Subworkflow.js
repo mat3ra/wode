@@ -21,6 +21,12 @@ class Subworkflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
     }
+    static repair(subworkflowData) {
+        const units = subworkflowData.units.map((unit) => {
+            return unit.type === enums_1.UnitType.execution ? units_1.ExecutionUnit.repair(unit) : unit;
+        });
+        return { ...subworkflowData, units };
+    }
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
         this.properties = [];
@@ -35,11 +41,14 @@ class Subworkflow extends entity_1.InMemoryEntity {
     }
     static get defaultConfig() {
         const defaultName = "New Subworkflow";
+        const application = new standata_1.ApplicationRegistry().getDefaultApplication();
+        if (!application) {
+            throw new Error("No default application found");
+        }
         return {
             _id: utils_1.Utils.uuid.getUUID(),
             name: defaultName,
-            application: new standata_1.ApplicationRegistry().getDefaultApplication(),
-            // TODO: confirm if `functional` is required field. If not, update ESSE schema
+            application,
             // `Model.defaultConfig` from @mat3ra/mode may omit `functional`; ESSE subworkflow schema requires it once schemas are registered.
             model: { ...mode_1.Model.defaultConfig, functional: "pbe" },
             properties: [],

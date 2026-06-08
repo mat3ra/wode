@@ -8,7 +8,6 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
@@ -18,6 +17,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
+import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
@@ -280,8 +280,10 @@ describe("Workflow", () => {
                     fixtureFile,
                 ) as unknown as WorkflowSchema[];
                 const workflow = workflows.find((w) => w.name === bandGapWorkflowName);
-                expect(workflow).to.exist;
-                const wf = new Workflow(workflow as WorkflowSchema);
+                if (!workflow) {
+                    throw new Error(`Workflow ${bandGapWorkflowName} not found`);
+                }
+                const wf = new Workflow(workflow);
                 const expectedHash = workflowHashes.espresso[fixtureFile].hash;
                 if (!expectedHash) {
                     // eslint-disable-next-line no-console

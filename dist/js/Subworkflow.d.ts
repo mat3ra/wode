@@ -40,13 +40,14 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     toJSON: () => SubworkflowSchema & AnyObject;
     _json: SubworkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
+    static repair(subworkflowData: SubworkflowSchema): SubworkflowSchema;
     constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
     static get defaultConfig(): {
         _id: any;
         name: string;
-        application: import("@mat3ra/esse/dist/js/types").ApplicationSchema | undefined;
+        application: import("@mat3ra/esse/dist/js/types").ApplicationSchema;
         model: {
-            functional: string;
+            functional: "pbe";
             method: {
                 readonly type: "pseudopotential";
                 readonly subtype: "us";
@@ -733,9 +734,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
-        originalUnit: {
-            [k: string]: unknown;
-        };
+        originalUnit: {};
         reason: string;
     } | undefined;
     findUnitKeyById(id: string): string;
