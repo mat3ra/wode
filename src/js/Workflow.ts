@@ -101,7 +101,10 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
                     _id: unit._id,
                     name: unit.name || "error",
                     flowchartId: unit.flowchartId,
-                    originalUnit: unit,
+                    originalUnit: {
+                        unit,
+                        subworkflow,
+                    },
                     preProcessors: unit.preProcessors || [],
                     postProcessors: unit.postProcessors || [],
                     monitors: unit.monitors || [],

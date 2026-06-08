@@ -484,7 +484,10 @@ describe("Workflow", () => {
 
             const errorUnit = result.units[0] as ErrorUnitSchema;
             expect(errorUnit.reason).to.equal("Invalid subworkflow");
-            expect(errorUnit.originalUnit).to.deep.equal(originalUnit);
+            expect(errorUnit.originalUnit).to.deep.equal({
+                unit: originalUnit,
+                subworkflow: workflowConfig.subworkflows[0],
+            });
             expect(() => new Workflow(result)).to.not.throw();
         });
     });
