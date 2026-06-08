@@ -8,7 +8,11 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { ErrorUnitSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    ConditionUnitSchema,
+    ErrorUnitSchema,
+    ExecutionUnitSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
@@ -352,6 +356,35 @@ describe("Workflow", () => {
             const result = Workflow.repair(workflowConfig);
 
             expect(result.subworkflows[0].units[0]).to.deep.equal(unit);
+        });
+
+        it("repairs legacy condition unit missing then and else via Workflow.repair", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const legacyCondition = {
+                name: "condition",
+                type: UnitType.condition,
+                input: [],
+                results: [],
+                preProcessors: [],
+                postProcessors: [],
+                statement: "true",
+                maxOccurrences: 100,
+                application: defaultApplication,
+                flowchartId: "e71f01a98db152d645e787b8",
+                monitors: [],
+                head: false,
+                next: "03b383bf35936d1d54d015ad",
+            };
+
+            workflowConfig.subworkflows[0].units = [legacyCondition as never];
+
+            const result = Workflow.repair(workflowConfig);
+            const condition = result.subworkflows[0].units[0] as ConditionUnitSchema;
+
+            expect(condition.type).to.equal(UnitType.condition);
+            expect(condition.then).to.equal("");
+            expect(condition.else).to.equal("");
+            expect(() => new Workflow(result).validate()).to.not.throw();
         });
 
         it("repairs only invalid execution units inside subworkflow", () => {

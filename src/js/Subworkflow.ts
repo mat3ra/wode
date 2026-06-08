@@ -94,7 +94,15 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
     static repair(subworkflowData: SubworkflowSchema): SubworkflowSchema {
         const units = subworkflowData.units.map((unit) => {
-            return unit.type === UnitType.execution ? ExecutionUnit.repair(unit) : unit;
+            if (unit.type === UnitType.execution) {
+                return ExecutionUnit.repair(unit);
+            }
+
+            if (unit.type === UnitType.condition) {
+                return ConditionUnit.repair(unit);
+            }
+
+            return unit;
         });
 
         return { ...subworkflowData, units };

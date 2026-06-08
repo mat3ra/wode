@@ -23,7 +23,13 @@ class Subworkflow extends entity_1.InMemoryEntity {
     }
     static repair(subworkflowData) {
         const units = subworkflowData.units.map((unit) => {
-            return unit.type === enums_1.UnitType.execution ? units_1.ExecutionUnit.repair(unit) : unit;
+            if (unit.type === enums_1.UnitType.execution) {
+                return units_1.ExecutionUnit.repair(unit);
+            }
+            if (unit.type === enums_1.UnitType.condition) {
+                return units_1.ConditionUnit.repair(unit);
+            }
+            return unit;
         });
         return { ...subworkflowData, units };
     }

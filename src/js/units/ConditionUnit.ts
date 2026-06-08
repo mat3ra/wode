@@ -1,9 +1,10 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ConditionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { ConditionUnitSchema, ErrorUnitSchema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 
-import { UnitType } from "../enums";
+import { UnitStatus, UnitType } from "../enums";
 import {
     type ConditionUnitSchemaMixin,
     conditionUnitSchemaMixin,
@@ -44,6 +45,27 @@ class ConditionUnit extends (BaseUnit as Base) implements Schema {
 
     getHashObject(): object {
         return { statement: this.statement, maxOccurrences: this.maxOccurrences };
+    }
+
+    static repair(unitData: Partial<Schema>): ConditionUnitSchema | ErrorUnitSchema {
+        try {
+            return new ConditionUnit(unitData as Schema).toJSON();
+        } catch (error: unknown) {
+            return {
+                results: [],
+                preProcessors: [],
+                postProcessors: [],
+                monitors: [],
+                name: unitData.name ?? UnitType.error,
+                type: UnitType.error,
+                status: UnitStatus.error,
+                flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
+                reason: JSON.stringify(error),
+                next: unitData.next ?? "",
+                head: unitData.head ?? false,
+                originalUnit: unitData,
+            };
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ConditionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { ConditionUnitSchema, ErrorUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { type ConditionUnitSchemaMixin } from "../generated/ConditionUnitSchemaMixin";
 import BaseUnit from "./BaseUnit";
 type Schema = ConditionUnitSchema;
@@ -13,5 +13,6 @@ declare class ConditionUnit extends ConditionUnit_base implements Schema {
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ConditionUnitConfig);
     getHashObject(): object;
+    static repair(unitData: Partial<Schema>): ConditionUnitSchema | ErrorUnitSchema;
 }
 export default ConditionUnit;
