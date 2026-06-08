@@ -72,13 +72,22 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         return JSONSchemasInterface.getSchemaById("workflow");
     }
 
+    // TODO: add static isValid method for InMemoryEntity
+    private static isValidSubworkflow(subworkflow: SubworkflowSchema): boolean {
+        try {
+            return new Subworkflow(subworkflow).isValid();
+        } catch {
+            return false;
+        }
+    }
+
     static repair(workflowData: WorkflowSchema): WorkflowSchema {
         const subworkflows = workflowData.subworkflows.map((subworkflow) => {
             return Subworkflow.repair(subworkflow);
         });
 
         const invalidSubworkflows = subworkflows.filter((subworkflow) => {
-            return !new Subworkflow(subworkflow).isValid();
+            return !Workflow.isValidSubworkflow(subworkflow);
         });
 
         const units = workflowData.units.map((unit): AnyWorkflowUnitSchema => {

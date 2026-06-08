@@ -400,6 +400,68 @@ describe("Workflow", () => {
             expect(() => new Workflow(document)).to.not.throw();
         });
 
+        it("repairs legacy subworkflow missing model without throwing", () => {
+            const legacyShellWorkflow = {
+                name: "Bash test",
+                subworkflows: [
+                    {
+                        name: "bash subworkflow",
+                        application: {
+                            name: "shell",
+                            version: "4.2.46",
+                            build: "Default",
+                            isDefault: true,
+                            summary: "Shell Script",
+                            shortName: "sh",
+                        },
+                        units: [
+                            {
+                                type: UnitType.execution,
+                                name: "test workflow",
+                                head: true,
+                                application: {
+                                    name: "shell",
+                                    version: "4.2.46",
+                                    build: "Default",
+                                    isDefault: true,
+                                    shortName: "sh",
+                                    summary: "Shell Script",
+                                },
+                                results: [],
+                                monitors: [{ name: "standard_output" }],
+                                preProcessors: [],
+                                postProcessors: [],
+                                input: [],
+                                context: [],
+                            },
+                        ],
+                        isDraft: false,
+                        properties: [],
+                    },
+                ],
+                units: [
+                    {
+                        name: "bash subworkflow",
+                        type: UnitType.subworkflow,
+                        head: true,
+                        monitors: [],
+                        results: [],
+                        preProcessors: [],
+                        postProcessors: [],
+                    },
+                ],
+                workflows: [],
+                properties: [],
+            } as unknown as WorkflowSchema;
+
+            const result = Workflow.repair(legacyShellWorkflow);
+
+            expect(result.subworkflows).to.have.lengthOf(0);
+            expect(result.units[0].type).to.equal(UnitType.error);
+            expect((result.units[0] as ErrorUnitSchema).reason).to.equal("Invalid subworkflow");
+            expect(() => new Workflow(result)).to.not.throw();
+        });
+
         it("converts invalid subworkflow unit to error and drops subworkflow", () => {
             const workflowConfig = structuredClone(Workflow.defaultConfig);
             const originalUnit = workflowConfig.units[0];

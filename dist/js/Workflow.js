@@ -24,12 +24,21 @@ class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
     }
+    // TODO: add static isValid method for InMemoryEntity
+    static isValidSubworkflow(subworkflow) {
+        try {
+            return new Subworkflow_1.default(subworkflow).isValid();
+        }
+        catch (_a) {
+            return false;
+        }
+    }
     static repair(workflowData) {
         const subworkflows = workflowData.subworkflows.map((subworkflow) => {
             return Subworkflow_1.default.repair(subworkflow);
         });
         const invalidSubworkflows = subworkflows.filter((subworkflow) => {
-            return !new Subworkflow_1.default(subworkflow).isValid();
+            return !Workflow.isValidSubworkflow(subworkflow);
         });
         const units = workflowData.units.map((unit) => {
             const subworkflow = invalidSubworkflows.find((subworkflow) => subworkflow._id === unit._id);
