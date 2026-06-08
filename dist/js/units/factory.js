@@ -48,6 +48,8 @@ class UnitFactory {
                 return new SubworkflowUnit_1.default(config);
             case enums_1.UnitType.reduce:
                 return new ReduceUnit_1.default(config);
+            case enums_1.UnitType.error:
+                return new ErrorUnit_1.default(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }

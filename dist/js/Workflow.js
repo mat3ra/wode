@@ -28,13 +28,38 @@ class Workflow extends entity_1.InMemoryEntity {
         const subworkflows = workflowData.subworkflows.map((subworkflow) => {
             return Subworkflow_1.default.repair(subworkflow);
         });
+        const invalidSubworkflows = subworkflows.filter((subworkflow) => {
+            return !new Subworkflow_1.default(subworkflow).isValid();
+        });
+        const units = workflowData.units.map((unit) => {
+            const subworkflow = invalidSubworkflows.find((subworkflow) => subworkflow._id === unit._id);
+            if (subworkflow) {
+                return {
+                    type: enums_1.UnitType.error,
+                    _id: unit._id,
+                    name: unit.name || "error",
+                    flowchartId: unit.flowchartId,
+                    originalUnit: unit,
+                    preProcessors: unit.preProcessors || [],
+                    postProcessors: unit.postProcessors || [],
+                    monitors: unit.monitors || [],
+                    results: unit.results || [],
+                    reason: "Invalid subworkflow",
+                };
+            }
+            return unit;
+        });
+        const validSubworkflows = subworkflows.filter((subworkflow) => {
+            return !invalidSubworkflows.map(({ _id }) => _id).includes(subworkflow._id);
+        });
         const workflows = workflowData.workflows.map((nested) => {
             return Workflow.repair(nested);
         });
         return {
             ...workflowData,
-            subworkflows,
+            subworkflows: validSubworkflows,
             workflows,
+            units,
         };
     }
     setTotalRepetitions(totalRepetition) {

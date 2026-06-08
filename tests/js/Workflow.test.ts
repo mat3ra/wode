@@ -8,6 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
+import type { ErrorUnitSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
@@ -15,10 +16,24 @@ import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { Subworkflow, Workflow } from "../../src/js";
+import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
+
+function invalidExecutionUnit(flowchartId: string) {
+    return {
+        type: UnitType.execution,
+        name: "exec",
+        flowchartId,
+        results: [],
+        preProcessors: [],
+        postProcessors: [],
+        monitors: [],
+        input: [],
+        context: [],
+    };
+}
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
@@ -292,6 +307,123 @@ describe("Workflow", () => {
                 }
                 expect(wf.calculateHash()).to.equal(expectedHash);
             });
+        });
+    });
+
+    describe("repair", () => {
+        let defaultApplication: ExecutionUnitSchema["application"];
+
+        before(() => {
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+        });
+
+        beforeEach(() => {
+            ApplicationRegistry.setDriver(new StandataDriver());
+            const app = new ApplicationRegistry().getDefaultApplication();
+            if (!app) {
+                throw new Error(
+                    "ApplicationRegistry.getDefaultApplication() returned no application",
+                );
+            }
+            defaultApplication = app;
+        });
+
+        it("converts invalid execution unit to error inside subworkflow", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const invalid = invalidExecutionUnit("fc-exec");
+            workflowConfig.subworkflows[0].units = [invalid as never];
+
+            const result = Workflow.repair(workflowConfig);
+
+            expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
+            expect((result.subworkflows[0].units[0] as ErrorUnitSchema).originalUnit).to.deep.equal(
+                invalid,
+            );
+        });
+
+        it("leaves valid execution unit unchanged inside subworkflow", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const unit = UnitFactory.createDefaultSubworkflowUnit(
+                "execution",
+                defaultApplication,
+            ).toJSON();
+            workflowConfig.subworkflows[0].units = [unit];
+
+            const result = Workflow.repair(workflowConfig);
+
+            expect(result.subworkflows[0].units[0]).to.deep.equal(unit);
+        });
+
+        it("repairs only invalid execution units inside subworkflow", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const validUnit = UnitFactory.createDefaultSubworkflowUnit("assignment").toJSON();
+            const invalidExecution = invalidExecutionUnit("fc-bad");
+            workflowConfig.subworkflows[0].units = [validUnit, invalidExecution as never];
+
+            const result = Workflow.repair(workflowConfig);
+
+            expect(result.subworkflows[0].units[0]).to.deep.equal(validUnit);
+            expect(result.subworkflows[0].units[1].type).to.equal(UnitType.error);
+        });
+
+        it("repairs invalid execution units in subworkflows and nested workflows", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const invalidExecution = invalidExecutionUnit("fc-nested");
+
+            workflowConfig.subworkflows[0].units = [invalidExecution as never];
+
+            const nestedSubworkflow = structuredClone(workflowConfig.subworkflows[0]);
+            nestedSubworkflow._id = "nested-subworkflow-id";
+            nestedSubworkflow.units = [invalidExecution as never];
+
+            workflowConfig.workflows = [
+                {
+                    ...structuredClone(workflowConfig),
+                    _id: "nested-workflow-id",
+                    subworkflows: [nestedSubworkflow],
+                    workflows: [],
+                },
+            ];
+
+            const result = Workflow.repair(workflowConfig);
+
+            expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
+            expect(result.workflows[0].subworkflows[0].units[0].type).to.equal(UnitType.error);
+        });
+
+        it("allows hydration after repair for converted execution units", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            workflowConfig.subworkflows[0].units = [invalidExecutionUnit("fc-hydrate") as never];
+
+            const document = Workflow.repair(workflowConfig);
+
+            expect(() => new Workflow(document)).to.not.throw();
+        });
+
+        it("converts invalid subworkflow unit to error and drops subworkflow", () => {
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const originalUnit = workflowConfig.units[0];
+            const subworkflowId = workflowConfig.subworkflows[0]._id;
+
+            workflowConfig.subworkflows[0] = {
+                ...workflowConfig.subworkflows[0],
+                model: {
+                    ...workflowConfig.subworkflows[0].model,
+                    type: "not-a-valid-model-type" as never,
+                },
+            };
+
+            const result = Workflow.repair(workflowConfig);
+
+            expect(result.subworkflows).to.have.lengthOf(0);
+            expect(result.units).to.have.lengthOf(1);
+            expect(result.units[0].type).to.equal(UnitType.error);
+            expect(result.units[0]._id).to.equal(subworkflowId);
+
+            const errorUnit = result.units[0] as ErrorUnitSchema;
+            expect(errorUnit.reason).to.equal("Invalid subworkflow");
+            expect(errorUnit.originalUnit).to.deep.equal(originalUnit);
+            expect(() => new Workflow(result)).to.not.throw();
         });
     });
 });

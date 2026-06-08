@@ -23,9 +23,13 @@ import MapUnit from "./MapUnit";
 import ReduceUnit from "./ReduceUnit";
 import SubworkflowUnit from "./SubworkflowUnit";
 
-export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit;
+export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit | ErrorUnit;
 
-export type AnyWorkflowUnitSchema = MapUnitSchema | SubworkflowUnitSchema | ReduceUnitSchema;
+export type AnyWorkflowUnitSchema =
+    | MapUnitSchema
+    | SubworkflowUnitSchema
+    | ReduceUnitSchema
+    | ErrorUnitSchema;
 
 export type AnySubworkflowUnit =
     | ExecutionUnit
@@ -115,6 +119,8 @@ export class UnitFactory {
                 return new SubworkflowUnit(config);
             case UnitType.reduce:
                 return new ReduceUnit(config);
+            case UnitType.error:
+                return new ErrorUnit(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }

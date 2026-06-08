@@ -30,7 +30,7 @@ import { UnitType } from "./enums";
 import { type WorkflowSchemaMixin, workflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
-import { type AnyWorkflowUnit, UnitFactory } from "./units/factory";
+import { type AnyWorkflowUnit, type AnyWorkflowUnitSchema, UnitFactory } from "./units/factory";
 import {
     getDefaultDescription,
     getHumanReadableProperties,
@@ -77,14 +77,46 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
             return Subworkflow.repair(subworkflow);
         });
 
+        const invalidSubworkflows = subworkflows.filter((subworkflow) => {
+            return !new Subworkflow(subworkflow).isValid();
+        });
+
+        const units = workflowData.units.map((unit): AnyWorkflowUnitSchema => {
+            const subworkflow = invalidSubworkflows.find(
+                (subworkflow) => subworkflow._id === unit._id,
+            );
+
+            if (subworkflow) {
+                return {
+                    type: UnitType.error,
+                    _id: unit._id,
+                    name: unit.name || "error",
+                    flowchartId: unit.flowchartId,
+                    originalUnit: unit,
+                    preProcessors: unit.preProcessors || [],
+                    postProcessors: unit.postProcessors || [],
+                    monitors: unit.monitors || [],
+                    results: unit.results || [],
+                    reason: "Invalid subworkflow",
+                };
+            }
+
+            return unit;
+        });
+
+        const validSubworkflows = subworkflows.filter((subworkflow) => {
+            return !invalidSubworkflows.map(({ _id }) => _id).includes(subworkflow._id);
+        });
+
         const workflows = workflowData.workflows.map((nested) => {
             return Workflow.repair(nested as WorkflowSchema);
         });
 
         return {
             ...workflowData,
-            subworkflows,
+            subworkflows: validSubworkflows,
             workflows,
+            units,
         };
     }
 
