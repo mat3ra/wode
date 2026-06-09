@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const in_memory_1 = require("@mat3ra/code/dist/js/entity/in_memory");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HasDescriptionMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HasDescriptionMixin");
 const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
@@ -24,29 +25,44 @@ class Workflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow");
     }
-    // TODO: add static isValid method for InMemoryEntity
-    static isValidSubworkflow(subworkflow) {
+    static getSubworkflowValidationError(subworkflow) {
+        // Two checks, same order as the old isValid() path (construct + validate), but split so we
+        // keep AJV errors when hydration would fail first:
+        // 1. validateData — JSON Schema on raw persisted subworkflow (no Application/ModelFactory/units).
+        //    Surfaces structured AJV errors (e.g. missing model) before the constructor runs.
+        // 2. new Subworkflow().validate() — hydration (app, model, units) then schema on the instance.
+        //    Catches schema-valid JSON that still cannot be built (unknown model, bad units, etc.).
         try {
-            return new Subworkflow_1.default(subworkflow).isValid();
+            Subworkflow_1.default.validateData({ ...subworkflow });
+            new Subworkflow_1.default(subworkflow).validate();
+            return null;
         }
-        catch (_a) {
-            return false;
+        catch (error) {
+            if (error instanceof in_memory_1.EntityError || error instanceof Error) {
+                return error;
+            }
+            return new Error(String(error));
         }
     }
     static repair(workflowData) {
         const subworkflows = workflowData.subworkflows.map((subworkflow) => {
             return Subworkflow_1.default.repair(subworkflow);
         });
-        const invalidSubworkflows = subworkflows.filter((subworkflow) => {
-            return !Workflow.isValidSubworkflow(subworkflow);
-        });
+        const invalidSubworkflows = subworkflows
+            .map((subworkflow) => {
+            const error = Workflow.getSubworkflowValidationError(subworkflow);
+            return error ? { subworkflow, error } : null;
+        })
+            .filter((entry) => entry !== null);
         const units = workflowData.units.map((unit) => {
-            const subworkflow = invalidSubworkflows.find((subworkflow) => subworkflow._id === unit._id);
-            if (subworkflow) {
+            const invalidEntry = invalidSubworkflows.find(({ subworkflow }) => subworkflow._id === unit._id);
+            if (invalidEntry) {
+                const { subworkflow, error } = invalidEntry;
+                const errorUnit = units_1.BaseUnit.toErrorUnitSchema(unit, error);
                 return {
-                    type: enums_1.UnitType.error,
+                    ...errorUnit,
                     _id: unit._id,
-                    name: unit.name || "error",
+                    name: unit.name || errorUnit.name,
                     flowchartId: unit.flowchartId,
                     originalUnit: {
                         unit,
@@ -56,13 +72,12 @@ class Workflow extends entity_1.InMemoryEntity {
                     postProcessors: unit.postProcessors || [],
                     monitors: unit.monitors || [],
                     results: unit.results || [],
-                    reason: "Invalid subworkflow",
                 };
             }
             return unit;
         });
         const validSubworkflows = subworkflows.filter((subworkflow) => {
-            return !invalidSubworkflows.map(({ _id }) => _id).includes(subworkflow._id);
+            return !invalidSubworkflows.some(({ subworkflow: invalid }) => invalid._id === subworkflow._id);
         });
         const workflows = workflowData.workflows.map((nested) => {
             return Workflow.repair(nested);

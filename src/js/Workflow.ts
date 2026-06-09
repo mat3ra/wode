@@ -1,4 +1,5 @@
 import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { EntityError } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     type Defaultable,
     defaultableEntityMixin,
@@ -29,7 +30,7 @@ import type { JobExternalContext } from "./context/providers/by_application/espr
 import { UnitType } from "./enums";
 import { type WorkflowSchemaMixin, workflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
-import { MapUnit } from "./units";
+import { BaseUnit, MapUnit } from "./units";
 import { type AnyWorkflowUnit, type AnyWorkflowUnitSchema, UnitFactory } from "./units/factory";
 import {
     getDefaultDescription,
@@ -72,12 +73,24 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         return JSONSchemasInterface.getSchemaById("workflow");
     }
 
-    // TODO: add static isValid method for InMemoryEntity
-    private static isValidSubworkflow(subworkflow: SubworkflowSchema): boolean {
+    private static getSubworkflowValidationError(
+        subworkflow: SubworkflowSchema,
+    ): EntityError | Error | null {
+        // Two checks, same order as the old isValid() path (construct + validate), but split so we
+        // keep AJV errors when hydration would fail first:
+        // 1. validateData — JSON Schema on raw persisted subworkflow (no Application/ModelFactory/units).
+        //    Surfaces structured AJV errors (e.g. missing model) before the constructor runs.
+        // 2. new Subworkflow().validate() — hydration (app, model, units) then schema on the instance.
+        //    Catches schema-valid JSON that still cannot be built (unknown model, bad units, etc.).
         try {
-            return new Subworkflow(subworkflow).isValid();
-        } catch {
-            return false;
+            Subworkflow.validateData({ ...subworkflow });
+            new Subworkflow(subworkflow).validate();
+            return null;
+        } catch (error: unknown) {
+            if (error instanceof EntityError || error instanceof Error) {
+                return error;
+            }
+            return new Error(String(error));
         }
     }
 
@@ -86,20 +99,29 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
             return Subworkflow.repair(subworkflow);
         });
 
-        const invalidSubworkflows = subworkflows.filter((subworkflow) => {
-            return !Workflow.isValidSubworkflow(subworkflow);
-        });
-
-        const units = workflowData.units.map((unit): AnyWorkflowUnitSchema => {
-            const subworkflow = invalidSubworkflows.find(
-                (subworkflow) => subworkflow._id === unit._id,
+        const invalidSubworkflows = subworkflows
+            .map((subworkflow) => {
+                const error = Workflow.getSubworkflowValidationError(subworkflow);
+                return error ? { subworkflow, error } : null;
+            })
+            .filter(
+                (entry): entry is { subworkflow: SubworkflowSchema; error: EntityError | Error } =>
+                    entry !== null,
             );
 
-            if (subworkflow) {
+        const units = workflowData.units.map((unit): AnyWorkflowUnitSchema => {
+            const invalidEntry = invalidSubworkflows.find(
+                ({ subworkflow }) => subworkflow._id === unit._id,
+            );
+
+            if (invalidEntry) {
+                const { subworkflow, error } = invalidEntry;
+                const errorUnit = BaseUnit.toErrorUnitSchema(unit, error);
+
                 return {
-                    type: UnitType.error,
+                    ...errorUnit,
                     _id: unit._id,
-                    name: unit.name || "error",
+                    name: unit.name || errorUnit.name,
                     flowchartId: unit.flowchartId,
                     originalUnit: {
                         unit,
@@ -109,7 +131,6 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
                     postProcessors: unit.postProcessors || [],
                     monitors: unit.monitors || [],
                     results: unit.results || [],
-                    reason: "Invalid subworkflow",
                 };
             }
 
@@ -117,7 +138,9 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         });
 
         const validSubworkflows = subworkflows.filter((subworkflow) => {
-            return !invalidSubworkflows.map(({ _id }) => _id).includes(subworkflow._id);
+            return !invalidSubworkflows.some(
+                ({ subworkflow: invalid }) => invalid._id === subworkflow._id,
+            );
         });
 
         const workflows = workflowData.workflows.map((nested) => {

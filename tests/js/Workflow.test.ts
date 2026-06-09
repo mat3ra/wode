@@ -491,7 +491,8 @@ describe("Workflow", () => {
 
             expect(result.subworkflows).to.have.lengthOf(0);
             expect(result.units[0].type).to.equal(UnitType.error);
-            expect((result.units[0] as ErrorUnitSchema).reason).to.equal("Invalid subworkflow");
+            const legacyErrorReason = JSON.parse((result.units[0] as ErrorUnitSchema).reason);
+            expect(legacyErrorReason).to.be.an("array").that.is.not.empty;
             expect(() => new Workflow(result)).to.not.throw();
         });
 
@@ -516,7 +517,10 @@ describe("Workflow", () => {
             expect(result.units[0]._id).to.equal(subworkflowId);
 
             const errorUnit = result.units[0] as ErrorUnitSchema;
-            expect(errorUnit.reason).to.equal("Invalid subworkflow");
+            const validationErrors = JSON.parse(errorUnit.reason);
+            expect(validationErrors).to.be.an("array").that.is.not.empty;
+            expect(validationErrors.some((e: { instancePath?: string }) => e.instancePath)).to.be
+                .true;
             expect(errorUnit.originalUnit).to.deep.equal({
                 unit: originalUnit,
                 subworkflow: workflowConfig.subworkflows[0],

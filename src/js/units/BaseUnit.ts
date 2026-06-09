@@ -1,4 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { EntityError } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     type Defaultable,
     defaultableEntityMixin,
@@ -113,6 +114,11 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
     }
 
     static toErrorUnitSchema(unitData: Partial<Schema>, error: unknown): ErrorUnitSchema {
+        const detailsError = error instanceof EntityError ? error.details?.error : undefined;
+        const reasonPayload =
+            detailsError ??
+            (error instanceof Error ? { message: error.message, name: error.name } : error);
+
         return {
             results: [],
             preProcessors: [],
@@ -122,7 +128,7 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
             type: UnitType.error,
             status: UnitStatus.error,
             flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
-            reason: JSON.stringify(error),
+            reason: JSON.stringify(reasonPayload),
             next: unitData.next ?? "",
             head: unitData.head ?? false,
             originalUnit: unitData,

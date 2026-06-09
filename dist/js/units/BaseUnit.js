@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const in_memory_1 = require("@mat3ra/code/dist/js/entity/in_memory");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
@@ -59,19 +60,21 @@ class BaseUnit extends entity_1.InMemoryEntity {
         this.repetition = repetition;
     }
     static toErrorUnitSchema(unitData, error) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
+        const detailsError = error instanceof in_memory_1.EntityError ? (_a = error.details) === null || _a === void 0 ? void 0 : _a.error : undefined;
+        const reasonPayload = detailsError !== null && detailsError !== void 0 ? detailsError : (error instanceof Error ? { message: error.message, name: error.name } : error);
         return {
             results: [],
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            name: (_a = unitData.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.error,
+            name: (_b = unitData.name) !== null && _b !== void 0 ? _b : enums_1.UnitType.error,
             type: enums_1.UnitType.error,
             status: enums_1.UnitStatus.error,
-            flowchartId: (_b = unitData.flowchartId) !== null && _b !== void 0 ? _b : utils_1.Utils.uuid.getUUID(),
-            reason: JSON.stringify(error),
-            next: (_c = unitData.next) !== null && _c !== void 0 ? _c : "",
-            head: (_d = unitData.head) !== null && _d !== void 0 ? _d : false,
+            flowchartId: (_c = unitData.flowchartId) !== null && _c !== void 0 ? _c : utils_1.Utils.uuid.getUUID(),
+            reason: JSON.stringify(reasonPayload),
+            next: (_d = unitData.next) !== null && _d !== void 0 ? _d : "",
+            head: (_e = unitData.head) !== null && _e !== void 0 ? _e : false,
             originalUnit: unitData,
         };
     }
