@@ -58,6 +58,31 @@ class BaseUnit extends entity_1.InMemoryEntity {
     setRepetition(repetition) {
         this.repetition = repetition;
     }
+    static toErrorUnitSchema(unitData, error) {
+        var _a, _b, _c, _d;
+        return {
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            name: (_a = unitData.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.error,
+            type: enums_1.UnitType.error,
+            status: enums_1.UnitStatus.error,
+            flowchartId: (_b = unitData.flowchartId) !== null && _b !== void 0 ? _b : utils_1.Utils.uuid.getUUID(),
+            reason: JSON.stringify(error),
+            next: (_c = unitData.next) !== null && _c !== void 0 ? _c : "",
+            head: (_d = unitData.head) !== null && _d !== void 0 ? _d : false,
+            originalUnit: unitData,
+        };
+    }
+    static repairUnit(UnitClass, unitData) {
+        try {
+            return new UnitClass(unitData).toJSON();
+        }
+        catch (error) {
+            return BaseUnit.toErrorUnitSchema(unitData, error);
+        }
+    }
 }
 (0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);
 (0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnit.prototype);

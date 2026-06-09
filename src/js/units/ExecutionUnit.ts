@@ -15,7 +15,7 @@ import {
     createProvider,
 } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
-import { UnitStatus, UnitType } from "../enums";
+import { UnitType } from "../enums";
 import {
     type ExecutionUnitSchemaMixin,
     executionUnitSchemaMixin,
@@ -73,24 +73,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     static repair(unitData: Partial<Schema>): ExecutionUnitSchema | ErrorUnitSchema {
-        try {
-            return new ExecutionUnit(unitData as Schema).toJSON();
-        } catch (error: unknown) {
-            return {
-                results: [],
-                preProcessors: [],
-                postProcessors: [],
-                monitors: [],
-                name: unitData.name ?? UnitType.error,
-                type: UnitType.error,
-                status: UnitStatus.error,
-                flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
-                reason: JSON.stringify(error),
-                next: unitData.next ?? "",
-                head: unitData.head ?? false,
-                originalUnit: unitData,
-            };
-        }
+        return BaseUnit.repairUnit(ExecutionUnit, unitData as ExecutionUnitConfig);
     }
 
     setApplication({

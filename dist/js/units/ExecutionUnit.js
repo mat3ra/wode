@@ -35,26 +35,7 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.name = this.name || this.flavor.name || "";
     }
     static repair(unitData) {
-        var _a, _b, _c, _d;
-        try {
-            return new ExecutionUnit(unitData).toJSON();
-        }
-        catch (error) {
-            return {
-                results: [],
-                preProcessors: [],
-                postProcessors: [],
-                monitors: [],
-                name: (_a = unitData.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.error,
-                type: enums_1.UnitType.error,
-                status: enums_1.UnitStatus.error,
-                flowchartId: (_b = unitData.flowchartId) !== null && _b !== void 0 ? _b : utils_1.Utils.uuid.getUUID(),
-                reason: JSON.stringify(error),
-                next: (_c = unitData.next) !== null && _c !== void 0 ? _c : "",
-                head: (_d = unitData.head) !== null && _d !== void 0 ? _d : false,
-                originalUnit: unitData,
-            };
-        }
+        return BaseUnit_1.default.repairUnit(ExecutionUnit, unitData);
     }
     setApplication({ application, executable, flavor, executableName, flavorName, }) {
         var _a, _b;

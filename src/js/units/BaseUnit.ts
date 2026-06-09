@@ -19,10 +19,14 @@ import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/Tagg
 import type { NameResultSchema } from "@mat3ra/code/dist/js/utils/object";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { StatusSchema, WorkflowBaseUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    ErrorUnitSchema,
+    StatusSchema,
+    WorkflowBaseUnitSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
-import { UnitStatus } from "../enums";
+import { UnitStatus, UnitType } from "../enums";
 import { type BaseUnitSchemaMixin, baseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
 import { type StatusSchemaMixin, statusSchemaMixin } from "../generated/StatusSchemaMixin";
 import {
@@ -31,6 +35,10 @@ import {
 } from "./mixins/RuntimeItemsUILogicMixin";
 
 type Schema = WorkflowBaseUnitSchema;
+
+type RepairableUnitConstructor<US extends Schema, C = Partial<US>> = new (config: C) => {
+    toJSON(): US;
+};
 
 type Base = typeof InMemoryEntity &
     Constructor<NamedEntity> &
@@ -102,6 +110,34 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     setRepetition(repetition: number) {
         this.repetition = repetition;
+    }
+
+    static toErrorUnitSchema(unitData: Partial<Schema>, error: unknown): ErrorUnitSchema {
+        return {
+            results: [],
+            preProcessors: [],
+            postProcessors: [],
+            monitors: [],
+            name: unitData.name ?? UnitType.error,
+            type: UnitType.error,
+            status: UnitStatus.error,
+            flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
+            reason: JSON.stringify(error),
+            next: unitData.next ?? "",
+            head: unitData.head ?? false,
+            originalUnit: unitData,
+        };
+    }
+
+    static repairUnit<US extends Schema, C = Partial<US>>(
+        UnitClass: RepairableUnitConstructor<US, C>,
+        unitData: C,
+    ): US | ErrorUnitSchema {
+        try {
+            return new UnitClass(unitData).toJSON();
+        } catch (error: unknown) {
+            return BaseUnit.toErrorUnitSchema(unitData as Partial<Schema>, error);
+        }
     }
 }
 
