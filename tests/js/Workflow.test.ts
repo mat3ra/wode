@@ -340,9 +340,10 @@ describe("Workflow", () => {
             const result = Workflow.repair(workflowConfig);
 
             expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
-            expect((result.subworkflows[0].units[0] as ErrorUnitSchema).originalUnit).to.deep.equal(
-                invalid,
+            const subworkflowErrorReason = JSON.parse(
+                (result.subworkflows[0].units[0] as ErrorUnitSchema).reason,
             );
+            expect(subworkflowErrorReason.json).to.deep.equal(invalid);
         });
 
         it("leaves valid execution unit unchanged inside subworkflow", () => {
@@ -492,7 +493,7 @@ describe("Workflow", () => {
             expect(result.subworkflows).to.have.lengthOf(0);
             expect(result.units[0].type).to.equal(UnitType.error);
             const legacyErrorReason = JSON.parse((result.units[0] as ErrorUnitSchema).reason);
-            expect(legacyErrorReason).to.be.an("array").that.is.not.empty;
+            expect(legacyErrorReason.error).to.be.an("array").that.is.not.empty;
             expect(() => new Workflow(result)).to.not.throw();
         });
 
@@ -517,11 +518,11 @@ describe("Workflow", () => {
             expect(result.units[0]._id).to.equal(subworkflowId);
 
             const errorUnit = result.units[0] as ErrorUnitSchema;
-            const validationErrors = JSON.parse(errorUnit.reason);
-            expect(validationErrors).to.be.an("array").that.is.not.empty;
-            expect(validationErrors.some((e: { instancePath?: string }) => e.instancePath)).to.be
-                .true;
-            expect(errorUnit.originalUnit).to.deep.equal({
+            const validationReason = JSON.parse(errorUnit.reason);
+            expect(validationReason.error).to.be.an("array").that.is.not.empty;
+            expect(validationReason.error.some((e: { instancePath?: string }) => e.instancePath)).to
+                .be.true;
+            expect(validationReason.json).to.deep.equal({
                 unit: originalUnit,
                 subworkflow: workflowConfig.subworkflows[0],
             });

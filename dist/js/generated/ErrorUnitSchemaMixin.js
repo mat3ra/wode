@@ -10,12 +10,6 @@ function errorUnitSchemaMixin(item) {
         set type(value) {
             this.setProp("type", value);
         },
-        get originalUnit() {
-            return this.requiredProp("originalUnit");
-        },
-        set originalUnit(value) {
-            this.setProp("originalUnit", value);
-        },
         get reason() {
             return this.requiredProp("reason");
         },

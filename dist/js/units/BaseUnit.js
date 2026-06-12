@@ -60,22 +60,39 @@ class BaseUnit extends entity_1.InMemoryEntity {
         this.repetition = repetition;
     }
     static toErrorUnitSchema(unitData, error) {
-        var _a, _b, _c, _d, _e;
-        const detailsError = error instanceof in_memory_1.EntityError ? (_a = error.details) === null || _a === void 0 ? void 0 : _a.error : undefined;
-        const reasonPayload = detailsError !== null && detailsError !== void 0 ? detailsError : (error instanceof Error ? { message: error.message, name: error.name } : error);
+        var _a, _b, _c, _d;
+        let reasonPayload;
+        if (error instanceof in_memory_1.EntityError && error.details) {
+            reasonPayload = {
+                error: error.details.error,
+                json: unitData,
+                schema: error.details.schema,
+            };
+        }
+        else if (error instanceof Error) {
+            reasonPayload = {
+                error: { message: error.message, name: error.name },
+                json: unitData,
+            };
+        }
+        else {
+            reasonPayload = {
+                error,
+                json: unitData,
+            };
+        }
         return {
             results: [],
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            name: (_b = unitData.name) !== null && _b !== void 0 ? _b : enums_1.UnitType.error,
+            name: (_a = unitData.name) !== null && _a !== void 0 ? _a : enums_1.UnitType.error,
             type: enums_1.UnitType.error,
             status: enums_1.UnitStatus.error,
-            flowchartId: (_c = unitData.flowchartId) !== null && _c !== void 0 ? _c : utils_1.Utils.uuid.getUUID(),
+            flowchartId: (_b = unitData.flowchartId) !== null && _b !== void 0 ? _b : utils_1.Utils.uuid.getUUID(),
             reason: JSON.stringify(reasonPayload),
-            next: (_d = unitData.next) !== null && _d !== void 0 ? _d : "",
-            head: (_e = unitData.head) !== null && _e !== void 0 ? _e : false,
-            originalUnit: unitData,
+            next: (_c = unitData.next) !== null && _c !== void 0 ? _c : "",
+            head: (_d = unitData.head) !== null && _d !== void 0 ? _d : false,
         };
     }
     static repairUnit(UnitClass, unitData) {

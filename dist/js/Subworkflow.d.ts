@@ -734,7 +734,6 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
-        originalUnit: {};
         reason: string;
     } | undefined;
     findUnitKeyById(id: string): string;

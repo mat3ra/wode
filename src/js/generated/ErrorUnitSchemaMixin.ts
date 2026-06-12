@@ -16,12 +16,6 @@ export function errorUnitSchemaMixin<T extends InMemoryEntity>(
         set type(value: ErrorUnitMixinSchema["type"]) {
             this.setProp("type", value);
         },
-        get originalUnit() {
-            return this.requiredProp<ErrorUnitMixinSchema["originalUnit"]>("originalUnit");
-        },
-        set originalUnit(value: ErrorUnitMixinSchema["originalUnit"]) {
-            this.setProp("originalUnit", value);
-        },
         get reason() {
             return this.requiredProp<ErrorUnitMixinSchema["reason"]>("reason");
         },

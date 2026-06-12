@@ -114,10 +114,25 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
     }
 
     static toErrorUnitSchema(unitData: Partial<Schema>, error: unknown): ErrorUnitSchema {
-        const detailsError = error instanceof EntityError ? error.details?.error : undefined;
-        const reasonPayload =
-            detailsError ??
-            (error instanceof Error ? { message: error.message, name: error.name } : error);
+        let reasonPayload: { error: unknown; json: object; schema?: unknown };
+
+        if (error instanceof EntityError && error.details) {
+            reasonPayload = {
+                error: error.details.error,
+                json: unitData as object,
+                schema: error.details.schema,
+            };
+        } else if (error instanceof Error) {
+            reasonPayload = {
+                error: { message: error.message, name: error.name },
+                json: unitData as object,
+            };
+        } else {
+            reasonPayload = {
+                error,
+                json: unitData as object,
+            };
+        }
 
         return {
             results: [],
@@ -131,7 +146,6 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
             reason: JSON.stringify(reasonPayload),
             next: unitData.next ?? "",
             head: unitData.head ?? false,
-            originalUnit: unitData,
         };
     }
 

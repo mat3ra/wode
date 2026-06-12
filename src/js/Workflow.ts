@@ -117,16 +117,17 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
             if (invalidEntry) {
                 const { subworkflow, error } = invalidEntry;
                 const errorUnit = BaseUnit.toErrorUnitSchema(unit, error);
+                const reasonPayload = {
+                    ...JSON.parse(errorUnit.reason),
+                    json: { unit, subworkflow },
+                };
 
                 return {
                     ...errorUnit,
                     _id: unit._id,
                     name: unit.name || errorUnit.name,
                     flowchartId: unit.flowchartId,
-                    originalUnit: {
-                        unit,
-                        subworkflow,
-                    },
+                    reason: JSON.stringify(reasonPayload),
                     preProcessors: unit.preProcessors || [],
                     postProcessors: unit.postProcessors || [],
                     monitors: unit.monitors || [],

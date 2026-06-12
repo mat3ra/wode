@@ -28,7 +28,6 @@ class ErrorUnit extends (BaseUnit as Base) implements Schema {
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            originalUnit: {},
             reason: "",
             ...config,
             type: UnitType.error as Schema["type"],

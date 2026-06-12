@@ -19,7 +19,6 @@ class ErrorUnit extends BaseUnit_1.default {
             preProcessors: [],
             postProcessors: [],
             monitors: [],
-            originalUnit: {},
             reason: "",
             ...config,
             type: enums_1.UnitType.error,
