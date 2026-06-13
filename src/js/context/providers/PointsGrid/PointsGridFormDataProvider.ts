@@ -134,21 +134,44 @@ abstract class PointsGridFormDataProvider<
         return isValid ? gridMetricValue : this.getDefaultGridMetricValue(gridMetricType);
     }
 
-    getData(): Data {
-        const data = super.getData();
-        const { preferGridMetric, gridMetricType, gridMetricValue } = data;
+    /** Keep gridMetricValue and dimensions consistent (both preferGridMetric modes). */
+    private dataWithEffectiveGridMetric(data: Data): Data {
+        const { preferGridMetric, gridMetricType, gridMetricValue, dimensions } = data;
 
-        if (!preferGridMetric || !gridMetricType) {
-            return data;
+        if (preferGridMetric && gridMetricType) {
+            const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
+            return {
+                ...data,
+                gridMetricValue: effectiveValue,
+                dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
+            };
         }
 
-        const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
+        if (!preferGridMetric && gridMetricType && dimensions.every((d) => typeof d === "number")) {
+            return {
+                ...data,
+                gridMetricValue: this.calculateGridMetric(gridMetricType, dimensions),
+            };
+        }
 
-        return {
-            ...data,
-            gridMetricValue: effectiveValue,
-            dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
-        };
+        return data;
+    }
+
+    private applyGridMetricInstanceFields(data: Data) {
+        const { gridMetricType, preferGridMetric, gridMetricValue } = data;
+        if (preferGridMetric !== undefined) {
+            this.preferGridMetric = preferGridMetric;
+        }
+        if (gridMetricType !== undefined) {
+            this.gridMetricType = gridMetricType;
+        }
+        if (gridMetricValue !== undefined) {
+            this.gridMetricValue = gridMetricValue;
+        }
+    }
+
+    getData(): Data {
+        return this.dataWithEffectiveGridMetric(super.getData());
     }
 
     getDefaultData() {
@@ -328,41 +351,9 @@ abstract class PointsGridFormDataProvider<
     }
 
     setData(data: Data) {
-        const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
-
-        if (preferGridMetric !== undefined) {
-            this.preferGridMetric = preferGridMetric;
-        }
-        if (gridMetricType !== undefined) {
-            this.gridMetricType = gridMetricType;
-        }
-
-        if (preferGridMetric && gridMetricType) {
-            const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
-            this.gridMetricValue = effectiveValue;
-
-            return super.setData({
-                ...data,
-                gridMetricValue: effectiveValue,
-                dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
-            });
-        }
-
-        if (!preferGridMetric && dimensions.every((d) => typeof d === "number")) {
-            const derivedMetric = this.calculateGridMetric(gridMetricType, dimensions);
-            this.gridMetricValue = derivedMetric;
-
-            return super.setData({
-                ...data,
-                gridMetricValue: derivedMetric,
-            });
-        }
-
-        if (gridMetricValue !== undefined) {
-            this.gridMetricValue = gridMetricValue;
-        }
-
-        return super.setData(data);
+        const synced = this.dataWithEffectiveGridMetric(data);
+        this.applyGridMetricInstanceFields(synced);
+        return super.setData(synced);
     }
 }
 

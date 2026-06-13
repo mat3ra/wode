@@ -33,6 +33,9 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     private initInstanceFields;
     private getDefaultGridMetricValue;
     private resolveGridMetricValue;
+    /** Keep gridMetricValue and dimensions consistent (both preferGridMetric modes). */
+    private dataWithEffectiveGridMetric;
+    private applyGridMetricInstanceFields;
     getData(): Data;
     getDefaultData(): PointsGridDataProviderSchema;
     protected get jsonSchemaPatchConfig(): {
