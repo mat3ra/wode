@@ -34,9 +34,6 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.setApplication(config);
         this.name = this.name || this.flavor.name || "";
     }
-    static repair(unitData) {
-        return BaseUnit_1.default.repairUnit(ExecutionUnit, unitData);
-    }
     setApplication({ application, executable, flavor, executableName, flavorName, }) {
         var _a, _b;
         const currentExecutable = this.prop("executable");

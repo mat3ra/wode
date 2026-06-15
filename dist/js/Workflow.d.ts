@@ -28,8 +28,6 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
     static readonly defaultConfig: WorkflowSchema;
     _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
-    private static getSubworkflowValidationError;
-    static repair(workflowData: WorkflowSchema): WorkflowSchema;
     subworkflowInstances: Subworkflow[];
     unitInstances: AnyWorkflowUnit[];
     workflowInstances: Workflow[];

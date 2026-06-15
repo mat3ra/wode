@@ -21,18 +21,6 @@ class Subworkflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
     }
-    static repair(subworkflowData) {
-        const units = subworkflowData.units.map((unit) => {
-            if (unit.type === enums_1.UnitType.execution) {
-                return units_1.ExecutionUnit.repair(unit);
-            }
-            if (unit.type === enums_1.UnitType.condition) {
-                return units_1.ConditionUnit.repair(unit);
-            }
-            return unit;
-        });
-        return { ...subworkflowData, units };
-    }
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
         this.properties = [];

@@ -1,7 +1,7 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ConditionUnitSchema, ErrorUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { ConditionUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitType } from "../enums";
 import {
@@ -44,10 +44,6 @@ class ConditionUnit extends (BaseUnit as Base) implements Schema {
 
     getHashObject(): object {
         return { statement: this.statement, maxOccurrences: this.maxOccurrences };
-    }
-
-    static repair(unitData: Partial<Schema>): ConditionUnitSchema | ErrorUnitSchema {
-        return BaseUnit.repairUnit(ConditionUnit, unitData);
     }
 }
 

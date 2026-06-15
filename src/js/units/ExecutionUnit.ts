@@ -1,11 +1,7 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ErrorUnitSchema,
-    ExecutionUnitInputItemSchema,
-    ExecutionUnitSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { ExecutionUnitInputItemSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { ApplicationRegistry, applicationVersionSatisfiesSupportedRange } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -70,10 +66,6 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.setApplication(config);
 
         this.name = this.name || this.flavor.name || "";
-    }
-
-    static repair(unitData: Partial<Schema>): ExecutionUnitSchema | ErrorUnitSchema {
-        return BaseUnit.repairUnit(ExecutionUnit, unitData as ExecutionUnitConfig);
     }
 
     setApplication({

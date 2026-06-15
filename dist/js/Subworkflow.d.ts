@@ -40,7 +40,6 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     toJSON: () => SubworkflowSchema & AnyObject;
     _json: SubworkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
-    static repair(subworkflowData: SubworkflowSchema): SubworkflowSchema;
     constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
     static get defaultConfig(): {
         _id: any;

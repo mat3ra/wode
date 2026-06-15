@@ -10,4 +10,5 @@ import Workflow from "./Workflow";
 export type { OrderedMaterial } from "./context/mixins/MaterialContextMixin";
 export type { MaterialsSet } from "./context/mixins/MaterialsSetContextMixin";
 export type { AnySubworkflowUnit, DefaultSubworkflowUnitType } from "./units/factory";
+export { repairWorkflow } from "./utils/repair";
 export { Subworkflow, Workflow, UnitFactory, TAB_NAVIGATION_CONFIG, UNIT_NAME_INVALID_CHARS, WORKFLOW_STATUSES, BaseUnit, ExecutionUnit, AssertionUnit, AssignmentUnit, ConditionUnit, ErrorUnit, IOUnit, MapUnit, ReduceUnit, SubworkflowUnit, defaultMapConfig, PointsPathFormDataProvider, globalSettings, utils, };

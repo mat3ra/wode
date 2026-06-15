@@ -1,6 +1,6 @@
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ErrorUnitSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { type AnyContextProvider, type ExternalContext } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
 import { type ExecutionUnitSchemaMixin } from "../generated/ExecutionUnitSchemaMixin";
@@ -23,7 +23,6 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     _json: Schema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ExecutionUnitConfig);
-    static repair(unitData: Partial<Schema>): ExecutionUnitSchema | ErrorUnitSchema;
     setApplication({ application, executable, flavor, executableName, flavorName, }: SetApplicationProps): void;
     setExecutable({ executableName, flavorName }: SetExecutableProps): void;
     setFlavor(flavorName?: string): void;

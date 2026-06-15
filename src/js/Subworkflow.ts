@@ -34,13 +34,7 @@ import {
     type SubworkflowSchemaMixin,
     subworkflowSchemaMixin,
 } from "./generated/SubworkflowSchemaMixin";
-import {
-    AssignmentUnit,
-    ConditionUnit,
-    ExecutionUnit,
-    SubworkflowUnit,
-    UnitFactory,
-} from "./units";
+import { AssignmentUnit, ConditionUnit, SubworkflowUnit, UnitFactory } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
 
 type ConvergenceConfig = {
@@ -90,22 +84,6 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/subworkflow");
-    }
-
-    static repair(subworkflowData: SubworkflowSchema): SubworkflowSchema {
-        const units = subworkflowData.units.map((unit) => {
-            if (unit.type === UnitType.execution) {
-                return ExecutionUnit.repair(unit);
-            }
-
-            if (unit.type === UnitType.condition) {
-                return ConditionUnit.repair(unit);
-            }
-
-            return unit;
-        });
-
-        return { ...subworkflowData, units };
     }
 
     constructor(config: SubworkflowSchema, _ModelFactory = ModelFactory) {

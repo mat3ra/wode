@@ -32,9 +32,6 @@ class ConditionUnit extends BaseUnit_1.default {
     getHashObject() {
         return { statement: this.statement, maxOccurrences: this.maxOccurrences };
     }
-    static repair(unitData) {
-        return BaseUnit_1.default.repairUnit(ConditionUnit, unitData);
-    }
 }
 (0, ConditionUnitSchemaMixin_1.conditionUnitSchemaMixin)(ConditionUnit.prototype);
 exports.default = ConditionUnit;

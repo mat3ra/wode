@@ -1,5 +1,4 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { EntityError } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     type Defaultable,
     defaultableEntityMixin,
@@ -20,14 +19,10 @@ import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/Tagg
 import type { NameResultSchema } from "@mat3ra/code/dist/js/utils/object";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ErrorUnitSchema,
-    StatusSchema,
-    WorkflowBaseUnitSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { StatusSchema, WorkflowBaseUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
-import { UnitStatus, UnitType } from "../enums";
+import { UnitStatus } from "../enums";
 import { type BaseUnitSchemaMixin, baseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
 import { type StatusSchemaMixin, statusSchemaMixin } from "../generated/StatusSchemaMixin";
 import {
@@ -36,10 +31,6 @@ import {
 } from "./mixins/RuntimeItemsUILogicMixin";
 
 type Schema = WorkflowBaseUnitSchema;
-
-type RepairableUnitConstructor<US extends Schema, C = Partial<US>> = new (config: C) => {
-    toJSON(): US;
-};
 
 type Base = typeof InMemoryEntity &
     Constructor<NamedEntity> &
@@ -111,52 +102,6 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
 
     setRepetition(repetition: number) {
         this.repetition = repetition;
-    }
-
-    static toErrorUnitSchema(unitData: Partial<Schema>, error: unknown): ErrorUnitSchema {
-        let reasonPayload: { error: unknown; json: object };
-
-        if (error instanceof EntityError && error.details) {
-            reasonPayload = {
-                error: error.details.error,
-                json: unitData as object,
-            };
-        } else if (error instanceof Error) {
-            reasonPayload = {
-                error: { message: error.message, name: error.name },
-                json: unitData as object,
-            };
-        } else {
-            reasonPayload = {
-                error,
-                json: unitData as object,
-            };
-        }
-
-        return {
-            results: [],
-            preProcessors: [],
-            postProcessors: [],
-            monitors: [],
-            name: unitData.name ?? UnitType.error,
-            type: UnitType.error,
-            status: UnitStatus.error,
-            flowchartId: unitData.flowchartId ?? Utils.uuid.getUUID(),
-            reason: JSON.stringify(reasonPayload),
-            next: unitData.next ?? "",
-            head: unitData.head ?? false,
-        };
-    }
-
-    static repairUnit<US extends Schema, C = Partial<US>>(
-        UnitClass: RepairableUnitConstructor<US, C>,
-        unitData: C,
-    ): US | ErrorUnitSchema {
-        try {
-            return new UnitClass(unitData).toJSON();
-        } catch (error: unknown) {
-            return BaseUnit.toErrorUnitSchema(unitData as Partial<Schema>, error);
-        }
     }
 }
 

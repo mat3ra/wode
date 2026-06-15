@@ -22,6 +22,7 @@ import Workflow from "./Workflow";
 export type { OrderedMaterial } from "./context/mixins/MaterialContextMixin";
 export type { MaterialsSet } from "./context/mixins/MaterialsSetContextMixin";
 export type { AnySubworkflowUnit, DefaultSubworkflowUnitType } from "./units/factory";
+export { repairWorkflow } from "./utils/repair";
 export {
     Subworkflow,
     Workflow,

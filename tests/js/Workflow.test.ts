@@ -1,4 +1,3 @@
-import { EntityError, ValidationErrorCode } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
@@ -23,7 +22,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
-import BaseUnit from "../../src/js/units/BaseUnit";
+import { repairWorkflow } from "../../src/js/utils/repair";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
 
@@ -339,7 +338,7 @@ describe("Workflow", () => {
             const invalid = invalidExecutionUnit("fc-exec");
             workflowConfig.subworkflows[0].units = [invalid as never];
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
 
             expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
             const subworkflowErrorReason = JSON.parse(
@@ -356,12 +355,12 @@ describe("Workflow", () => {
             ).toJSON();
             workflowConfig.subworkflows[0].units = [unit];
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
 
             expect(result.subworkflows[0].units[0]).to.deep.equal(unit);
         });
 
-        it("repairs legacy condition unit missing then and else via Workflow.repair", () => {
+        it("repairs legacy condition unit missing then and else via repairWorkflow", () => {
             const workflowConfig = structuredClone(Workflow.defaultConfig);
             const legacyCondition = {
                 name: "condition",
@@ -381,7 +380,7 @@ describe("Workflow", () => {
 
             workflowConfig.subworkflows[0].units = [legacyCondition as never];
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
             const condition = result.subworkflows[0].units[0] as ConditionUnitSchema;
 
             expect(condition.type).to.equal(UnitType.condition);
@@ -396,7 +395,7 @@ describe("Workflow", () => {
             const invalidExecution = invalidExecutionUnit("fc-bad");
             workflowConfig.subworkflows[0].units = [validUnit, invalidExecution as never];
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
 
             expect(result.subworkflows[0].units[0]).to.deep.equal(validUnit);
             expect(result.subworkflows[0].units[1].type).to.equal(UnitType.error);
@@ -421,7 +420,7 @@ describe("Workflow", () => {
                 },
             ];
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
 
             expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
             expect(result.workflows[0].subworkflows[0].units[0].type).to.equal(UnitType.error);
@@ -431,7 +430,7 @@ describe("Workflow", () => {
             const workflowConfig = structuredClone(Workflow.defaultConfig);
             workflowConfig.subworkflows[0].units = [invalidExecutionUnit("fc-hydrate") as never];
 
-            const document = Workflow.repair(workflowConfig);
+            const document = repairWorkflow(workflowConfig);
 
             expect(() => new Workflow(document)).to.not.throw();
         });
@@ -490,7 +489,7 @@ describe("Workflow", () => {
                 properties: [],
             } as unknown as WorkflowSchema;
 
-            const result = Workflow.repair(legacyShellWorkflow);
+            const result = repairWorkflow(legacyShellWorkflow);
 
             expect(result.subworkflows).to.have.lengthOf(0);
             expect(result.units[0].type).to.equal(UnitType.error);
@@ -500,25 +499,16 @@ describe("Workflow", () => {
         });
 
         it("does not store JSON schema in error unit reason", () => {
-            const unitData = { name: "exec", flowchartId: "fc-1" };
-            const schema = {
-                type: "object",
-                properties: { name: { type: "string" } },
-            } as JSONSchema7;
-            const entityError = new EntityError({
-                code: ValidationErrorCode.IN_MEMORY_ENTITY_DATA_INVALID,
-                details: {
-                    error: [{ instancePath: "/name", message: "required" }],
-                    json: unitData,
-                    schema,
-                },
-            });
+            const workflowConfig = structuredClone(Workflow.defaultConfig);
+            const invalid = invalidExecutionUnit("fc-1");
+            workflowConfig.subworkflows[0].units = [invalid as never];
 
-            const errorUnit = BaseUnit.toErrorUnitSchema(unitData, entityError);
+            const result = repairWorkflow(workflowConfig);
+            const errorUnit = result.subworkflows[0].units[0] as ErrorUnitSchema;
             const reason = JSON.parse(errorUnit.reason);
 
             expect(reason).to.have.property("error");
-            expect(reason).to.have.property("json").that.deep.equals(unitData);
+            expect(reason).to.have.property("json");
             expect(reason).to.not.have.property("schema");
         });
 
@@ -535,7 +525,7 @@ describe("Workflow", () => {
                 },
             };
 
-            const result = Workflow.repair(workflowConfig);
+            const result = repairWorkflow(workflowConfig);
 
             expect(result.subworkflows).to.have.lengthOf(0);
             expect(result.units).to.have.lengthOf(1);
