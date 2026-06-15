@@ -66,7 +66,6 @@ class BaseUnit extends entity_1.InMemoryEntity {
             reasonPayload = {
                 error: error.details.error,
                 json: unitData,
-                schema: error.details.schema,
             };
         }
         else if (error instanceof Error) {

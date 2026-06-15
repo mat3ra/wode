@@ -1,3 +1,4 @@
+import { EntityError, ValidationErrorCode } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
@@ -22,6 +23,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
+import BaseUnit from "../../src/js/units/BaseUnit";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
 
@@ -495,6 +497,29 @@ describe("Workflow", () => {
             const legacyErrorReason = JSON.parse((result.units[0] as ErrorUnitSchema).reason);
             expect(legacyErrorReason.error).to.be.an("array").that.is.not.empty;
             expect(() => new Workflow(result)).to.not.throw();
+        });
+
+        it("does not store JSON schema in error unit reason", () => {
+            const unitData = { name: "exec", flowchartId: "fc-1" };
+            const schema = {
+                type: "object",
+                properties: { name: { type: "string" } },
+            } as JSONSchema7;
+            const entityError = new EntityError({
+                code: ValidationErrorCode.IN_MEMORY_ENTITY_DATA_INVALID,
+                details: {
+                    error: [{ instancePath: "/name", message: "required" }],
+                    json: unitData,
+                    schema,
+                },
+            });
+
+            const errorUnit = BaseUnit.toErrorUnitSchema(unitData, entityError);
+            const reason = JSON.parse(errorUnit.reason);
+
+            expect(reason).to.have.property("error");
+            expect(reason).to.have.property("json").that.deep.equals(unitData);
+            expect(reason).to.not.have.property("schema");
         });
 
         it("converts invalid subworkflow unit to error and drops subworkflow", () => {

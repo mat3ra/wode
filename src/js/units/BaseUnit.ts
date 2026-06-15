@@ -114,13 +114,12 @@ class BaseUnit<S extends Schema = Schema> extends (InMemoryEntity as Base) imple
     }
 
     static toErrorUnitSchema(unitData: Partial<Schema>, error: unknown): ErrorUnitSchema {
-        let reasonPayload: { error: unknown; json: object; schema?: unknown };
+        let reasonPayload: { error: unknown; json: object };
 
         if (error instanceof EntityError && error.details) {
             reasonPayload = {
                 error: error.details.error,
                 json: unitData as object,
-                schema: error.details.schema,
             };
         } else if (error instanceof Error) {
             reasonPayload = {
