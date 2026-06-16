@@ -8,6 +8,7 @@ const enums_1 = require("../enums");
 const AssertionUnit_1 = __importDefault(require("./AssertionUnit"));
 const AssignmentUnit_1 = __importDefault(require("./AssignmentUnit"));
 const ConditionUnit_1 = __importDefault(require("./ConditionUnit"));
+const ErrorUnit_1 = __importDefault(require("./ErrorUnit"));
 const ExecutionUnit_1 = __importDefault(require("./ExecutionUnit"));
 const IOUnit_1 = __importDefault(require("./IOUnit"));
 const MapUnit_1 = __importDefault(require("./MapUnit"));
@@ -47,6 +48,8 @@ class UnitFactory {
                 return new SubworkflowUnit_1.default(config);
             case enums_1.UnitType.reduce:
                 return new ReduceUnit_1.default(config);
+            case enums_1.UnitType.error:
+                return new ErrorUnit_1.default(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }
@@ -63,6 +66,8 @@ class UnitFactory {
                 return new IOUnit_1.default(config);
             case enums_1.UnitType.assertion:
                 return new AssertionUnit_1.default(config);
+            case enums_1.UnitType.error:
+                return new ErrorUnit_1.default(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }

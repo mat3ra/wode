@@ -2,6 +2,7 @@ import AssertionUnit from "./AssertionUnit";
 import AssignmentUnit from "./AssignmentUnit";
 import BaseUnit from "./BaseUnit";
 import ConditionUnit from "./ConditionUnit";
+import ErrorUnit from "./ErrorUnit";
 import ExecutionUnit from "./ExecutionUnit";
 import { UnitFactory } from "./factory";
 import IOUnit from "./IOUnit";
@@ -16,6 +17,7 @@ export {
     AssertionUnit,
     AssignmentUnit,
     ConditionUnit,
+    ErrorUnit,
     ExecutionUnit,
     IOUnit,
     MapUnit,

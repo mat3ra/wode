@@ -8,13 +8,13 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
+import type { WorkflowSchema } from "src/js/workflows/types";
 
 import { ExecutionUnit, Subworkflow, Workflow } from "../../src/js";
 import { assertNotNull } from "./assertNotNull";
@@ -49,13 +49,13 @@ function findVaspBandsUnit(workflow: Workflow): ExecutionUnit | undefined {
 }
 
 function findBandStructureVaspJson(): WorkflowSchema {
+    const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
     // eslint-disable-next-line no-restricted-syntax
-    for (const workflow of new WorkflowStandata().getAll()) {
+    for (const workflow of standataWorkflows) {
         if (workflow.name === "Band Structure") {
-            const candidate = workflow as unknown as WorkflowSchema;
-            const probe = new Workflow(candidate);
+            const probe = new Workflow(workflow);
             if (findVaspBandsUnit(probe)) {
-                return candidate;
+                return workflow;
             }
         }
     }

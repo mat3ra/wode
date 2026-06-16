@@ -1,4 +1,4 @@
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type { WorkflowSchema } from "./types";
 
 const defaultWorkflowConfig: WorkflowSchema = {
     name: "New Workflow",

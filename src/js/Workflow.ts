@@ -15,11 +15,7 @@ import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntity
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type {
-    ApplicationSchema,
-    SubworkflowSchema,
-    WorkflowSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { ApplicationSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -45,6 +41,7 @@ import {
     getUsedModels,
 } from "./utils/workflow";
 import defaultWorkflowConfig from "./workflows/default";
+import type { WorkflowSchema } from "./workflows/types";
 
 interface Workflow
     extends Defaultable,

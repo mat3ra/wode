@@ -1,8 +1,10 @@
 import type {
+    ApplicationSchema,
     AssertionUnitSchema,
     AssignmentUnitSchema,
     ConditionUnitSchema,
     DataIOUnitSchema,
+    ErrorUnitSchema,
     ExecutionUnitSchema,
     MapUnitSchema,
     ReduceUnitSchema,
@@ -14,35 +16,43 @@ import { UnitType } from "../enums";
 import AssertionUnit, { type AssertionUnitConfig } from "./AssertionUnit";
 import AssignmentUnit, { type AssignmentUnitConfig } from "./AssignmentUnit";
 import ConditionUnit, { type ConditionUnitConfig } from "./ConditionUnit";
+import ErrorUnit, { type ErrorUnitConfig } from "./ErrorUnit";
 import ExecutionUnit, { type ExecutionUnitConfig } from "./ExecutionUnit";
 import IOUnit, { type IOUnitConfig } from "./IOUnit";
 import MapUnit from "./MapUnit";
 import ReduceUnit from "./ReduceUnit";
 import SubworkflowUnit from "./SubworkflowUnit";
 
-export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit;
+export type AnyWorkflowUnit = MapUnit | SubworkflowUnit | ReduceUnit | ErrorUnit;
 
-export type AnyWorkflowUnitSchema = MapUnitSchema | SubworkflowUnitSchema | ReduceUnitSchema;
+export type AnyWorkflowUnitSchema =
+    | MapUnitSchema
+    | SubworkflowUnitSchema
+    | ReduceUnitSchema
+    | ErrorUnitSchema;
 
 export type AnySubworkflowUnit =
     | ExecutionUnit
     | AssignmentUnit
     | ConditionUnit
     | IOUnit
-    | AssertionUnit;
+    | AssertionUnit
+    | ErrorUnit;
 
 export type AnySubworkflowUnitSchema =
     | ExecutionUnitSchema
     | AssertionUnitSchema
     | AssignmentUnitSchema
     | ConditionUnitSchema
-    | DataIOUnitSchema;
+    | DataIOUnitSchema
+    | ErrorUnitSchema;
 
 type ExcutionConfig = ExecutionUnitConfig & Pick<ExecutionUnitSchema, "type">;
 type AssignmentConfig = AssignmentUnitConfig & Pick<AssignmentUnitSchema, "type">;
 type ConditionConfig = ConditionUnitConfig & Pick<ConditionUnitSchema, "type">;
 type IOConfig = IOUnitConfig & Pick<DataIOUnitSchema, "type">;
 type AssertionConfig = AssertionUnitConfig & Pick<AssertionUnitSchema, "type">;
+type ErrorConfig = ErrorUnitConfig & Pick<ErrorUnitSchema, "type">;
 
 /** Subworkflow unit kinds supported by {@link UnitFactory.createDefaultSubworkflowUnit}. */
 export type DefaultSubworkflowUnitType =
@@ -59,16 +69,20 @@ export class UnitFactory {
      */
     static createDefaultSubworkflowUnit(
         type: "execution",
-        application: ExecutionUnitSchema["application"],
-    ): AnySubworkflowUnit;
+        application: ApplicationSchema,
+    ): ExecutionUnit;
 
-    static createDefaultSubworkflowUnit(
-        type: "assignment" | "condition" | "io" | "assertion",
-    ): AnySubworkflowUnit;
+    static createDefaultSubworkflowUnit(type: "assignment"): AssignmentUnit;
+
+    static createDefaultSubworkflowUnit(type: "condition"): ConditionUnit;
+
+    static createDefaultSubworkflowUnit(type: "io"): IOUnit;
+
+    static createDefaultSubworkflowUnit(type: "assertion"): AssertionUnit;
 
     static createDefaultSubworkflowUnit(
         type: DefaultSubworkflowUnitType,
-        application?: ExecutionUnitSchema["application"],
+        application?: ApplicationSchema,
     ): AnySubworkflowUnit {
         if (type === "execution") {
             if (application === undefined) {
@@ -105,13 +119,21 @@ export class UnitFactory {
                 return new SubworkflowUnit(config);
             case UnitType.reduce:
                 return new ReduceUnit(config);
+            case UnitType.error:
+                return new ErrorUnit(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }
     }
 
     static createInSubworkflow(
-        config: ExcutionConfig | AssignmentConfig | ConditionConfig | IOConfig | AssertionConfig,
+        config:
+            | ExcutionConfig
+            | AssignmentConfig
+            | ConditionConfig
+            | IOConfig
+            | AssertionConfig
+            | ErrorConfig,
     ): AnySubworkflowUnit {
         switch (config.type) {
             case UnitType.execution:
@@ -124,6 +146,8 @@ export class UnitFactory {
                 return new IOUnit(config);
             case UnitType.assertion:
                 return new AssertionUnit(config);
+            case UnitType.error:
+                return new ErrorUnit(config);
             default:
                 throw new Error(`Unknown unit type: ${config.type}`);
         }

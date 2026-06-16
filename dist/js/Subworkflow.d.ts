@@ -44,9 +44,9 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     static get defaultConfig(): {
         _id: any;
         name: string;
-        application: import("@mat3ra/esse/dist/js/types").ApplicationSchema | undefined;
+        application: import("@mat3ra/esse/dist/js/types").ApplicationSchema;
         model: {
-            functional: string;
+            functional: "pbe";
             method: {
                 readonly type: "pseudopotential";
                 readonly subtype: "us";
@@ -461,7 +461,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 contextProviderName: "vasp-neb";
             };
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -483,7 +483,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 preferGridMetric?: boolean;
             };
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -496,7 +496,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 steps: number;
             }[]];
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -522,7 +522,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 hubbardUValue?: number;
             }[];
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -575,7 +575,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 targetFermiEnergy?: number;
             };
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -615,7 +615,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 totalMagnetization: number;
             };
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         } | {
@@ -650,7 +650,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 };
             };
             extraData: {
-                materialHash: string;
+                materialHash?: string;
             };
             isEdited: boolean;
         })[];
@@ -697,6 +697,43 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         }[];
         operand: string;
         value: string | boolean | number;
+    } | {
+        _id?: string;
+        slug?: string;
+        systemName?: string;
+        schemaVersion?: string;
+        name: string;
+        isDefault?: boolean;
+        preProcessors: {
+            name: string;
+            [k: string]: unknown;
+        }[];
+        postProcessors: {
+            name: string;
+            [k: string]: unknown;
+        }[];
+        monitors: {
+            name: string;
+            [k: string]: unknown;
+        }[];
+        results: {
+            name: string;
+            [k: string]: unknown;
+        }[];
+        tags?: string[];
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        statusTrack?: {
+            trackedAt: number;
+            status: string;
+            repetition?: number;
+        }[];
+        isDraft?: boolean;
+        type: "error";
+        head?: boolean;
+        flowchartId: string;
+        next?: string;
+        enableRender?: boolean;
+        reason: string;
     } | undefined;
     findUnitKeyById(id: string): string;
     private findUnitWithTag;

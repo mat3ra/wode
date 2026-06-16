@@ -11,6 +11,7 @@ export const UNIT_TYPES = {
     subworkflow: "subworkflow",
     io: "io",
     assertion: "assertion",
+    error: "error",
 } as const;
 
 export enum UnitType {
@@ -24,6 +25,7 @@ export enum UnitType {
     subworkflow = "subworkflow",
     io = "io",
     assertion = "assertion",
+    error = "error",
 }
 
 export enum UnitTag {

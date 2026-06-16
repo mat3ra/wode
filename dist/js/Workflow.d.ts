@@ -4,7 +4,7 @@ import { type HasDescription } from "@mat3ra/code/dist/js/entity/mixins/HasDescr
 import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ApplicationSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type { ApplicationSchema } from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -17,6 +17,7 @@ import { type WorkflowSchemaMixin } from "./generated/WorkflowSchemaMixin";
 import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
+import type { WorkflowSchema } from "./workflows/types";
 interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
     compute: WorkflowSchema["compute"];
 }
