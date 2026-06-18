@@ -736,14 +736,14 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         reason: string;
     } | undefined;
     findUnitKeyById(id: string): string;
-    private findUnitWithTag;
+    private findAssignmentUnitWithTag;
     get hasConvergence(): boolean;
     get convergenceParam(): string | undefined;
     get convergenceResult(): string | undefined;
     convergenceSeries(scopeTrack: JobSchema["scopeTrack"]): {
         x: number;
-        param: any;
-        y: any;
+        param: unknown;
+        y: unknown;
     }[];
     updateMethodData(materials: Material[], metaProperties: MetaPropertyHolder[]): void;
     addConvergence({ parameter, parameterInitial, parameterIncrement, result, resultInitial, condition, operator, tolerance, maxOccurrences, externalContext, }: ConvergenceConfig): void;

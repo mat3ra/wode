@@ -186,7 +186,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         const index = this.units.findIndex((u) => u.flowchartId === id);
         return `units.${index}`;
     }
-    findUnitWithTag(tag) {
+    findAssignmentUnitWithTag(tag) {
         return this.units
             .filter((unit) => unit.type === enums_1.UnitType.assignment)
             .find((unit) => { var _a; return (_a = unit.tags) === null || _a === void 0 ? void 0 : _a.includes(tag); });
@@ -196,27 +196,32 @@ class Subworkflow extends entity_1.InMemoryEntity {
     }
     get convergenceParam() {
         var _a;
-        return (_a = this.findUnitWithTag(enums_1.UnitTag.hasConvergenceParam)) === null || _a === void 0 ? void 0 : _a.operand;
+        return (_a = this.findAssignmentUnitWithTag(enums_1.UnitTag.hasConvergenceParam)) === null || _a === void 0 ? void 0 : _a.operand;
     }
     get convergenceResult() {
         var _a;
-        return (_a = this.findUnitWithTag(enums_1.UnitTag.hasConvergenceResult)) === null || _a === void 0 ? void 0 : _a.operand;
+        return (_a = this.findAssignmentUnitWithTag(enums_1.UnitTag.hasConvergenceResult)) === null || _a === void 0 ? void 0 : _a.operand;
     }
     convergenceSeries(scopeTrack) {
-        if (!this.hasConvergence || !(scopeTrack === null || scopeTrack === void 0 ? void 0 : scopeTrack.length)) {
+        const { convergenceParam, convergenceResult } = this;
+        if (!convergenceParam || !convergenceResult || !(scopeTrack === null || scopeTrack === void 0 ? void 0 : scopeTrack.length)) {
             return [];
         }
         let prevResult;
+        // `scopeTrack` stores per-repetition diffs: each item only carries the global/local keys
+        // that were added or changed in that repetition (see UnitEndpoint.saveUnitStatus). Accumulate
+        // the global scope across items so each iteration reads the full scope, not just its delta.
+        // This also stays correct for legacy full-snapshot scopeTrack data, since re-applying a full
+        // snapshot is idempotent.
+        const accumulatedGlobal = {};
         return scopeTrack
             .map((scopeItem, i) => {
-            var _a, _b;
+            var _a;
+            Object.assign(accumulatedGlobal, (_a = scopeItem.scope) === null || _a === void 0 ? void 0 : _a.global);
             return {
                 x: i,
-                // TODO: fix types
-                // @ts-ignore
-                param: (_a = scopeItem.scope) === null || _a === void 0 ? void 0 : _a.global[this.convergenceParam],
-                // @ts-ignore
-                y: (_b = scopeItem.scope) === null || _b === void 0 ? void 0 : _b.global[this.convergenceResult],
+                param: accumulatedGlobal[convergenceParam],
+                y: accumulatedGlobal[convergenceResult],
             };
         })
             .filter(({ y }) => {

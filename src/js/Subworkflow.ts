@@ -279,7 +279,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         return `units.${index}`;
     }
 
-    private findUnitWithTag(tag: UnitTag) {
+    private findAssignmentUnitWithTag(tag: UnitTag) {
         return this.units
             .filter((unit) => unit.type === UnitType.assignment)
             .find((unit) => unit.tags?.includes(tag));
@@ -290,29 +290,35 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     }
 
     get convergenceParam() {
-        return this.findUnitWithTag(UnitTag.hasConvergenceParam)?.operand;
+        return this.findAssignmentUnitWithTag(UnitTag.hasConvergenceParam)?.operand;
     }
 
     get convergenceResult() {
-        return this.findUnitWithTag(UnitTag.hasConvergenceResult)?.operand;
+        return this.findAssignmentUnitWithTag(UnitTag.hasConvergenceResult)?.operand;
     }
 
     convergenceSeries(scopeTrack: JobSchema["scopeTrack"]) {
-        if (!this.hasConvergence || !scopeTrack?.length) {
+        const { convergenceParam, convergenceResult } = this;
+
+        if (!convergenceParam || !convergenceResult || !scopeTrack?.length) {
             return [];
         }
 
         let prevResult: unknown;
+        // `scopeTrack` stores per-repetition diffs: each item only carries the global/local keys
+        // that were added or changed in that repetition (see UnitEndpoint.saveUnitStatus). Accumulate
+        // the global scope across items so each iteration reads the full scope, not just its delta.
+        // This also stays correct for legacy full-snapshot scopeTrack data, since re-applying a full
+        // snapshot is idempotent.
+        const accumulatedGlobal: Record<string, unknown> = {};
 
         return scopeTrack
             .map((scopeItem, i) => {
+                Object.assign(accumulatedGlobal, scopeItem.scope?.global);
                 return {
                     x: i,
-                    // TODO: fix types
-                    // @ts-ignore
-                    param: scopeItem.scope?.global[this.convergenceParam],
-                    // @ts-ignore
-                    y: scopeItem.scope?.global[this.convergenceResult],
+                    param: accumulatedGlobal[convergenceParam],
+                    y: accumulatedGlobal[convergenceResult],
                 };
             })
             .filter(({ y }) => {
