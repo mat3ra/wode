@@ -173,8 +173,8 @@ def test_lattice_reciprocal_vector_ratios():
     assert lattice.reciprocal_vector_ratios == [1.0, 0.5, 0.25]
 
 
-def test_convergence_series_uses_scope_track():
     subworkflow = _build_total_energy_subworkflow()
+    n_k = ConvergenceParameterNameEnum.N_k.value
 
     subworkflow.add_convergence(
         parameter=ConvergenceParameterNameEnum.N_k,
@@ -186,15 +186,14 @@ def test_convergence_series_uses_scope_track():
     )
 
     scope_track = [
-        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 1, "total_energy": -10.0}}},
-        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 1, "total_energy": -10.0}}},
-        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 2, "total_energy": -10.5}}},
-        {"scope": {"global": {ConvergenceParameterNameEnum.N_k.value: 3}}},
+        {"scope": {"global": {n_k: 12, "total_energy": -100}}},
+        {"scope": {"global": {"total_energy": -98}}},
+        {"scope": {"global": {n_k: 36}}},
     ]
 
     assert subworkflow.convergence_series(scope_track) == [
-        {"x": 1, "parameter": 1, "y": -10.0},
-        {"x": 2, "parameter": 2, "y": -10.5},
+        {"x": 1, "parameter": 12, "y": -100},
+        {"x": 2, "parameter": 12, "y": -98},
     ]
 
 

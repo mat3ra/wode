@@ -48,10 +48,12 @@ class ConvergenceMixin:
 
         last_result = object()
         series: List[Dict[str, Any]] = []
+        accumulated_global: Dict[str, Any] = {}
         for scope_item in scope_track:
-            global_scope = ((scope_item or {}).get("scope") or {}).get("global") or {}
-            parameter = global_scope.get(self.convergence_parameter)
-            result = global_scope.get(self.convergence_result)
+            item_global = ((scope_item or {}).get("scope") or {}).get("global") or {}
+            accumulated_global = {**accumulated_global, **item_global}
+            parameter = accumulated_global.get(self.convergence_parameter)
+            result = accumulated_global.get(self.convergence_result)
             is_new_result = result is not None and result != last_result
             last_result = result
             if is_new_result:
