@@ -14,6 +14,7 @@ exports.UNIT_TYPES = {
     subworkflow: "subworkflow",
     io: "io",
     assertion: "assertion",
+    error: "error",
 };
 var UnitType;
 (function (UnitType) {
@@ -27,6 +28,7 @@ var UnitType;
     UnitType["subworkflow"] = "subworkflow";
     UnitType["io"] = "io";
     UnitType["assertion"] = "assertion";
+    UnitType["error"] = "error";
 })(UnitType || (exports.UnitType = UnitType = {}));
 var UnitTag;
 (function (UnitTag) {

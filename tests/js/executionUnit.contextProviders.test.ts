@@ -8,13 +8,13 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
+import type { WorkflowSchema } from "src/js/workflows/types";
 
 import { ExecutionUnit, Workflow } from "../../src/js";
 import KGridFormDataManager from "../../src/js/context/providers/PointsGrid/KGridFormDataManager";
@@ -41,7 +41,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
     });
 
     it("persists in-memory provider edits when render() runs again (Important settings path)", () => {
-        const standataWorkflows = new WorkflowStandata().getAll();
+        const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 
         const material = OrderedMaterial.createDefault();
@@ -59,7 +59,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
 
         // eslint-disable-next-line no-restricted-syntax
         for (const standataJson of standataWorkflows) {
-            const w = new Workflow(standataJson as unknown as WorkflowSchema);
+            const w = new Workflow(standataJson);
             w.render(context);
             // eslint-disable-next-line no-restricted-syntax
             for (const sub of w.subworkflowInstances) {
@@ -81,6 +81,10 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
             if (executionUnit) break;
         }
 
+        if (!workflow) {
+            throw new Error("Workflow not found");
+        }
+
         expect(
             workflow,
             "expected a standata workflow with boundaryConditions on an execution unit",
@@ -91,13 +95,17 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
         const provider = unit.contextProvidersInstances.find((p) => {
             return p.name === "boundaryConditions";
         });
+
+        if (!provider) {
+            throw new Error("Provider not found");
+        }
         // eslint-disable-next-line no-unused-expressions
         expect(provider).to.be.ok;
 
         const distinctiveElectricField = 9.87654321;
-        const priorData = provider!.getData();
-        provider!.setIsEdited(true);
-        provider!.setData({
+        const priorData = provider.getData();
+        provider.setIsEdited(true);
+        provider.setData({
             ...priorData,
             electricField: distinctiveElectricField,
         });
@@ -106,7 +114,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
         // Same workflow + same unit instances as the designer: persist then `onContextChanged` → `workflow.render()`.
         // Without `savePersistentContext()` before this, the next render rebuilds providers from stale
         // `this.context` and this assertion fails.
-        workflow!.render(context);
+        workflow.render(context);
 
         const persisted = unit.context.find((c) => c.name === "boundaryConditions");
         expect(persisted?.data).to.include({ electricField: distinctiveElectricField });

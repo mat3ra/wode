@@ -7,6 +7,7 @@ import {
     AssignmentUnit,
     BaseUnit,
     ConditionUnit,
+    ErrorUnit,
     ExecutionUnit,
     IOUnit,
     MapUnit,
@@ -21,6 +22,7 @@ import Workflow from "./Workflow";
 export type { OrderedMaterial } from "./context/mixins/MaterialContextMixin";
 export type { MaterialsSet } from "./context/mixins/MaterialsSetContextMixin";
 export type { AnySubworkflowUnit, DefaultSubworkflowUnitType } from "./units/factory";
+export { repairWorkflow } from "./utils/repair";
 export {
     Subworkflow,
     Workflow,
@@ -33,6 +35,7 @@ export {
     AssertionUnit,
     AssignmentUnit,
     ConditionUnit,
+    ErrorUnit,
     IOUnit,
     MapUnit,
     ReduceUnit,

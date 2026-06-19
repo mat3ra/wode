@@ -8,7 +8,6 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
@@ -19,6 +18,7 @@ import { Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import { AssignmentUnit, ConditionUnit } from "../../src/js/units";
 import type { WorkflowRenderContext } from "../../src/js/Workflow";
+import type { WorkflowSchema } from "../../src/js/workflows/types";
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
@@ -40,11 +40,11 @@ describe("Subworkflow", () => {
     });
 
     it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", () => {
-        const standataWorkflows = new WorkflowStandata().getAll();
+        const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 
         const workflows = standataWorkflows.map((standataJson) => {
-            return new Workflow(structuredClone(standataJson) as unknown as WorkflowSchema);
+            return new Workflow(structuredClone(standataJson));
         });
 
         const material = OrderedMaterial.createDefault();
