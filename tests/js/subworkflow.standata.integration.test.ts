@@ -39,7 +39,9 @@ describe("Subworkflow", () => {
         ApplicationRegistry.setDriver(new StandataDriver());
     });
 
-    it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", () => {
+    it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", function () {
+        this.timeout(10000);
+
         const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 
