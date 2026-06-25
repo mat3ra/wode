@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BaseUnitCore = void 0;
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
@@ -12,7 +11,7 @@ const enums_1 = require("../enums");
 const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
 const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
-class BaseUnitCore extends entity_1.InMemoryEntity {
+class BaseUnit extends entity_1.InMemoryEntity {
     /**
      * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
      */
@@ -61,7 +60,6 @@ class BaseUnitCore extends entity_1.InMemoryEntity {
         this.repetition = repetition;
     }
 }
-exports.BaseUnitCore = BaseUnitCore;
 (0, TaggableMixin_1.taggableMixin)(BaseUnitCore.prototype);
 (0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnitCore.prototype);
 (0, RuntimeItemsMixin_1.runtimeItemsMixin)(BaseUnitCore.prototype);
