@@ -5,7 +5,7 @@ function materialContextMixin(item) {
     // @ts-expect-error
     const properties = {
         updateMaterialHash() {
-            this.extraData = { materialHash: this.material.hash };
+            this.extraData = { materialHash: this.material.calculateHash() };
         },
         initMaterialContextMixin(externalContext) {
             this.material = externalContext.material;

@@ -6,9 +6,6 @@ export type MaterialContextMixin = {
     readonly isMaterialCreatedDefault: boolean;
     readonly isMaterialUpdated: boolean;
     material: OrderedMaterial;
-    extraData?: {
-        materialHash?: string;
-    };
     initMaterialContextMixin(externalContext: MaterialExternalContext): void;
     updateMaterialHash(): void;
 };

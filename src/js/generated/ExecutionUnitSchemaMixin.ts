@@ -9,39 +9,39 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
 ): asserts item is T & ExecutionUnitSchemaMixin {
     // @ts-expect-error
-    const properties: InMemoryEntity & ExecutionUnitSchemaMixin = {
+    const properties: InMemoryEntity<ExecutionUnitSchemaMixin> & ExecutionUnitSchemaMixin = {
         get type() {
-            return this.requiredProp<ExecutionUnitMixinSchema["type"]>("type");
+            return this.requiredProp("type");
         },
         set type(value: ExecutionUnitMixinSchema["type"]) {
             this.setProp("type", value);
         },
         get application() {
-            return this.requiredProp<ExecutionUnitMixinSchema["application"]>("application");
+            return this.requiredProp("application");
         },
         set application(value: ExecutionUnitMixinSchema["application"]) {
             this.setProp("application", value);
         },
         get executable() {
-            return this.requiredProp<ExecutionUnitMixinSchema["executable"]>("executable");
+            return this.requiredProp("executable");
         },
         set executable(value: ExecutionUnitMixinSchema["executable"]) {
             this.setProp("executable", value);
         },
         get flavor() {
-            return this.requiredProp<ExecutionUnitMixinSchema["flavor"]>("flavor");
+            return this.requiredProp("flavor");
         },
         set flavor(value: ExecutionUnitMixinSchema["flavor"]) {
             this.setProp("flavor", value);
         },
         get input() {
-            return this.requiredProp<ExecutionUnitMixinSchema["input"]>("input");
+            return this.requiredProp("input");
         },
         set input(value: ExecutionUnitMixinSchema["input"]) {
             this.setProp("input", value);
         },
         get context() {
-            return this.requiredProp<ExecutionUnitMixinSchema["context"]>("context");
+            return this.requiredProp("context");
         },
         set context(value: ExecutionUnitMixinSchema["context"]) {
             this.setProp("context", value);

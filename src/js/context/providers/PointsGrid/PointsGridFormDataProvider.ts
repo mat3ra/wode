@@ -1,6 +1,5 @@
 import { Units } from "@mat3ra/code/dist/js/constants";
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type {
     GridContextItemSchema,
     PointsGridDataProviderSchema,
@@ -21,10 +20,18 @@ type Schema = GridContextItemSchema;
 type Data = PointsGridDataProviderSchema;
 export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 
-type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> &
-    Constructor<MaterialContextMixin>;
-
 type GridMetricType = Data["gridMetricType"];
+
+interface MixinsContextProvider extends MaterialContextMixin, MaterialExternalContext {}
+
+abstract class MixinsContextProvider extends JSONSchemaFormDataProvider<Schema, ExternalContext> {
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
+        super(contextItem, externalContext);
+        this.initMaterialContextMixin(externalContext);
+    }
+}
+
+materialContextMixin(MixinsContextProvider.prototype);
 
 const vector = (
     defaultValue: string | number | readonly number[] | readonly string[],
@@ -47,9 +54,7 @@ const vector = (
 const defaultShift = 0;
 const defaultShifts: Vector3DSchema = [defaultShift, defaultShift, defaultShift];
 
-abstract class PointsGridFormDataProvider<
-    N extends Schema["name"],
-> extends (JSONSchemaFormDataProvider as Base) {
+abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends MixinsContextProvider {
     abstract readonly name: N;
 
     readonly domain = "important" as const;
@@ -86,7 +91,6 @@ abstract class PointsGridFormDataProvider<
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number) {
         super(contextItem, externalContext);
         this.divisor = divisor;
-        this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
     }
 
@@ -295,7 +299,7 @@ abstract class PointsGridFormDataProvider<
     ): Vector3DSchema {
         switch (gridMetricType) {
             case "KPPRA": {
-                const nAtoms = this.material ? this.material.Basis.nAtoms : 1;
+                const nAtoms = this.material ? this.material.getBasis().nAtoms : 1;
                 return this.reciprocalLattice.getDimensionsFromPointsCount(
                     gridMetricValue / nAtoms,
                 );
@@ -313,7 +317,7 @@ abstract class PointsGridFormDataProvider<
     private calculateGridMetric(gridMetricType: GridMetricType, dimensions: Vector3DSchema) {
         switch (gridMetricType) {
             case "KPPRA": {
-                const nAtoms = this.material ? this.material.Basis.nAtoms : 1;
+                const nAtoms = this.material ? this.material.getBasis().nAtoms : 1;
                 return dimensions.reduce((a, b) => a * b) * nAtoms;
             }
             case "spacing":
@@ -365,7 +369,5 @@ abstract class PointsGridFormDataProvider<
         return super.setData(data);
     }
 }
-
-materialContextMixin(PointsGridFormDataProvider.prototype);
 
 export default PointsGridFormDataProvider;

@@ -1,6 +1,5 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ReduceUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitType } from "../enums";
@@ -11,16 +10,13 @@ import {
 import BaseUnit from "./BaseUnit";
 
 type Schema = ReduceUnitSchema;
-type Base = typeof BaseUnit<Schema> & Constructor<ReduceUnitSchemaMixin>;
 
 export type ReduceUnitConfig = Partial<Omit<Schema, "type" | "flowchartId">> &
     Pick<Schema, "flowchartId">;
 
-class ReduceUnit extends (BaseUnit as Base) implements Schema {
-    declare toJSON: () => Schema & AnyObject;
+interface ReduceUnit extends ReduceUnitSchemaMixin, Taggable {}
 
-    declare _json: Schema & AnyObject;
-
+class ReduceUnit extends BaseUnit<Schema> implements Schema {
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/flowchart");
     }

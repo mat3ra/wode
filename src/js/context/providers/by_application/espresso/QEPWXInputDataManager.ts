@@ -95,7 +95,8 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
     }
 
     private buildQEPWXContext(material: Material): Data {
-        const { Basis: basis, Lattice: lattice } = material;
+        const basis = material.getBasis();
+        const lattice = material.getLattice();
         const { jobHasParent, workflowHasRelaxation } = this;
 
         const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {

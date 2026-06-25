@@ -10,24 +10,6 @@ function baseUnitSchemaMixin(item) {
         set isDraft(value) {
             this.setProp("isDraft", value);
         },
-        get type() {
-            return this.requiredProp("type");
-        },
-        set type(value) {
-            this.setProp("type", value);
-        },
-        get name() {
-            return this.prop("name");
-        },
-        set name(value) {
-            this.setProp("name", value);
-        },
-        get status() {
-            return this.prop("status");
-        },
-        set status(value) {
-            this.setProp("status", value);
-        },
         get head() {
             return this.prop("head");
         },

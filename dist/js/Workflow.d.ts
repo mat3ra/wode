@@ -1,10 +1,11 @@
-import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { type HasDescription } from "@mat3ra/code/dist/js/entity/mixins/HasDescriptionMixin";
 import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
+import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ApplicationSchema } from "@mat3ra/esse/dist/js/types";
+import type { ApplicationSchema, BaseInMemoryEntitySchema } from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -18,15 +19,15 @@ import Subworkflow from "./Subworkflow";
 import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
 import type { WorkflowSchema } from "./workflows/types";
-interface Workflow extends Defaultable, NamedInMemoryEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
+export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
+interface Workflow extends Defaultable, NamedEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
     compute: WorkflowSchema["compute"];
 }
 /** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
-declare class Workflow extends InMemoryEntity implements WorkflowSchema {
+declare class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema {
     createDefault: () => Workflow;
     static readonly defaultConfig: WorkflowSchema;
-    _json: WorkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     subworkflowInstances: Subworkflow[];
     unitInstances: AnyWorkflowUnit[];

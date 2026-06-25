@@ -5,9 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("../base/JSONSchemaDataProvider"));
-class HubbardContextProvider extends JSONSchemaDataProvider_1.default {
+class MixinsHubbardContextProvider extends JSONSchemaDataProvider_1.default {
     constructor(contextItem, externalContext) {
-        var _a, _b, _c;
+        super(contextItem, externalContext);
+        this.initMaterialContextMixin(externalContext);
+    }
+}
+(0, MaterialContextMixin_1.default)(MixinsHubbardContextProvider.prototype);
+class HubbardContextProvider extends MixinsHubbardContextProvider {
+    constructor(contextItem, externalContext) {
+        var _a, _b;
         super(contextItem, externalContext);
         this.domain = "important";
         this.entityName = "unit";
@@ -31,17 +38,15 @@ class HubbardContextProvider extends JSONSchemaDataProvider_1.default {
             "7p",
             "7d",
         ];
-        this.initMaterialContextMixin(externalContext);
         this.uniqueElementsWithLabels = [
-            ...new Set(((_a = this.material.Basis) === null || _a === void 0 ? void 0 : _a.elementsWithLabelsArray) || []),
+            ...new Set((this.material.getBasis().elements || []).map((element) => String(element.value))),
         ];
         this.firstElement =
-            ((_b = this.uniqueElementsWithLabels) === null || _b === void 0 ? void 0 : _b.length) > 0 ? this.uniqueElementsWithLabels[0] : "";
+            ((_a = this.uniqueElementsWithLabels) === null || _a === void 0 ? void 0 : _a.length) > 0 ? this.uniqueElementsWithLabels[0] : "";
         this.secondSpecies =
-            ((_c = this.uniqueElementsWithLabels) === null || _c === void 0 ? void 0 : _c.length) > 1
+            ((_b = this.uniqueElementsWithLabels) === null || _b === void 0 ? void 0 : _b.length) > 1
                 ? this.uniqueElementsWithLabels[1]
                 : this.firstElement;
     }
 }
-(0, MaterialContextMixin_1.default)(HubbardContextProvider.prototype);
 exports.default = HubbardContextProvider;

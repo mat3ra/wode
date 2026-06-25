@@ -48,7 +48,6 @@ describe("Subworkflow", () => {
         });
 
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const workflowRenderContext: WorkflowRenderContext = {
             material,
             materials: [material, material, material],

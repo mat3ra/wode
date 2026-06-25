@@ -9,9 +9,9 @@ export function subworkflowUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
 ): asserts item is T & SubworkflowUnitSchemaMixin {
     // @ts-expect-error
-    const properties: InMemoryEntity & SubworkflowUnitSchemaMixin = {
+    const properties: InMemoryEntity<SubworkflowUnitSchemaMixin> & SubworkflowUnitSchemaMixin = {
         get type() {
-            return this.prop<SubworkflowUnitMixinSchema["type"]>("type");
+            return this.prop("type");
         },
         set type(value: SubworkflowUnitMixinSchema["type"]) {
             this.setProp("type", value);

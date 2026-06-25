@@ -1,18 +1,24 @@
 import { Application } from "@mat3ra/ade";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
-    type DefaultableInMemoryEntity,
-    type NamedInMemoryEntity,
-    InMemoryEntity,
-} from "@mat3ra/code/dist/js/entity";
-import { defaultableEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+    type Defaultable,
+    defaultableEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import {
     type HashedEntity,
     hashedEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
-import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import {
+    type NamedEntity,
+    namedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    AssignmentUnitSchema,
+    BaseInMemoryEntitySchema,
+    JobSchema,
+    SubworkflowSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { type PseudopotentialMethod, Model, ModelFactory } from "@mat3ra/mode";
@@ -51,8 +57,8 @@ type ConvergenceConfig = {
 };
 
 interface Subworkflow
-    extends DefaultableInMemoryEntity,
-        NamedInMemoryEntity,
+    extends Defaultable,
+        NamedEntity,
         SubworkflowSchemaMixin,
         HashedEntity,
         Omit<ComputedEntityMixin, "compute"> {}
@@ -63,7 +69,15 @@ type SubworkflowExternalContext = MaterialExternalContext &
     WorkflowExternalContext &
     JobExternalContext;
 
-class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
+function isAssignmentUnitSchema(
+    unit: SubworkflowSchema["units"][number],
+): unit is AssignmentUnitSchema {
+    return unit.type === UnitType.assignment;
+}
+
+export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
+
+class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements SubworkflowSchema {
     private ModelFactory: typeof ModelFactory;
 
     private applicationInstance: Application;
@@ -77,10 +91,6 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     repetition = 0;
 
     declare static createDefault: () => Subworkflow;
-
-    declare toJSON: () => SubworkflowSchema & AnyObject;
-
-    declare _json: SubworkflowSchema & AnyObject;
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/subworkflow");
@@ -165,18 +175,16 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
 
     setModel(model: Model) {
         this.modelInstance = model;
-        this.model = model.toJSON();
+        this.model = model.toJSON() as SubworkflowSchema["model"];
     }
 
     private buildExternalContext(context: SubworkflowExternalContext): ExternalContext {
-        const subworkflowContext = this.units
-            .filter((u) => u.type === UnitType.assignment)
-            .reduce((acc, u) => {
-                return {
-                    ...acc,
-                    [u.operand]: u.value,
-                };
-            }, {} as AssignmentContext);
+        const subworkflowContext = this.units.filter(isAssignmentUnitSchema).reduce((acc, u) => {
+            return {
+                ...acc,
+                [u.operand]: u.value,
+            };
+        }, {} as AssignmentContext);
 
         return {
             ...context,
@@ -279,10 +287,8 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         return `units.${index}`;
     }
 
-    private findAssignmentUnitWithTag(tag: UnitTag) {
-        return this.units
-            .filter((unit) => unit.type === UnitType.assignment)
-            .find((unit) => unit.tags?.includes(tag));
+    private findAssignmentUnitWithTag(tag: UnitTag): AssignmentUnitSchema | undefined {
+        return this.units.filter(isAssignmentUnitSchema).find((unit) => unit.tags?.includes(tag));
     }
 
     get hasConvergence() {
@@ -379,7 +385,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 });
 
                 this.modelInstance.setMethod(method);
-                this.model = this.modelInstance.toJSON();
+                this.model = this.modelInstance.toJSON() as SubworkflowSchema["model"];
             });
 
         // TODO: Try if/else instead of running both
@@ -390,7 +396,7 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             });
 
             this.modelInstance.setMethod(method);
-            this.model = this.modelInstance.toJSON();
+            this.model = this.modelInstance.toJSON() as SubworkflowSchema["model"];
         }
     }
 

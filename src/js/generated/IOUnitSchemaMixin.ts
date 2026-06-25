@@ -9,27 +9,27 @@ export function iOUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
 ): asserts item is T & IOUnitSchemaMixin {
     // @ts-expect-error
-    const properties: InMemoryEntity & IOUnitSchemaMixin = {
+    const properties: InMemoryEntity<IOUnitSchemaMixin> & IOUnitSchemaMixin = {
         get type() {
-            return this.prop<DataIOUnitMixinSchema["type"]>("type");
+            return this.prop("type");
         },
         set type(value: DataIOUnitMixinSchema["type"]) {
             this.setProp("type", value);
         },
         get subtype() {
-            return this.requiredProp<DataIOUnitMixinSchema["subtype"]>("subtype");
+            return this.requiredProp("subtype");
         },
         set subtype(value: DataIOUnitMixinSchema["subtype"]) {
             this.setProp("subtype", value);
         },
         get source() {
-            return this.requiredProp<DataIOUnitMixinSchema["source"]>("source");
+            return this.requiredProp("source");
         },
         set source(value: DataIOUnitMixinSchema["source"]) {
             this.setProp("source", value);
         },
         get input() {
-            return this.requiredProp<DataIOUnitMixinSchema["input"]>("input");
+            return this.requiredProp("input");
         },
         set input(value: DataIOUnitMixinSchema["input"]) {
             this.setProp("input", value);

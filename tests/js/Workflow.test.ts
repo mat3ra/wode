@@ -61,7 +61,7 @@ describe("Workflow", () => {
             );
             expect(workflow.toJSON().units).to.have.lengthOf(Workflow.defaultConfig.units.length);
             expect(workflow._id).to.be.a("string");
-            expect(workflow._id.length).to.be.above(0);
+            expect(workflow._id?.length).to.be.above(0);
         });
     });
 
@@ -133,7 +133,6 @@ describe("Workflow", () => {
                 },
             ];
             const workflow = new Workflow(config);
-            const secondSubworkflow = new Subworkflow(config.subworkflows[1]);
             const thirdSubworkflow = new Subworkflow({
                 ...defaultSub,
                 _id: "third-sw-id",
@@ -144,7 +143,7 @@ describe("Workflow", () => {
             expect(workflow.toJSON().subworkflows).to.have.lengthOf(3);
             expect(workflow.toJSON().units).to.have.lengthOf(3);
 
-            workflow.removeSubworkflow(secondSubworkflow.id);
+            workflow.removeSubworkflow("second-sw-id");
 
             expect(workflow.toJSON().subworkflows).to.have.lengthOf(2);
             expect(workflow.toJSON().units).to.have.lengthOf(2);
@@ -234,7 +233,6 @@ describe("Workflow", () => {
             ).to.be.above(0);
 
             const material = OrderedMaterial.createDefault();
-            material.hash = material.calculateHash();
             const context: WorkflowRenderContext = {
                 material,
                 materials: [material, material, material],

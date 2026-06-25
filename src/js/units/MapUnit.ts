@@ -1,6 +1,5 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { MapUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitType } from "../enums";
@@ -25,16 +24,11 @@ export const defaultMapConfig = {
     preProcessors: [],
     postProcessors: [],
 };
-
-type Base = typeof BaseUnit<Schema> & Constructor<MapUnitSchemaMixin>;
-
 export type MapUnitConfig = Partial<Omit<Schema, "type">>;
 
-class MapUnit extends (BaseUnit as Base) implements Schema {
-    declare toJSON: () => Schema & AnyObject;
+interface MapUnit extends MapUnitSchemaMixin, Taggable {}
 
-    declare _json: Schema & AnyObject;
-
+class MapUnit extends BaseUnit<Schema> implements Schema {
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/flowchart");
     }
@@ -50,7 +44,7 @@ class MapUnit extends (BaseUnit as Base) implements Schema {
     }
 
     setWorkflowId(id: string) {
-        this.setProp("workflowId", id);
+        this.workflowId = id;
     }
 }
 

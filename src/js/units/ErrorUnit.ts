@@ -1,6 +1,5 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ErrorUnitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { UnitStatus, UnitType } from "../enums";
@@ -8,15 +7,12 @@ import { type ErrorUnitSchemaMixin, errorUnitSchemaMixin } from "../generated/Er
 import BaseUnit from "./BaseUnit";
 
 type Schema = ErrorUnitSchema;
-type Base = typeof BaseUnit<Schema> & Constructor<ErrorUnitSchemaMixin>;
 
 export type ErrorUnitConfig = Partial<Schema>;
 
-class ErrorUnit extends (BaseUnit as Base) implements Schema {
-    declare toJSON: () => Schema & AnyObject;
+interface ErrorUnit extends ErrorUnitSchemaMixin, Taggable {}
 
-    declare _json: Schema & AnyObject;
-
+class ErrorUnit extends BaseUnit<Schema> implements Schema {
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/error");
     }

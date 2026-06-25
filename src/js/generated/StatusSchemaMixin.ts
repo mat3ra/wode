@@ -9,15 +9,15 @@ export function statusSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
 ): asserts item is T & StatusSchemaMixin {
     // @ts-expect-error
-    const properties: InMemoryEntity & StatusSchemaMixin = {
+    const properties: InMemoryEntity<StatusSchemaMixin> & StatusSchemaMixin = {
         get status() {
-            return this.prop<StatusSchema["status"]>("status");
+            return this.prop("status");
         },
         set status(value: StatusSchema["status"]) {
             this.setProp("status", value);
         },
         get statusTrack() {
-            return this.prop<StatusSchema["statusTrack"]>("statusTrack");
+            return this.prop("statusTrack");
         },
         set statusTrack(value: StatusSchema["statusTrack"]) {
             this.setProp("statusTrack", value);

@@ -9,21 +9,21 @@ export function mapUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
 ): asserts item is T & MapUnitSchemaMixin {
     // @ts-expect-error
-    const properties: InMemoryEntity & MapUnitSchemaMixin = {
+    const properties: InMemoryEntity<MapUnitSchemaMixin> & MapUnitSchemaMixin = {
         get type() {
-            return this.prop<MapUnitMixinSchema["type"]>("type");
+            return this.prop("type");
         },
         set type(value: MapUnitMixinSchema["type"]) {
             this.setProp("type", value);
         },
         get workflowId() {
-            return this.requiredProp<MapUnitMixinSchema["workflowId"]>("workflowId");
+            return this.requiredProp("workflowId");
         },
         set workflowId(value: MapUnitMixinSchema["workflowId"]) {
             this.setProp("workflowId", value);
         },
         get input() {
-            return this.requiredProp<MapUnitMixinSchema["input"]>("input");
+            return this.requiredProp("input");
         },
         set input(value: MapUnitMixinSchema["input"]) {
             this.setProp("input", value);

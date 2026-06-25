@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { GridContextItemSchema, PointsGridDataProviderSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 import { type MaterialContextMixin, type MaterialExternalContext } from "../../mixins/MaterialContextMixin";
@@ -7,10 +6,13 @@ import JSONSchemaFormDataProvider from "../base/JSONSchemaFormDataProvider";
 type Schema = GridContextItemSchema;
 type Data = PointsGridDataProviderSchema;
 export type ExternalContext = JinjaExternalContext & MaterialExternalContext;
-type Base = typeof JSONSchemaFormDataProvider<Schema, ExternalContext> & Constructor<MaterialContextMixin>;
 type GridMetricType = Data["gridMetricType"];
-declare const PointsGridFormDataProvider_base: Base;
-declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends PointsGridFormDataProvider_base {
+interface MixinsContextProvider extends MaterialContextMixin, MaterialExternalContext {
+}
+declare abstract class MixinsContextProvider extends JSONSchemaFormDataProvider<Schema, ExternalContext> {
+    constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
+}
+declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends MixinsContextProvider {
     abstract readonly name: N;
     readonly domain: "important";
     readonly entityName: "unit";

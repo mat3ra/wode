@@ -1,5 +1,4 @@
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type {
@@ -36,11 +35,13 @@ type ExternalContext = PointsPathFormDataProviderExternalContext;
 
 const jsonSchemaId = "context-providers-directory/points-path-data-provider";
 
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext, RenderingData> &
-    Constructor<MaterialContextMixin> &
-    Constructor<ApplicationContextMixin>;
+interface MixinsContextProvider extends MaterialContextMixin, ApplicationContextMixin {}
 
-abstract class MixinsContextProvider extends (JSONSchemaDataProvider as Base) {
+abstract class MixinsContextProvider extends JSONSchemaDataProvider<
+    Schema,
+    ExternalContext,
+    RenderingData
+> {
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
@@ -79,10 +80,12 @@ abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends Mixi
 
         super.updateMaterialHash();
 
+        const currentMaterialHash = this.extraData?.materialHash;
+
         // Reset path only when the material actually changed (hash). Do not clear `isEdited` just
         // because the material has no id (common default material in designers): that ran every
         // render, wiped isEdited, and savePersistentContext dropped k-path/Q-path from `unit.context`.
-        if (previousMaterialHash && previousMaterialHash !== this.material.hash) {
+        if (previousMaterialHash && previousMaterialHash !== currentMaterialHash) {
             this.isEdited = false;
         }
     }

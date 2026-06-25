@@ -76,7 +76,6 @@ describe("vasp_bands kpath Important settings", () => {
 
     it("preserves edited kpath across repeated render() when material has no id", () => {
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const context: WorkflowRenderContext = {
             material,
             materials: [material],
@@ -104,7 +103,6 @@ describe("vasp_bands kpath Important settings", () => {
 
     it("clears isEdited when persisted materialHash differs from the current material", () => {
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const context: WorkflowRenderContext = {
             material,
             materials: [material],
@@ -133,7 +131,6 @@ describe("vasp_bands kpath Important settings", () => {
 
     it("renders 13 explicit k-points after custom L-4 Γ-4 X-4 W-4 path is persisted and re-rendered", () => {
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const context: WorkflowRenderContext = {
             material,
             materials: [material],

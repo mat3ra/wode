@@ -1,4 +1,4 @@
-import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
     type Defaultable,
     defaultableEntityMixin,
@@ -11,11 +11,18 @@ import {
     type HashedEntity,
     hashedEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
-import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import {
+    type NamedEntity,
+    namedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ApplicationSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    ApplicationSchema,
+    BaseInMemoryEntitySchema,
+    SubworkflowSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -43,9 +50,11 @@ import {
 import defaultWorkflowConfig from "./workflows/default";
 import type { WorkflowSchema } from "./workflows/types";
 
+export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
+
 interface Workflow
     extends Defaultable,
-        NamedInMemoryEntity,
+        NamedEntity,
         WorkflowSchemaMixin,
         Taggable,
         HashedEntity,
@@ -61,12 +70,10 @@ export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsSetExternalContext &
     JobExternalContext;
 
-class Workflow extends InMemoryEntity implements WorkflowSchema {
+class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema {
     declare createDefault: () => Workflow;
 
     static readonly defaultConfig = defaultWorkflowConfig;
-
-    declare _json: WorkflowSchema & AnyObject;
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow");
@@ -117,7 +124,7 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
     }
 
     get workflows() {
-        return this.requiredProp<WorkflowSchema[]>("workflows");
+        return this.requiredProp("workflows");
     }
 
     set workflows(value: WorkflowSchema[]) {

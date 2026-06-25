@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type {
     HubbardJContextItemSchema,
     HubbardLegacyContextItemSchema,
@@ -20,13 +19,24 @@ type Schema =
 
 export type HubbardExternalContext = JinjaExternalContext & MaterialExternalContext;
 
-type Base = typeof JSONSchemaDataProvider<Schema, HubbardExternalContext> &
-    Constructor<MaterialContextMixin>;
+interface MixinsHubbardContextProvider extends MaterialContextMixin, MaterialExternalContext {}
+
+abstract class MixinsHubbardContextProvider extends JSONSchemaDataProvider<
+    Schema,
+    HubbardExternalContext
+> {
+    constructor(contextItem: Partial<Schema>, externalContext: HubbardExternalContext) {
+        super(contextItem, externalContext);
+        this.initMaterialContextMixin(externalContext);
+    }
+}
+
+materialContextMixin(MixinsHubbardContextProvider.prototype);
 
 abstract class HubbardContextProvider<
     S extends Schema,
     EC extends HubbardExternalContext = HubbardExternalContext,
-> extends (JSONSchemaDataProvider as Base) {
+> extends MixinsHubbardContextProvider {
     abstract readonly name: S["name"];
 
     abstract getDefaultData(): S["data"];
@@ -64,10 +74,11 @@ abstract class HubbardContextProvider<
 
     constructor(contextItem: Partial<S>, externalContext: EC) {
         super(contextItem, externalContext);
-        this.initMaterialContextMixin(externalContext);
 
         this.uniqueElementsWithLabels = [
-            ...new Set(this.material.Basis?.elementsWithLabelsArray || []),
+            ...new Set(
+                (this.material.getBasis().elements || []).map((element) => String(element.value)),
+            ),
         ];
 
         this.firstElement =
@@ -79,7 +90,5 @@ abstract class HubbardContextProvider<
                 : this.firstElement;
     }
 }
-
-materialContextMixin(HubbardContextProvider.prototype);
 
 export default HubbardContextProvider;

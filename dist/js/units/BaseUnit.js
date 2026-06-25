@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BaseUnitCore = void 0;
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HashedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin");
@@ -11,7 +12,7 @@ const enums_1 = require("../enums");
 const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
 const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
-class BaseUnit extends entity_1.InMemoryEntity {
+class BaseUnitCore extends entity_1.InMemoryEntity {
     /**
      * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
      */
@@ -43,7 +44,8 @@ class BaseUnit extends entity_1.InMemoryEntity {
         return sortedStatusTrack[sortedStatusTrack.length - 1];
     }
     getHashObject() {
-        return { ...this.hashObjectFromRuntimeItems, type: this.type };
+        const { type } = this._json;
+        return { ...this.hashObjectFromRuntimeItems, ...(type !== undefined ? { type } : {}) };
     }
     isInStatus(status) {
         return this.status === status;
@@ -59,12 +61,15 @@ class BaseUnit extends entity_1.InMemoryEntity {
         this.repetition = repetition;
     }
 }
-(0, TaggableMixin_1.taggableMixin)(BaseUnit.prototype);
-(0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnit.prototype);
-(0, RuntimeItemsMixin_1.runtimeItemsMixin)(BaseUnit.prototype);
-(0, RuntimeItemsUILogicMixin_1.runtimeItemsUILogicMixin)(BaseUnit.prototype);
-(0, BaseUnitSchemaMixin_1.baseUnitSchemaMixin)(BaseUnit.prototype);
-(0, StatusSchemaMixin_1.statusSchemaMixin)(BaseUnit.prototype);
-(0, NamedEntityMixin_1.namedEntityMixin)(BaseUnit.prototype);
-(0, DefaultableMixin_1.defaultableEntityMixin)(BaseUnit);
+exports.BaseUnitCore = BaseUnitCore;
+(0, TaggableMixin_1.taggableMixin)(BaseUnitCore.prototype);
+(0, HashedEntityMixin_1.hashedEntityMixin)(BaseUnitCore.prototype);
+(0, RuntimeItemsMixin_1.runtimeItemsMixin)(BaseUnitCore.prototype);
+(0, RuntimeItemsUILogicMixin_1.runtimeItemsUILogicMixin)(BaseUnitCore.prototype);
+(0, BaseUnitSchemaMixin_1.baseUnitSchemaMixin)(BaseUnitCore.prototype);
+(0, StatusSchemaMixin_1.statusSchemaMixin)(BaseUnitCore.prototype);
+(0, NamedEntityMixin_1.namedEntityMixin)(BaseUnitCore.prototype);
+(0, DefaultableMixin_1.defaultableEntityMixin)(BaseUnitCore);
+class BaseUnit extends BaseUnitCore {
+}
 exports.default = BaseUnit;
