@@ -40,6 +40,7 @@ describe("Subworkflow", () => {
     });
 
     it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", function () {
+        // Renders every standata workflow; ~1s locally but exceeds Mocha's default 2s on GitHub Actions.
         this.timeout(10000);
 
         const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
