@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const constants_1 = require("@mat3ra/code/dist/js/constants");
 const math_1 = require("@mat3ra/code/dist/js/math");
+const JSONSchemasInterface_1 = __importDefault(require("@mat3ra/esse/dist/js/esse/JSONSchemasInterface"));
 const made_1 = require("@mat3ra/made");
 const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const JSONSchemaFormDataProvider_1 = __importDefault(require("../base/JSONSchemaFormDataProvider"));
@@ -112,7 +113,6 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         };
         const gridMetricType = ((_a = this.data) === null || _a === void 0 ? void 0 : _a.gridMetricType) || this.defaultMetric.type;
         return {
-            dimensions: vector(this.defaultDimensions, this.isUsingJinjaVariables),
             shifts: vector(defaultShifts),
             reciprocalVectorRatios: vector(this.reciprocalVectorRatios),
             gridMetricType: { default: this.defaultMetric.type },
@@ -157,6 +157,18 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
                 },
             },
         };
+    }
+    /**
+     * Form schema for RJSF. Replaces ESSE `dimensions.anyOf` (number[] | string[]) with a single
+     * array type — patch merge cannot remove `anyOf`, which makes RJSF render a branch picker.
+     */
+    buildFormJsonSchema() {
+        const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(this.jsonSchemaId, this.jsonSchemaPatchConfig);
+        if (!(jsonSchema === null || jsonSchema === void 0 ? void 0 : jsonSchema.properties)) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+        jsonSchema.properties.dimensions = vector(this.defaultDimensions, this.isUsingJinjaVariables);
+        return jsonSchema;
     }
     /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
     get preferGridMetricForUi() {
