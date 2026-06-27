@@ -11,7 +11,7 @@ const enums_1 = require("../enums");
 const ExecutionUnitSchemaMixin_1 = require("../generated/ExecutionUnitSchemaMixin");
 const BaseUnit_1 = __importDefault(require("./BaseUnit"));
 const ExecutionUnitInput_1 = __importDefault(require("./ExecutionUnitInput"));
-/** Context items always serialized on the unit so rupy can store them in scope after execution. */
+// Context items always serialized on the unit so rupy can store them in scope after execution.
 const CONTEXT_SCOPE_ITEMS = new Set(["kgrid"]);
 class ExecutionUnit extends BaseUnit_1.default {
     static get jsonSchema() {

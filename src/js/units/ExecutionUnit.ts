@@ -34,7 +34,7 @@ type SetExecutableProps = {
     flavorName?: string;
 };
 
-/** Context items always serialized on the unit so rupy can store them in scope after execution. */
+// Context items always serialized on the unit so rupy can store them in scope after execution.
 const CONTEXT_SCOPE_ITEMS = new Set(["kgrid"]);
 
 class ExecutionUnit extends (BaseUnit as Base) implements Schema {
