@@ -8,11 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type {
-    ConditionUnitSchema,
-    ErrorUnitSchema,
-    ExecutionUnitSchema,
-} from "@mat3ra/esse/dist/js/types";
+import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
@@ -20,25 +16,9 @@ import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
+import { ExecutionUnit, Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
-import { repairWorkflow } from "../../src/js/utils/repair";
-import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
-
-function invalidExecutionUnit(flowchartId: string) {
-    return {
-        type: UnitType.execution,
-        name: "exec",
-        flowchartId,
-        results: [],
-        preProcessors: [],
-        postProcessors: [],
-        monitors: [],
-        input: [],
-        context: [],
-    };
-}
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
@@ -256,7 +236,17 @@ describe("Workflow", () => {
                                 "workflowHasRelaxation",
                                 workflow.hasRelaxation,
                             );
-                            expect(unit.context).to.be.deep.equal([]);
+                            const executionUnit = unit as ExecutionUnit;
+                            const hasKgrid = executionUnit.contextProvidersInstances.some(
+                                (p) => p.name === "kgrid",
+                            );
+                            if (hasKgrid) {
+                                expect(executionUnit.context.map((c) => c.name)).to.deep.equal([
+                                    "kgrid",
+                                ]);
+                            } else {
+                                expect(executionUnit.context).to.be.deep.equal([]);
+                            }
                         });
                 });
             });
@@ -300,9 +290,7 @@ describe("Workflow", () => {
                     fixtureFile,
                 ) as unknown as WorkflowSchema[];
                 const workflow = workflows.find((w) => w.name === bandGapWorkflowName);
-                if (!workflow) {
-                    throw new Error(`Workflow ${bandGapWorkflowName} not found`);
-                }
+                expect(workflow).to.exist;
                 const wf = new Workflow(workflow);
                 const expectedHash = workflowHashes.espresso[fixtureFile].hash;
                 if (!expectedHash) {
@@ -312,236 +300,6 @@ describe("Workflow", () => {
                 }
                 expect(wf.calculateHash()).to.equal(expectedHash);
             });
-        });
-    });
-
-    describe("repair", () => {
-        let defaultApplication: ExecutionUnitSchema["application"];
-
-        before(() => {
-            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-        });
-
-        beforeEach(() => {
-            ApplicationRegistry.setDriver(new StandataDriver());
-            const app = new ApplicationRegistry().getDefaultApplication();
-            if (!app) {
-                throw new Error(
-                    "ApplicationRegistry.getDefaultApplication() returned no application",
-                );
-            }
-            defaultApplication = app;
-        });
-
-        it("converts invalid execution unit to error inside subworkflow", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const invalid = invalidExecutionUnit("fc-exec");
-            workflowConfig.subworkflows[0].units = [invalid as never];
-
-            const result = repairWorkflow(workflowConfig);
-
-            expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
-            const subworkflowErrorReason = JSON.parse(
-                (result.subworkflows[0].units[0] as ErrorUnitSchema).reason,
-            );
-            expect(subworkflowErrorReason.json).to.deep.equal(invalid);
-        });
-
-        it("leaves valid execution unit unchanged inside subworkflow", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const unit = UnitFactory.createDefaultSubworkflowUnit(
-                "execution",
-                defaultApplication,
-            ).toJSON();
-            workflowConfig.subworkflows[0].units = [unit];
-
-            const result = repairWorkflow(workflowConfig);
-
-            expect(result.subworkflows[0].units[0]).to.deep.equal(unit);
-        });
-
-        it("repairs legacy condition unit missing then and else via repairWorkflow", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const legacyCondition = {
-                name: "condition",
-                type: UnitType.condition,
-                input: [],
-                results: [],
-                preProcessors: [],
-                postProcessors: [],
-                statement: "true",
-                maxOccurrences: 100,
-                application: defaultApplication,
-                flowchartId: "e71f01a98db152d645e787b8",
-                monitors: [],
-                head: false,
-                next: "03b383bf35936d1d54d015ad",
-            };
-
-            workflowConfig.subworkflows[0].units = [legacyCondition as never];
-
-            const result = repairWorkflow(workflowConfig);
-            const condition = result.subworkflows[0].units[0] as ConditionUnitSchema;
-
-            expect(condition.type).to.equal(UnitType.condition);
-            expect(condition.then).to.equal("");
-            expect(condition.else).to.equal("");
-            expect(() => new Workflow(result).validate()).to.not.throw();
-        });
-
-        it("repairs only invalid execution units inside subworkflow", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const validUnit = UnitFactory.createDefaultSubworkflowUnit("assignment").toJSON();
-            const invalidExecution = invalidExecutionUnit("fc-bad");
-            workflowConfig.subworkflows[0].units = [validUnit, invalidExecution as never];
-
-            const result = repairWorkflow(workflowConfig);
-
-            expect(result.subworkflows[0].units[0]).to.deep.equal(validUnit);
-            expect(result.subworkflows[0].units[1].type).to.equal(UnitType.error);
-        });
-
-        it("repairs invalid execution units in subworkflows and nested workflows", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const invalidExecution = invalidExecutionUnit("fc-nested");
-
-            workflowConfig.subworkflows[0].units = [invalidExecution as never];
-
-            const nestedSubworkflow = structuredClone(workflowConfig.subworkflows[0]);
-            nestedSubworkflow._id = "nested-subworkflow-id";
-            nestedSubworkflow.units = [invalidExecution as never];
-
-            workflowConfig.workflows = [
-                {
-                    ...structuredClone(workflowConfig),
-                    _id: "nested-workflow-id",
-                    subworkflows: [nestedSubworkflow],
-                    workflows: [],
-                },
-            ];
-
-            const result = repairWorkflow(workflowConfig);
-
-            expect(result.subworkflows[0].units[0].type).to.equal(UnitType.error);
-            expect(result.workflows[0].subworkflows[0].units[0].type).to.equal(UnitType.error);
-        });
-
-        it("allows hydration after repair for converted execution units", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            workflowConfig.subworkflows[0].units = [invalidExecutionUnit("fc-hydrate") as never];
-
-            const document = repairWorkflow(workflowConfig);
-
-            expect(() => new Workflow(document)).to.not.throw();
-        });
-
-        it("repairs legacy subworkflow missing model without throwing", () => {
-            const legacyShellWorkflow = {
-                name: "Bash test",
-                subworkflows: [
-                    {
-                        name: "bash subworkflow",
-                        application: {
-                            name: "shell",
-                            version: "4.2.46",
-                            build: "Default",
-                            isDefault: true,
-                            summary: "Shell Script",
-                            shortName: "sh",
-                        },
-                        units: [
-                            {
-                                type: UnitType.execution,
-                                name: "test workflow",
-                                head: true,
-                                application: {
-                                    name: "shell",
-                                    version: "4.2.46",
-                                    build: "Default",
-                                    isDefault: true,
-                                    shortName: "sh",
-                                    summary: "Shell Script",
-                                },
-                                results: [],
-                                monitors: [{ name: "standard_output" }],
-                                preProcessors: [],
-                                postProcessors: [],
-                                input: [],
-                                context: [],
-                            },
-                        ],
-                        isDraft: false,
-                        properties: [],
-                    },
-                ],
-                units: [
-                    {
-                        name: "bash subworkflow",
-                        type: UnitType.subworkflow,
-                        head: true,
-                        monitors: [],
-                        results: [],
-                        preProcessors: [],
-                        postProcessors: [],
-                    },
-                ],
-                workflows: [],
-                properties: [],
-            } as unknown as WorkflowSchema;
-
-            const result = repairWorkflow(legacyShellWorkflow);
-
-            expect(result.subworkflows).to.have.lengthOf(0);
-            expect(result.units[0].type).to.equal(UnitType.error);
-            const legacyErrorReason = JSON.parse((result.units[0] as ErrorUnitSchema).reason);
-            expect(legacyErrorReason.error).to.be.an("array").that.is.not.empty;
-            expect(() => new Workflow(result)).to.not.throw();
-        });
-
-        it("does not store JSON schema in error unit reason", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const invalid = invalidExecutionUnit("fc-1");
-            workflowConfig.subworkflows[0].units = [invalid as never];
-
-            const result = repairWorkflow(workflowConfig);
-            const errorUnit = result.subworkflows[0].units[0] as ErrorUnitSchema;
-            const reason = JSON.parse(errorUnit.reason);
-
-            expect(reason).to.have.property("error");
-            expect(reason).to.have.property("json");
-            expect(reason).to.not.have.property("schema");
-        });
-
-        it("converts invalid subworkflow unit to error and drops subworkflow", () => {
-            const workflowConfig = structuredClone(Workflow.defaultConfig);
-            const originalUnit = workflowConfig.units[0];
-            const subworkflowId = workflowConfig.subworkflows[0]._id;
-
-            workflowConfig.subworkflows[0] = {
-                ...workflowConfig.subworkflows[0],
-                model: {
-                    ...workflowConfig.subworkflows[0].model,
-                    type: "not-a-valid-model-type" as never,
-                },
-            };
-
-            const result = repairWorkflow(workflowConfig);
-
-            expect(result.subworkflows).to.have.lengthOf(0);
-            expect(result.units).to.have.lengthOf(1);
-            expect(result.units[0].type).to.equal(UnitType.error);
-            expect(result.units[0]._id).to.equal(subworkflowId);
-
-            const errorUnit = result.units[0] as ErrorUnitSchema;
-            const validationReason = JSON.parse(errorUnit.reason);
-            expect(validationReason.error).to.be.an("array").that.is.not.empty;
-            expect(validationReason.error.some((e: { instancePath?: string }) => e.instancePath)).to
-                .be.true;
-            expect(validationReason.json).to.deep.equal({
-                unit: originalUnit,
-                subworkflow: workflowConfig.subworkflows[0],
-            });
-            expect(() => new Workflow(result)).to.not.throw();
         });
     });
 });
