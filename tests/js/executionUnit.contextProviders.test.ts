@@ -8,13 +8,14 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { GridContextItemSchema, WorkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type { GridContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
+import type { WorkflowSchema } from "src/js/workflows/types";
 
 import { ExecutionUnit, Workflow } from "../../src/js";
 import KGridFormDataManager from "../../src/js/context/providers/PointsGrid/KGridFormDataManager";
@@ -41,7 +42,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
     });
 
     it("persists in-memory provider edits when render() runs again (Important settings path)", () => {
-        const standataWorkflows = new WorkflowStandata().getAll();
+        const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 
         const material = OrderedMaterial.createDefault();
@@ -59,7 +60,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
 
         // eslint-disable-next-line no-restricted-syntax
         for (const standataJson of standataWorkflows) {
-            const w = new Workflow(standataJson as unknown as WorkflowSchema);
+            const w = new Workflow(standataJson);
             w.render(context);
             // eslint-disable-next-line no-restricted-syntax
             for (const sub of w.subworkflowInstances) {
@@ -113,7 +114,7 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
     });
 
     it("persists kgrid in unit context when not user-edited (rupy scope / precision)", () => {
-        const standataWorkflows = new WorkflowStandata().getAll();
+        const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 
         const material = OrderedMaterial.createDefault();

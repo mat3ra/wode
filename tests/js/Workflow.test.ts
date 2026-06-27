@@ -8,13 +8,13 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import type { WorkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
+import type { WorkflowSchema } from "src/js/workflows/types";
 
 import { ExecutionUnit, Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
@@ -291,7 +291,7 @@ describe("Workflow", () => {
                 ) as unknown as WorkflowSchema[];
                 const workflow = workflows.find((w) => w.name === bandGapWorkflowName);
                 expect(workflow).to.exist;
-                const wf = new Workflow(workflow);
+                const wf = new Workflow(workflow!);
                 const expectedHash = workflowHashes.espresso[fixtureFile].hash;
                 if (!expectedHash) {
                     // eslint-disable-next-line no-console
