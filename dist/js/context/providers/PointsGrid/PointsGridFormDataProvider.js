@@ -68,7 +68,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         const isValid = gridMetricType === "KPPRA" ? gridMetricValue >= 1 : gridMetricValue > 0;
         return isValid ? gridMetricValue : this.getDefaultGridMetricValue(gridMetricType);
     }
-    /** Keep gridMetricValue and dimensions consistent (both preferGridMetric modes). */
+    // Keep gridMetricValue and dimensions consistent (both preferGridMetric modes).
     dataWithEffectiveGridMetric(data) {
         const { preferGridMetric, gridMetricType, gridMetricValue, dimensions } = data;
         if (preferGridMetric && gridMetricType) {
@@ -179,7 +179,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
             },
         };
     }
-    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    // Prefer persisted `data` — `setData` runs before React re-inits the provider on render.
     get preferGridMetricForUi() {
         var _a, _b;
         return (_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.preferGridMetric) !== null && _b !== void 0 ? _b : this.preferGridMetric;

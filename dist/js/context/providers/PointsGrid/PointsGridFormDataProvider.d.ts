@@ -33,7 +33,6 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     private initInstanceFields;
     private getDefaultGridMetricValue;
     private resolveGridMetricValue;
-    /** Keep gridMetricValue and dimensions consistent (both preferGridMetric modes). */
     private dataWithEffectiveGridMetric;
     private applyGridMetricInstanceFields;
     getData(): Data;
@@ -116,7 +115,6 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
             };
         };
     };
-    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
     private get preferGridMetricForUi();
     get uiSchema(): {
         dimensions: {

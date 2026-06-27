@@ -134,7 +134,7 @@ abstract class PointsGridFormDataProvider<
         return isValid ? gridMetricValue : this.getDefaultGridMetricValue(gridMetricType);
     }
 
-    /** Keep gridMetricValue and dimensions consistent (both preferGridMetric modes). */
+    // Keep gridMetricValue and dimensions consistent (both preferGridMetric modes).
     private dataWithEffectiveGridMetric(data: Data): Data {
         const { preferGridMetric, gridMetricType, gridMetricValue, dimensions } = data;
 
@@ -258,7 +258,7 @@ abstract class PointsGridFormDataProvider<
         };
     }
 
-    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    // Prefer persisted `data` — `setData` runs before React re-inits the provider on render.
     private get preferGridMetricForUi() {
         return this.data?.preferGridMetric ?? this.preferGridMetric;
     }
