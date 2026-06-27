@@ -58,6 +58,8 @@ DataForRendering = S["data"]> {
     setIsEdited(isEdited: boolean): void;
     getData(): S["data"];
     setData(data: S["data"]): void;
+    /** Re-run `setData` normalization before persisting (e.g. derive grid metric from dimensions). */
+    syncPersistentData(): void;
     /**
      * Derive template-facing `data` from persisted `data`. Override when the template needs fields
      * that must not be stored (e.g. coordinates from symmetry point names + lattice).

@@ -50,6 +50,10 @@ class ContextProvider {
     setData(data) {
         this.data = utils_1.Utils.clone.deepClone(data);
     }
+    /** Re-run `setData` normalization before persisting (e.g. derive grid metric from dimensions). */
+    syncPersistentData() {
+        this.setData(this.getData());
+    }
     /**
      * Derive template-facing `data` from persisted `data`. Override when the template needs fields
      * that must not be stored (e.g. coordinates from symmetry point names + lattice).

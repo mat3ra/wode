@@ -34,6 +34,9 @@ type SetExecutableProps = {
     flavorName?: string;
 };
 
+// Context items always serialized on the unit so rupy can store them in scope after execution.
+const CONTEXT_SCOPE_ITEMS = new Set(["kgrid"]);
+
 class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
 
@@ -228,8 +231,12 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
     }
 
     savePersistentContext() {
+        this.contextProvidersInstances
+            .filter((p) => CONTEXT_SCOPE_ITEMS.has(p.name))
+            .forEach((p) => p.syncPersistentData());
+
         const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
-        this.context = persistentItems.filter((c) => c.isEdited);
+        this.context = persistentItems.filter((c) => c.isEdited || CONTEXT_SCOPE_ITEMS.has(c.name));
     }
 
     saveRenderingContext(externalContext: ExternalContext) {

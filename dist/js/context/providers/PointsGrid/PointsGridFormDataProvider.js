@@ -68,18 +68,39 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         const isValid = gridMetricType === "KPPRA" ? gridMetricValue >= 1 : gridMetricValue > 0;
         return isValid ? gridMetricValue : this.getDefaultGridMetricValue(gridMetricType);
     }
-    getData() {
-        const data = super.getData();
-        const { preferGridMetric, gridMetricType, gridMetricValue } = data;
-        if (!preferGridMetric || !gridMetricType) {
-            return data;
+    // Keep gridMetricValue and dimensions consistent (both preferGridMetric modes).
+    dataWithEffectiveGridMetric(data) {
+        const { preferGridMetric, gridMetricType, gridMetricValue, dimensions } = data;
+        if (preferGridMetric && gridMetricType) {
+            const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
+            return {
+                ...data,
+                gridMetricValue: effectiveValue,
+                dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
+            };
         }
-        const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
-        return {
-            ...data,
-            gridMetricValue: effectiveValue,
-            dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
-        };
+        if (!preferGridMetric && gridMetricType && dimensions.every((d) => typeof d === "number")) {
+            return {
+                ...data,
+                gridMetricValue: this.calculateGridMetric(gridMetricType, dimensions),
+            };
+        }
+        return data;
+    }
+    applyGridMetricInstanceFields(data) {
+        const { gridMetricType, preferGridMetric, gridMetricValue } = data;
+        if (preferGridMetric !== undefined) {
+            this.preferGridMetric = preferGridMetric;
+        }
+        if (gridMetricType !== undefined) {
+            this.gridMetricType = gridMetricType;
+        }
+        if (gridMetricValue !== undefined) {
+            this.gridMetricValue = gridMetricValue;
+        }
+    }
+    getData() {
+        return this.dataWithEffectiveGridMetric(super.getData());
     }
     getDefaultData() {
         const defaultData = {
@@ -158,7 +179,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
             },
         };
     }
-    /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
+    // Prefer persisted `data` — `setData` runs before React re-inits the provider on render.
     get preferGridMetricForUi() {
         var _a, _b;
         return (_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.preferGridMetric) !== null && _b !== void 0 ? _b : this.preferGridMetric;
@@ -236,34 +257,9 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         }
     }
     setData(data) {
-        const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
-        if (preferGridMetric !== undefined) {
-            this.preferGridMetric = preferGridMetric;
-        }
-        if (gridMetricType !== undefined) {
-            this.gridMetricType = gridMetricType;
-        }
-        if (preferGridMetric && gridMetricType) {
-            const effectiveValue = this.resolveGridMetricValue(gridMetricType, gridMetricValue);
-            this.gridMetricValue = effectiveValue;
-            return super.setData({
-                ...data,
-                gridMetricValue: effectiveValue,
-                dimensions: this.calculateDimensions(gridMetricType, effectiveValue),
-            });
-        }
-        if (!preferGridMetric && dimensions.every((d) => typeof d === "number")) {
-            const derivedMetric = this.calculateGridMetric(gridMetricType, dimensions);
-            this.gridMetricValue = derivedMetric;
-            return super.setData({
-                ...data,
-                gridMetricValue: derivedMetric,
-            });
-        }
-        if (gridMetricValue !== undefined) {
-            this.gridMetricValue = gridMetricValue;
-        }
-        return super.setData(data);
+        const synced = this.dataWithEffectiveGridMetric(data);
+        this.applyGridMetricInstanceFields(synced);
+        return super.setData(synced);
     }
 }
 (0, MaterialContextMixin_1.default)(PointsGridFormDataProvider.prototype);
