@@ -36,16 +36,6 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     getData(): Data;
     getDefaultData(): PointsGridDataProviderSchema;
     protected get jsonSchemaPatchConfig(): {
-        dimensions: {
-            default?: any[] | undefined;
-            type: string;
-            items: {
-                default?: string | number | readonly number[] | readonly string[] | undefined;
-                type: string;
-            };
-            minItems: number;
-            maxItems: number;
-        };
         shifts: {
             default?: any[] | undefined;
             type: string;
@@ -113,6 +103,11 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
             };
         };
     };
+    /**
+     * Form schema for RJSF. Replaces ESSE `dimensions.anyOf` (number[] | string[]) with a single
+     * array type — patch merge cannot remove `anyOf`, which makes RJSF render a branch picker.
+     */
+    protected buildFormJsonSchema(): JSONSchema7;
     /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */
     private get preferGridMetricForUi();
     get uiSchema(): {
