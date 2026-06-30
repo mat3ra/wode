@@ -52,7 +52,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider_1.default {
             const pseudo = (((_b = this.methodData) === null || _b === void 0 ? void 0 : _b.pseudo) || []).find((p) => p.element === symbolWithoutLabel);
             return {
                 X: `${symbolWithoutLabel}${label}`,
-                Mass_X: periodic_table_js_1.PERIODIC_TABLE[symbol].atomic_mass,
+                Mass_X: periodic_table_js_1.PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
                 PseudoPot_X: (pseudo === null || pseudo === void 0 ? void 0 : pseudo.filename) || path_1.default.basename((pseudo === null || pseudo === void 0 ? void 0 : pseudo.path) || ""),
             };
         });
