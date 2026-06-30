@@ -117,7 +117,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             );
             return {
                 X: `${symbolWithoutLabel}${label}`,
-                Mass_X: PERIODIC_TABLE[symbol].atomic_mass,
+                Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
                 PseudoPot_X: pseudo?.filename || path.basename(pseudo?.path || ""),
             };
         });
