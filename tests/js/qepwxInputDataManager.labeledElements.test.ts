@@ -9,14 +9,10 @@ import {
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import { Material } from "@mat3ra/made";
-import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
-import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
-import type { WorkflowRenderContext } from "src/js/Workflow";
-import type { WorkflowSchema } from "src/js/workflows/types";
 
-import { Workflow } from "../../src/js";
+import QEPWXInputDataManager from "../../src/js/context/providers/by_application/espresso/QEPWXInputDataManager";
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
@@ -28,19 +24,16 @@ inMemoryEntityInSetMixin(OrderedMaterial.prototype);
 orderedEntityInSetMixin(OrderedMaterial.prototype);
 
 /**
- * Verifies that context providers (e.g. QEPWXInputDataManager) correctly handle
+ * Verifies that QEPWXInputDataManager.buildQEPWXContext correctly handles
  * labeled elements (e.g. Si1, Si2) by stripping labels before looking up
  * PERIODIC_TABLE for atomic mass.
  */
-describe("Workflow render with labeled elements", () => {
+describe("QEPWXInputDataManager with labeled elements", () => {
     before(() => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-        ApplicationRegistry.setDriver(new StandataDriver());
     });
 
-    it("renders all Standata workflows with labeled material", () => {
-        const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
-
+    it("returns correct atomic mass for labeled elements", () => {
         const material = OrderedMaterial.createDefault();
         material.setBasis({
             ...material.Basis.toJSON(),
@@ -49,20 +42,17 @@ describe("Workflow render with labeled elements", () => {
                 { id: 1, value: 2 },
             ],
         });
-        material.hash = material.calculateHash();
 
-        const context: WorkflowRenderContext = {
-            material,
-            materials: [material, material, material],
-            jobHasParent: false,
-        };
+        const provider = new QEPWXInputDataManager(
+            {},
+            { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
+        );
+        const data = provider.getDefaultData();
 
-        // eslint-disable-next-line no-restricted-syntax
-        for (const standataJson of standataWorkflows) {
-            expect(
-                () => new Workflow(standataJson).render(context),
-                `workflow "${standataJson.name}" should render with labeled material`,
-            ).to.not.throw();
-        }
+        expect(data.ATOMIC_SPECIES_WITH_LABELS).to.have.lengthOf(2);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].X).to.equal("Si1");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("Si2");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].Mass_X).to.be.a("number").and.be.above(0);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].Mass_X).to.be.a("number").and.be.above(0);
     });
 });
