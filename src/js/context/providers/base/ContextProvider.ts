@@ -1,5 +1,7 @@
 import { type ContextItemSchema } from "@mat3ra/esse/dist/js/types";
+import { setupNunjucksEnvironment } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
+import nunjucks from "nunjucks";
 
 export type UnitContext = ContextItemSchema[];
 export type ContextName = ContextItemSchema["name"];
@@ -27,6 +29,16 @@ export type EntityName = "unit" | "subworkflow";
 
 /** Minimal bound for provider external context; the full contract is ExternalContext in context/providers/index.ts */
 export type BaseExternalContext = object;
+
+const nunjucksEnvironment = setupNunjucksEnvironment(new nunjucks.Environment());
+
+const parseNumericStrings = (_key: string, value: unknown) => {
+    if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+        return Number(value);
+    }
+
+    return value;
+};
 
 /**
  * Context providers expose three data layers. Keep them separate.
@@ -132,6 +144,25 @@ abstract class ContextProvider<
             ...this.getContextItemData(),
             data: this.getDataForRendering(),
         };
+    }
+
+    /**
+     * Resolves Jinja placeholders in persisted context `data` from `scope.global`.
+     */
+    renderContext(scopeGlobal: Record<string, unknown>): boolean {
+        const data = this.getData();
+        const dataJson = JSON.stringify(data);
+        const renderedJson = nunjucksEnvironment.renderString(dataJson, scopeGlobal);
+        const resolved = JSON.parse(renderedJson, parseNumericStrings) as S["data"];
+
+        if (JSON.stringify(data) === JSON.stringify(resolved)) {
+            return false;
+        }
+
+        this.setData(resolved);
+        this.setIsEdited(true);
+
+        return true;
     }
 
     /**

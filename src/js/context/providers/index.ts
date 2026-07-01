@@ -77,6 +77,10 @@ export type SubworkflowContext = {
     subworkflowContext: AssignmentContext;
 };
 
+export type ScopeGlobalExternalContext = {
+    scopeGlobal?: Record<string, unknown>;
+};
+
 /**
  * External context type used by ExecutionUnitInput when creating providers.
  * This type is always expected to be present when providers are instantiated.
@@ -89,7 +93,8 @@ export type ExternalContext = ApplicationExternalContext &
     MaterialsSetExternalContext &
     MaterialExternalContext &
     JinjaExternalContext &
-    SubworkflowContext;
+    SubworkflowContext &
+    ScopeGlobalExternalContext;
 
 /**
  * Type for provider names as they appear in templates.

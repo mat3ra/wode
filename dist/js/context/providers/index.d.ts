@@ -65,11 +65,14 @@ export type AssignmentContext = Record<AssignmentUnitSchema["operand"], Assignme
 export type SubworkflowContext = {
     subworkflowContext: AssignmentContext;
 };
+export type ScopeGlobalExternalContext = {
+    scopeGlobal?: Record<string, unknown>;
+};
 /**
  * External context type used by ExecutionUnitInput when creating providers.
  * This type is always expected to be present when providers are instantiated.
  */
-export type ExternalContext = ApplicationExternalContext & WorkflowExternalContext & JobExternalContext & MaterialsExternalContext & MethodDataExternalContext & MaterialsSetExternalContext & MaterialExternalContext & JinjaExternalContext & SubworkflowContext;
+export type ExternalContext = ApplicationExternalContext & WorkflowExternalContext & JobExternalContext & MaterialsExternalContext & MethodDataExternalContext & MaterialsSetExternalContext & MaterialExternalContext & JinjaExternalContext & SubworkflowContext & ScopeGlobalExternalContext;
 /**
  * Type for provider names as they appear in templates.
  */

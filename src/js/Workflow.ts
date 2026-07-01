@@ -55,11 +55,13 @@ interface Workflow
     compute: WorkflowSchema["compute"];
 }
 
-/** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
+/** Context passed to Workflow.render(); subworkflows also receive `workflowHasRelaxation`. */
 export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsExternalContext &
     MaterialsSetExternalContext &
-    JobExternalContext;
+    JobExternalContext & {
+        scopeGlobal?: Record<string, unknown>;
+    };
 
 class Workflow extends InMemoryEntity implements WorkflowSchema {
     declare createDefault: () => Workflow;
