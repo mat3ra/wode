@@ -200,6 +200,24 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     }
 
     /**
+     * Substitutes Jinja-templated context on execution units using `scope.global`.
+     */
+    renderContext(
+        scopeGlobal: Record<string, unknown>,
+        externalContext: SubworkflowExternalContext,
+    ): void {
+        const ctx = this.buildExternalContext(externalContext);
+
+        this.unitsInstances.forEach((unit) => {
+            if (unit.type === UnitType.execution) {
+                unit.renderContext(scopeGlobal, ctx);
+            }
+        });
+
+        this.units = this.unitsInstances.map((u) => u.toJSON());
+    }
+
+    /**
      * TODO: reuse workflow function instead
      */
     addUnit(unit: AnySubworkflowUnit, index = -1) {

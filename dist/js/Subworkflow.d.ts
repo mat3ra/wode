@@ -64,6 +64,10 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     private buildExternalContext;
     render(context: SubworkflowExternalContext): void;
     /**
+     * Substitutes Jinja-templated context on execution units using `scope.global`.
+     */
+    renderContext(scopeGlobal: Record<string, unknown>, externalContext: SubworkflowExternalContext): void;
+    /**
      * TODO: reuse workflow function instead
      */
     addUnit(unit: AnySubworkflowUnit, index?: number): void;

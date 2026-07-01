@@ -161,6 +161,8 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     };
     private calculateDimensions;
     private calculateGridMetric;
+    renderContext(scopeGlobal: Record<string, unknown>): boolean;
+    private static resolveDimensionsFromScope;
     setData(data: Data): void;
 }
 export default PointsGridFormDataProvider;

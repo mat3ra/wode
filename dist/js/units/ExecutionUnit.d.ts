@@ -45,6 +45,10 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     savePersistentContext(): void;
     saveRenderingContext(externalContext: ExternalContext): void;
     saveContext(externalContext: ExternalContext): void;
+    /**
+     * Resolves templated grid `dimensions` from `scope.global` via context providers.
+     */
+    renderContext(scopeGlobal: Record<string, unknown>, externalContext: ExternalContext): boolean;
     getHashObject(): {
         application: {
             _id?: string;

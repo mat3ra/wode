@@ -54,6 +54,10 @@ declare class Workflow extends InMemoryEntity implements WorkflowSchema {
      */
     syncLinkedSubworkflowNameFromUnit(unit: AnyWorkflowUnit): void;
     render(context: WorkflowRenderContext): void;
+    /**
+     * Substitutes Jinja-templated context on execution units using `scope.global`.
+     */
+    renderContext(scopeGlobal: Record<string, unknown>, context: WorkflowRenderContext): void;
     get usedApplications(): ApplicationSchema[];
     get usedApplicationNames(): string[];
     get usedApplicationVersions(): string[];

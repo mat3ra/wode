@@ -130,7 +130,7 @@ class ExecutionUnit extends BaseUnit_1.default {
                 .flat()),
         ];
         // TODO: kgrid should be abstracted and selected by user
-        const parameterToContextProviderMap = {
+        const parameterToProviderMap = {
             N_k: "kgrid",
             N_k_nonuniform: "kgrid",
         };
@@ -139,8 +139,7 @@ class ExecutionUnit extends BaseUnit_1.default {
             return (0, providers_1.createProvider)(name, this.context, externalContext);
         })
             .map((provider) => {
-            if (convergence &&
-                provider.name === parameterToContextProviderMap[convergence.name]) {
+            if (convergence && provider.name === parameterToProviderMap[convergence.name]) {
                 provider.applyConvergenceParameter(convergence);
             }
             return provider;
@@ -163,6 +162,17 @@ class ExecutionUnit extends BaseUnit_1.default {
     saveContext(externalContext) {
         this.savePersistentContext();
         this.saveRenderingContext(externalContext);
+    }
+    /**
+     * Resolves templated grid `dimensions` from `scope.global` via context providers.
+     */
+    renderContext(scopeGlobal, externalContext) {
+        this.contextProvidersInstances = this.getContextProvidersInstances(externalContext);
+        const changed = this.contextProvidersInstances.some((provider) => provider.renderContext(scopeGlobal));
+        if (changed) {
+            this.savePersistentContext();
+        }
+        return changed;
     }
     getHashObject() {
         const { input, flavor, application, executable } = this.toJSON();

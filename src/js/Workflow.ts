@@ -180,6 +180,21 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         });
     }
 
+    /**
+     * Substitutes Jinja-templated context on execution units using `scope.global`.
+     */
+    renderContext(scopeGlobal: Record<string, unknown>, context: WorkflowRenderContext): void {
+        this.subworkflowInstances.forEach((sw) => {
+            sw.renderContext(scopeGlobal, {
+                ...context,
+                workflowHasRelaxation: this.hasRelaxation,
+            });
+        });
+        this.workflowInstances.forEach((wf) => {
+            wf.renderContext(scopeGlobal, context);
+        });
+    }
+
     get usedApplications(): ApplicationSchema[] {
         return getUsedApplications(this);
     }

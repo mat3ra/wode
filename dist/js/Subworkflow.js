@@ -119,6 +119,18 @@ class Subworkflow extends entity_1.InMemoryEntity {
         this.units = this.unitsInstances.map((u) => u.toJSON());
     }
     /**
+     * Substitutes Jinja-templated context on execution units using `scope.global`.
+     */
+    renderContext(scopeGlobal, externalContext) {
+        const ctx = this.buildExternalContext(externalContext);
+        this.unitsInstances.forEach((unit) => {
+            if (unit.type === enums_1.UnitType.execution) {
+                unit.renderContext(scopeGlobal, ctx);
+            }
+        });
+        this.units = this.unitsInstances.map((u) => u.toJSON());
+    }
+    /**
      * TODO: reuse workflow function instead
      */
     addUnit(unit, index = -1) {

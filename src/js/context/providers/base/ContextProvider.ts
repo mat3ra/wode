@@ -135,6 +135,17 @@ abstract class ContextProvider<
     }
 
     /**
+     * Grid providers override to resolve templated `dimensions` from `scope.global`.
+     */
+    // eslint-disable-next-line class-methods-use-this -- default no-op; grid providers override
+    renderContext(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- base no-op
+        _scopeGlobal: Record<string, unknown>,
+    ): boolean {
+        return false;
+    }
+
+    /**
      * Helper method to find a context item from a unit context array by name.
      * Returns a partial schema object that can be safely passed to constructors.
      */
