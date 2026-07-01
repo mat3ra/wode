@@ -158,7 +158,7 @@ describe("renderContext", () => {
         });
     });
 
-    describe("Subworkflow.renderContext", () => {
+    describe("Subworkflow.render", () => {
         it("persists resolved kgrid on pw_scf after convergence templating", () => {
             const context = createWorkflowRenderContext();
             const { workflow, subworkflow, executionUnit } =
@@ -170,25 +170,23 @@ describe("renderContext", () => {
                 "{{N_k}}",
             ]);
 
-            subworkflow.renderContext(
-                { N_k: 3 },
-                {
-                    ...context,
-                    workflowHasRelaxation: workflow.hasRelaxation,
-                },
-            );
+            subworkflow.render({
+                ...context,
+                workflowHasRelaxation: workflow.hasRelaxation,
+                scopeGlobal: { N_k: 3 },
+            });
 
             expect(getKgridContextData(executionUnit)?.dimensions).to.deep.equal([3, 3, 3]);
             expect(getKgridContextData(executionUnit)?.gridMetricValue).to.equal(54);
         });
     });
 
-    describe("Workflow.renderContext", () => {
-        it("delegates to subworkflow execution units", () => {
+    describe("Workflow.render", () => {
+        it("resolves scope.global on subworkflow execution units", () => {
             const context = createWorkflowRenderContext();
             const { workflow, executionUnit } = setupTotalEnergyWithConvergence(context);
 
-            workflow.renderContext({ N_k: 2 }, context);
+            workflow.render({ ...context, scopeGlobal: { N_k: 2 } });
 
             expect(getKgridContextData(executionUnit)?.dimensions).to.deep.equal([2, 2, 2]);
             expect(getKgridContextData(executionUnit)?.gridMetricValue).to.equal(16);

@@ -67,9 +67,9 @@ DataForRendering = S["data"]> {
     getContextItemData(): S;
     getContextItemDataForRendering(): ContextItemForRendering<S, DataForRendering>;
     /**
-     * Grid providers override to resolve templated `dimensions` from `scope.global`.
+     * Resolves Jinja placeholders in persisted context `data` from `scope.global`.
      */
-    renderContext(_scopeGlobal: Record<string, unknown>): boolean;
+    renderContext(scopeGlobal: Record<string, unknown>): boolean;
     /**
      * Helper method to find a context item from a unit context array by name.
      * Returns a partial schema object that can be safely passed to constructors.

@@ -351,49 +351,6 @@ abstract class PointsGridFormDataProvider<
         }
     }
 
-    renderContext(scopeGlobal: Record<string, unknown>): boolean {
-        const data = this.getData();
-        const dimensions = PointsGridFormDataProvider.resolveDimensionsFromScope(
-            data.dimensions,
-            scopeGlobal,
-        );
-
-        if (dimensions === null) {
-            return false;
-        }
-
-        this.setData({ ...data, dimensions });
-        this.setIsEdited(true);
-
-        return true;
-    }
-
-    private static resolveDimensionsFromScope(
-        dimensions: Data["dimensions"],
-        scopeGlobal: Record<string, unknown>,
-    ): Vector3DSchema | null {
-        if (dimensions.every((dimension) => typeof dimension === "number")) {
-            return null;
-        }
-
-        const scopeVariablePattern = /^\{\{\s*(\w+)\s*\}\}$/;
-
-        return dimensions.map((dimension) => {
-            if (typeof dimension === "number") {
-                return dimension;
-            }
-
-            const trimmed = dimension.trim();
-            const match = scopeVariablePattern.exec(trimmed);
-
-            if (match) {
-                return Number(scopeGlobal[match[1]]);
-            }
-
-            return Number(trimmed);
-        }) as Vector3DSchema;
-    }
-
     setData(data: Data) {
         const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
 

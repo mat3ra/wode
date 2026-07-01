@@ -149,30 +149,30 @@ class ExecutionUnit extends BaseUnit_1.default {
         const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
         this.context = persistentItems.filter((c) => c.isEdited);
     }
+    renderContext(scopeGlobal) {
+        this.contextProvidersInstances.forEach((provider) => {
+            provider.renderContext(scopeGlobal);
+        });
+    }
     saveRenderingContext(externalContext) {
+        // scopeGlobal resolves provider data only; do not pass it to input Jinja templates.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from Jinja context
+        const { scopeGlobal, ...renderingExternalContext } = externalContext;
         const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
-            ...externalContext,
+            ...renderingExternalContext,
         };
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
     }
-    saveContext(externalContext) {
+    saveContext({ scopeGlobal, ...externalContext }) {
+        if (scopeGlobal) {
+            this.renderContext(scopeGlobal);
+        }
         this.savePersistentContext();
         this.saveRenderingContext(externalContext);
-    }
-    /**
-     * Resolves templated grid `dimensions` from `scope.global` via context providers.
-     */
-    renderContext(scopeGlobal, externalContext) {
-        this.contextProvidersInstances = this.getContextProvidersInstances(externalContext);
-        const changed = this.contextProvidersInstances.some((provider) => provider.renderContext(scopeGlobal));
-        if (changed) {
-            this.savePersistentContext();
-        }
-        return changed;
     }
     getHashObject() {
         const { input, flavor, application, executable } = this.toJSON();

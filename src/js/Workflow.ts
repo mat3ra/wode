@@ -55,11 +55,13 @@ interface Workflow
     compute: WorkflowSchema["compute"];
 }
 
-/** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
+/** Context passed to Workflow.render(); subworkflows also receive `workflowHasRelaxation`. */
 export type WorkflowRenderContext = MaterialExternalContext &
     MaterialsExternalContext &
     MaterialsSetExternalContext &
-    JobExternalContext;
+    JobExternalContext & {
+        scopeGlobal?: Record<string, unknown>;
+    };
 
 class Workflow extends InMemoryEntity implements WorkflowSchema {
     declare createDefault: () => Workflow;
@@ -177,21 +179,6 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         });
         this.workflowInstances.forEach((wf) => {
             wf.render(context);
-        });
-    }
-
-    /**
-     * Substitutes Jinja-templated context on execution units using `scope.global`.
-     */
-    renderContext(scopeGlobal: Record<string, unknown>, context: WorkflowRenderContext): void {
-        this.subworkflowInstances.forEach((sw) => {
-            sw.renderContext(scopeGlobal, {
-                ...context,
-                workflowHasRelaxation: this.hasRelaxation,
-            });
-        });
-        this.workflowInstances.forEach((wf) => {
-            wf.renderContext(scopeGlobal, context);
         });
     }
 

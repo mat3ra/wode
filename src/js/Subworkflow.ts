@@ -20,14 +20,8 @@ import type { MetaPropertyHolder } from "@mat3ra/prode";
 import { ApplicationRegistry, setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
-import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
-import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
-import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
 import type { AssignmentContext, ExternalContext } from "./context/providers";
-import type {
-    JobExternalContext,
-    WorkflowExternalContext,
-} from "./context/providers/by_application/espresso/QEPWXInputDataManager";
+import type { WorkflowExternalContext } from "./context/providers/by_application/espresso/QEPWXInputDataManager";
 import { createConvergenceParameter } from "./convergence/factory";
 import { UnitTag, UnitType } from "./enums";
 import {
@@ -36,6 +30,7 @@ import {
 } from "./generated/SubworkflowSchemaMixin";
 import { AssignmentUnit, ConditionUnit, SubworkflowUnit, UnitFactory } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
+import type { WorkflowRenderContext } from "./Workflow";
 
 type ConvergenceConfig = {
     parameter: "N_k" | "N_k_nonuniform";
@@ -57,11 +52,7 @@ interface Subworkflow
         HashedEntity,
         Omit<ComputedEntityMixin, "compute"> {}
 
-type SubworkflowExternalContext = MaterialExternalContext &
-    MaterialsExternalContext &
-    MaterialsSetExternalContext &
-    WorkflowExternalContext &
-    JobExternalContext;
+type SubworkflowExternalContext = WorkflowRenderContext & WorkflowExternalContext;
 
 class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     private ModelFactory: typeof ModelFactory;
@@ -196,24 +187,6 @@ class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
         });
 
         // Keep serialized `units` in sync with instances after execution units update `input`.
-        this.units = this.unitsInstances.map((u) => u.toJSON());
-    }
-
-    /**
-     * Substitutes Jinja-templated context on execution units using `scope.global`.
-     */
-    renderContext(
-        scopeGlobal: Record<string, unknown>,
-        externalContext: SubworkflowExternalContext,
-    ): void {
-        const ctx = this.buildExternalContext(externalContext);
-
-        this.unitsInstances.forEach((unit) => {
-            if (unit.type === UnitType.execution) {
-                unit.renderContext(scopeGlobal, ctx);
-            }
-        });
-
         this.units = this.unitsInstances.map((u) => u.toJSON());
     }
 

@@ -1,6 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const standata_1 = require("@mat3ra/standata");
 const utils_1 = require("@mat3ra/utils");
+const nunjucks_1 = __importDefault(require("nunjucks"));
+const nunjucksEnvironment = (0, standata_1.setupNunjucksEnvironment)(new nunjucks_1.default.Environment());
+const parseNumericStrings = (_key, value) => {
+    if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+        return Number(value);
+    }
+    return value;
+};
 /**
  * Context providers expose three data layers. Keep them separate.
  *
@@ -76,13 +88,19 @@ class ContextProvider {
         };
     }
     /**
-     * Grid providers override to resolve templated `dimensions` from `scope.global`.
+     * Resolves Jinja placeholders in persisted context `data` from `scope.global`.
      */
-    // eslint-disable-next-line class-methods-use-this -- default no-op; grid providers override
-    renderContext(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- base no-op
-    _scopeGlobal) {
-        return false;
+    renderContext(scopeGlobal) {
+        const data = this.getData();
+        const dataJson = JSON.stringify(data);
+        const renderedJson = nunjucksEnvironment.renderString(dataJson, scopeGlobal);
+        const resolved = JSON.parse(renderedJson, parseNumericStrings);
+        if (JSON.stringify(data) === JSON.stringify(resolved)) {
+            return false;
+        }
+        this.setData(resolved);
+        this.setIsEdited(true);
+        return true;
     }
     /**
      * Helper method to find a context item from a unit context array by name.

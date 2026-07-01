@@ -112,20 +112,6 @@ class Workflow extends entity_1.InMemoryEntity {
             wf.render(context);
         });
     }
-    /**
-     * Substitutes Jinja-templated context on execution units using `scope.global`.
-     */
-    renderContext(scopeGlobal, context) {
-        this.subworkflowInstances.forEach((sw) => {
-            sw.renderContext(scopeGlobal, {
-                ...context,
-                workflowHasRelaxation: this.hasRelaxation,
-            });
-        });
-        this.workflowInstances.forEach((wf) => {
-            wf.renderContext(scopeGlobal, context);
-        });
-    }
     get usedApplications() {
         return (0, workflow_1.getUsedApplications)(this);
     }

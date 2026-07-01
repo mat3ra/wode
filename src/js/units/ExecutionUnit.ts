@@ -229,38 +229,35 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.context = persistentItems.filter((c) => c.isEdited);
     }
 
+    renderContext(scopeGlobal: Record<string, unknown>) {
+        this.contextProvidersInstances.forEach((provider) => {
+            provider.renderContext(scopeGlobal);
+        });
+    }
+
     saveRenderingContext(externalContext: ExternalContext) {
+        // scopeGlobal resolves provider data only; do not pass it to input Jinja templates.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from Jinja context
+        const { scopeGlobal, ...renderingExternalContext } = externalContext;
         const renderingItems = this.contextProvidersInstances.map((p) =>
             p.getContextItemDataForRendering(),
         );
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
-            ...externalContext,
+            ...renderingExternalContext,
         };
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
     }
 
-    saveContext(externalContext: ExternalContext) {
-        this.savePersistentContext();
-        this.saveRenderingContext(externalContext);
-    }
-
-    /**
-     * Resolves templated grid `dimensions` from `scope.global` via context providers.
-     */
-    renderContext(scopeGlobal: Record<string, unknown>, externalContext: ExternalContext): boolean {
-        this.contextProvidersInstances = this.getContextProvidersInstances(externalContext);
-        const changed = this.contextProvidersInstances.some((provider) =>
-            provider.renderContext(scopeGlobal),
-        );
-
-        if (changed) {
-            this.savePersistentContext();
+    saveContext({ scopeGlobal, ...externalContext }: ExternalContext) {
+        if (scopeGlobal) {
+            this.renderContext(scopeGlobal);
         }
 
-        return changed;
+        this.savePersistentContext();
+        this.saveRenderingContext(externalContext);
     }
 
     getHashObject() {

@@ -247,33 +247,6 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
                 return 1;
         }
     }
-    renderContext(scopeGlobal) {
-        const data = this.getData();
-        const dimensions = PointsGridFormDataProvider.resolveDimensionsFromScope(data.dimensions, scopeGlobal);
-        if (dimensions === null) {
-            return false;
-        }
-        this.setData({ ...data, dimensions });
-        this.setIsEdited(true);
-        return true;
-    }
-    static resolveDimensionsFromScope(dimensions, scopeGlobal) {
-        if (dimensions.every((dimension) => typeof dimension === "number")) {
-            return null;
-        }
-        const scopeVariablePattern = /^\{\{\s*(\w+)\s*\}\}$/;
-        return dimensions.map((dimension) => {
-            if (typeof dimension === "number") {
-                return dimension;
-            }
-            const trimmed = dimension.trim();
-            const match = scopeVariablePattern.exec(trimmed);
-            if (match) {
-                return Number(scopeGlobal[match[1]]);
-            }
-            return Number(trimmed);
-        });
-    }
     setData(data) {
         const { dimensions, gridMetricType, preferGridMetric, gridMetricValue } = data;
         if (preferGridMetric !== undefined) {
