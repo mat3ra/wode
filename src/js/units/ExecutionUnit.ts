@@ -207,7 +207,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         ];
 
         // TODO: kgrid should be abstracted and selected by user
-        const parameterToContextProviderMap = {
+        const parameterToProviderMap = {
             N_k: "kgrid",
             N_k_nonuniform: "kgrid",
         } as const;
@@ -217,10 +217,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
                 return createProvider(name, this.context, externalContext);
             })
             .map((provider) => {
-                if (
-                    convergence &&
-                    provider.name === parameterToContextProviderMap[convergence.name]
-                ) {
+                if (convergence && provider.name === parameterToProviderMap[convergence.name]) {
                     provider.applyConvergenceParameter(convergence);
                 }
                 return provider;
@@ -232,20 +229,33 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.context = persistentItems.filter((c) => c.isEdited);
     }
 
+    renderContext(scopeGlobal: Record<string, unknown>) {
+        this.contextProvidersInstances.forEach((provider) => {
+            provider.renderContext(scopeGlobal);
+        });
+    }
+
     saveRenderingContext(externalContext: ExternalContext) {
+        // scopeGlobal resolves provider data only; do not pass it to input Jinja templates.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from Jinja context
+        const { scopeGlobal, ...renderingExternalContext } = externalContext;
         const renderingItems = this.contextProvidersInstances.map((p) =>
             p.getContextItemDataForRendering(),
         );
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
-            ...externalContext,
+            ...renderingExternalContext,
         };
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
     }
 
-    saveContext(externalContext: ExternalContext) {
+    saveContext({ scopeGlobal, ...externalContext }: ExternalContext) {
+        if (scopeGlobal) {
+            this.renderContext(scopeGlobal);
+        }
+
         this.savePersistentContext();
         this.saveRenderingContext(externalContext);
     }

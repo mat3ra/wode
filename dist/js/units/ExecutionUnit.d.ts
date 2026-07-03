@@ -43,8 +43,9 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;
     private getContextProvidersInstances;
     savePersistentContext(): void;
+    renderContext(scopeGlobal: Record<string, unknown>): void;
     saveRenderingContext(externalContext: ExternalContext): void;
-    saveContext(externalContext: ExternalContext): void;
+    saveContext({ scopeGlobal, ...externalContext }: ExternalContext): void;
     getHashObject(): {
         application: {
             _id?: string;
