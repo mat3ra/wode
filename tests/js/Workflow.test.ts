@@ -23,6 +23,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import { repairWorkflow } from "../../src/js/utils/repair";
+import type { WorkflowEntity } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
 
@@ -540,6 +541,25 @@ describe("Workflow", () => {
                 subworkflow: workflowConfig.subworkflows[0],
             });
             expect(() => new Workflow(result)).to.not.throw();
+        });
+    });
+
+    describe("generic schema wrapper", () => {
+        type WiderWorkflowSchema = WorkflowEntity & { webappOnly?: string };
+
+        class WiderWorkflow extends Workflow<WiderWorkflowSchema> {}
+
+        it("allows subclasses to widen _json typing and storage", () => {
+            const workflow = new WiderWorkflow(structuredClone(Workflow.defaultConfig));
+
+            workflow._json.webappOnly = "webapp-value";
+            expect(workflow._json.webappOnly).to.equal("webapp-value");
+
+            expect(workflow.toJSON().name).to.equal(Workflow.defaultConfig.name);
+            expect(workflow._json.webappOnly).to.equal("webapp-value");
+
+            workflow._json.webappOnly = "updated";
+            expect(workflow._json.webappOnly).to.equal("updated");
         });
     });
 });

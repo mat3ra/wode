@@ -68,7 +68,9 @@ function isAssignmentUnitSchema(
 
 export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
 
-class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements SubworkflowSchema {
+type Schema = SubworkflowEntity;
+
+class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     private ModelFactory: typeof ModelFactory;
 
     private applicationInstance: Application;
@@ -87,7 +89,8 @@ class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements Subworkfl
         return JSONSchemasInterface.getSchemaById("workflow/subworkflow");
     }
 
-    constructor(config: SubworkflowSchema, _ModelFactory = ModelFactory) {
+    // NoInfer: keep default S (or an explicit type arg) instead of inferring S from the config literal.
+    constructor(config: NoInfer<S>, _ModelFactory = ModelFactory) {
         super(config);
         this.ModelFactory = _ModelFactory;
 

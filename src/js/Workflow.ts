@@ -17,7 +17,6 @@ import {
 } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
     ApplicationSchema,
     BaseInMemoryEntitySchema,
@@ -52,6 +51,8 @@ import type { WorkflowSchema } from "./workflows/types";
 
 export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
 
+type Schema = WorkflowEntity;
+
 interface Workflow
     extends Defaultable,
         NamedEntity,
@@ -72,7 +73,7 @@ export type WorkflowRenderContext = MaterialExternalContext &
         scopeGlobal?: Record<string, unknown>;
     };
 
-class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema {
+class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements WorkflowSchema {
     declare createDefault: () => Workflow;
 
     static readonly defaultConfig = defaultWorkflowConfig;
@@ -114,11 +115,15 @@ class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema 
         return new this(config);
     }
 
-    constructor(config: WorkflowSchema & { applicationName?: string }) {
+    // NoInfer: keep default S (or an explicit type arg) instead of inferring S from the config literal.
+    constructor(config: NoInfer<S> & { applicationName?: string }) {
+        // Strip applicationName (fromSubworkflow helper); not part of WorkflowEntity.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { applicationName, ...rest } = config;
         super({
-            ...config,
-            _id: config._id || Utils.uuid.getUUID(),
-        });
+            ...rest,
+            _id: (rest as Partial<Schema>)._id || Utils.uuid.getUUID(),
+        } as S);
 
         this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow(x));
         this.workflowInstances = this.workflows?.map((x) => new Workflow(x)) || [];
@@ -130,7 +135,7 @@ class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema 
     }
 
     set workflows(value: WorkflowSchema[]) {
-        this.setProp("workflows", value);
+        (this._json as Schema).workflows = value;
     }
 
     addSubworkflow(subworkflow: Subworkflow, head = false, index = -1) {
@@ -214,7 +219,7 @@ class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema 
         return getHumanReadableUsedModels(this);
     }
 
-    toJSON(): WorkflowSchema & AnyObject {
+    toJSON(): S {
         return {
             ...super.toJSON(),
             name: this.name,
@@ -222,7 +227,7 @@ class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema 
             units: this.unitInstances.map((x) => x.toJSON()),
             subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
             workflows: this.workflowInstances.map((x) => x.toJSON()),
-        };
+        } as S;
     }
 
     getHumanReadableProperties() {

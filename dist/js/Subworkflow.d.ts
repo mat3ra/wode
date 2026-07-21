@@ -29,7 +29,8 @@ interface Subworkflow extends Defaultable, NamedEntity, SubworkflowSchemaMixin, 
 }
 type SubworkflowExternalContext = WorkflowRenderContext & WorkflowExternalContext;
 export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
-declare class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements SubworkflowSchema {
+type Schema = SubworkflowEntity;
+declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     private ModelFactory;
     private applicationInstance;
     unitsInstances: AnySubworkflowUnit[];
@@ -38,7 +39,7 @@ declare class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements S
     repetition: number;
     static createDefault: () => Subworkflow;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
-    constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
+    constructor(config: NoInfer<S>, _ModelFactory?: typeof ModelFactory);
     static get defaultConfig(): {
         _id: any;
         name: string;

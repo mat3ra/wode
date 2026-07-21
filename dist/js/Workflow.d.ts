@@ -4,7 +4,6 @@ import { type HasDescription } from "@mat3ra/code/dist/js/entity/mixins/HasDescr
 import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ApplicationSchema, BaseInMemoryEntitySchema } from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
@@ -20,6 +19,7 @@ import { MapUnit } from "./units";
 import { type AnyWorkflowUnit } from "./units/factory";
 import type { WorkflowSchema } from "./workflows/types";
 export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
+type Schema = WorkflowEntity;
 interface Workflow extends Defaultable, NamedEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
     compute: WorkflowSchema["compute"];
 }
@@ -27,7 +27,7 @@ interface Workflow extends Defaultable, NamedEntity, WorkflowSchemaMixin, Taggab
 export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext & {
     scopeGlobal?: Record<string, unknown>;
 };
-declare class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema {
+declare class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements WorkflowSchema {
     createDefault: () => Workflow;
     static readonly defaultConfig: WorkflowSchema;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
@@ -38,8 +38,8 @@ declare class Workflow extends InMemoryEntity<WorkflowEntity> implements Workflo
     totalRepetitions: number;
     setTotalRepetitions(totalRepetition: number): void;
     setRepetition(repetition: number): void;
-    static fromSubworkflow(subworkflow: Subworkflow): Workflow;
-    constructor(config: WorkflowSchema & {
+    static fromSubworkflow(subworkflow: Subworkflow): Workflow<WorkflowEntity>;
+    constructor(config: NoInfer<S> & {
         applicationName?: string;
     });
     get workflows(): WorkflowSchema[];
@@ -63,7 +63,7 @@ declare class Workflow extends InMemoryEntity<WorkflowEntity> implements Workflo
     get usedApplicationNamesWithVersions(): string[];
     getUsedModels(): ("dft" | "ml" | "unknown")[];
     getHumanReadableUsedModels(): string[];
-    toJSON(): WorkflowSchema & AnyObject;
+    toJSON(): S;
     getHumanReadableProperties(): string[];
     getProperties(): string[];
     getSystemName(): string;
@@ -72,7 +72,7 @@ declare class Workflow extends InMemoryEntity<WorkflowEntity> implements Workflo
     removeUnit(flowchartId: string): void;
     addUnitType(type: UnitType, head?: boolean, index?: number): void;
     addMapUnit(mapUnit: MapUnit, mapWorkflow: Workflow): void;
-    get allSubworkflows(): Subworkflow[];
+    get allSubworkflows(): Subworkflow<import("./Subworkflow").SubworkflowEntity>[];
     get hasRelaxation(): boolean;
     toggleRelaxation(): void;
     getHashObject(): {
