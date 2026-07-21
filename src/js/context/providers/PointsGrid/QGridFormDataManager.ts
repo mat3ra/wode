@@ -1,4 +1,3 @@
-import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type { GridContextItemSchema } from "@mat3ra/esse/dist/js/types";
 import type { JSONSchema7 } from "json-schema";
 
@@ -16,16 +15,7 @@ export default class QGridFormDataManager extends PointsGridFormDataProvider<Nam
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext, 5);
 
-        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
-            this.jsonSchemaId,
-            this.jsonSchemaPatchConfig,
-        );
-
-        if (!jsonSchema) {
-            throw new Error("Failed to get patched JSON schema");
-        }
-
-        this.jsonSchema = jsonSchema;
+        this.jsonSchema = this.buildFormJsonSchema();
     }
 
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {

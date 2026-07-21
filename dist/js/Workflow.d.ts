@@ -23,8 +23,10 @@ export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
 interface Workflow extends Defaultable, NamedEntity, WorkflowSchemaMixin, Taggable, HashedEntity, ComputedEntityMixin, HasDescription {
     compute: WorkflowSchema["compute"];
 }
-/** Context passed to Workflow.render() before `workflowHasRelaxation` is injected for subworkflows. */
-export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext;
+/** Context passed to Workflow.render(); subworkflows also receive `workflowHasRelaxation`. */
+export type WorkflowRenderContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & JobExternalContext & {
+    scopeGlobal?: Record<string, unknown>;
+};
 declare class Workflow extends InMemoryEntity<WorkflowEntity> implements WorkflowSchema {
     createDefault: () => Workflow;
     static readonly defaultConfig: WorkflowSchema;

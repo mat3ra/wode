@@ -46,7 +46,7 @@ interface BaseUnitCore
         RuntimeItems,
         RuntimeItemsUILogic {}
 
-class BaseUnit extends InMemoryEntity<UnitEntity<Schema>> {
+class BaseUnitCore extends InMemoryEntity<UnitEntity<Schema>> {
     defaultResults: NameResultSchema[] = [];
 
     defaultMonitors: NameResultSchema[] = [];

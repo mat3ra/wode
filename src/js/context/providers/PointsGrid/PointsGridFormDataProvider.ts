@@ -1,12 +1,13 @@
 import { Units } from "@mat3ra/code/dist/js/constants";
 import { math as codeJSMath } from "@mat3ra/code/dist/js/math";
+import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
     GridContextItemSchema,
     PointsGridDataProviderSchema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
 import { type ReciprocalLattice, Made } from "@mat3ra/made";
-import type { JSONSchema7 } from "json-schema";
+import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
 
 import materialContextMixin, {
     type MaterialContextMixin,
@@ -86,6 +87,8 @@ abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends Mixi
         value: number;
     };
 
+    // Assigned in subclass constructors via buildFormJsonSchema() — not in this constructor:
+    // jsonSchemaPatchConfig uses this.name, which is only set after super() returns.
     abstract readonly jsonSchema: JSONSchema7;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number) {
@@ -190,7 +193,6 @@ abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends Mixi
         const gridMetricType = this.data?.gridMetricType || this.defaultMetric.type;
 
         return {
-            dimensions: vector(this.defaultDimensions, this.isUsingJinjaVariables),
             shifts: vector(defaultShifts),
             reciprocalVectorRatios: vector(this.reciprocalVectorRatios),
             gridMetricType: { default: this.defaultMetric.type },
@@ -237,6 +239,28 @@ abstract class PointsGridFormDataProvider<N extends Schema["name"]> extends Mixi
                 },
             },
         };
+    }
+
+    /**
+     * Form schema for RJSF. Replaces ESSE `dimensions.anyOf` (number[] | string[]) with a single
+     * array type — patch merge cannot remove `anyOf`, which makes RJSF render a branch picker.
+     */
+    protected buildFormJsonSchema(): JSONSchema7 {
+        const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(
+            this.jsonSchemaId,
+            this.jsonSchemaPatchConfig,
+        );
+
+        if (!jsonSchema?.properties) {
+            throw new Error("Failed to get patched JSON schema");
+        }
+
+        jsonSchema.properties.dimensions = vector(
+            this.defaultDimensions,
+            this.isUsingJinjaVariables,
+        ) as JSONSchema7Definition;
+
+        return jsonSchema;
     }
 
     /** Prefer persisted `data` — `setData` runs before React re-inits the provider on render. */

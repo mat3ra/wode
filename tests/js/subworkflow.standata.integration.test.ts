@@ -8,7 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import { Material } from "@mat3ra/made";
+import { MaterialHashed } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
@@ -22,7 +22,7 @@ import type { WorkflowSchema } from "../../src/js/workflows/types";
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends Material implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends MaterialHashed implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 
@@ -39,7 +39,10 @@ describe("Subworkflow", () => {
         ApplicationRegistry.setDriver(new StandataDriver());
     });
 
-    it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", () => {
+    it("addConvergence on first subworkflow then workflow.render for every standata workflow (when applicable)", function () {
+        // Renders every standata workflow; ~1s locally but exceeds Mocha's default 2s on GitHub Actions.
+        this.timeout(10000);
+
         const standataWorkflows = new WorkflowStandata().getAll() as unknown as WorkflowSchema[];
         expect(standataWorkflows.length).to.be.above(0);
 

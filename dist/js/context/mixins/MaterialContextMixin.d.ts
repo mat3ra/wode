@@ -1,7 +1,7 @@
 import type { OrderedInMemoryEntityInSet } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
-import { Material } from "@mat3ra/made/dist/js/material";
+import type { MaterialHashed } from "@mat3ra/made";
 import type ContextProvider from "../providers/base/ContextProvider";
-export type OrderedMaterial = OrderedInMemoryEntityInSet & Material;
+export type OrderedMaterial = OrderedInMemoryEntityInSet & MaterialHashed;
 export type MaterialContextMixin = {
     readonly isMaterialCreatedDefault: boolean;
     readonly isMaterialUpdated: boolean;

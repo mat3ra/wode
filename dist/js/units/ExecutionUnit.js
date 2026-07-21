@@ -130,7 +130,7 @@ class ExecutionUnit extends BaseUnit_1.default {
                 .flat()),
         ];
         // TODO: kgrid should be abstracted and selected by user
-        const parameterToContextProviderMap = {
+        const parameterToProviderMap = {
             N_k: "kgrid",
             N_k_nonuniform: "kgrid",
         };
@@ -139,8 +139,7 @@ class ExecutionUnit extends BaseUnit_1.default {
             return (0, providers_1.createProvider)(name, this.context, externalContext);
         })
             .map((provider) => {
-            if (convergence &&
-                provider.name === parameterToContextProviderMap[convergence.name]) {
+            if (convergence && provider.name === parameterToProviderMap[convergence.name]) {
                 provider.applyConvergenceParameter(convergence);
             }
             return provider;
@@ -150,17 +149,28 @@ class ExecutionUnit extends BaseUnit_1.default {
         const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
         this.context = persistentItems.filter((c) => c.isEdited);
     }
+    renderContext(scopeGlobal) {
+        this.contextProvidersInstances.forEach((provider) => {
+            provider.renderContext(scopeGlobal);
+        });
+    }
     saveRenderingContext(externalContext) {
+        // scopeGlobal resolves provider data only; do not pass it to input Jinja templates.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from Jinja context
+        const { scopeGlobal, ...renderingExternalContext } = externalContext;
         const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
-            ...externalContext,
+            ...renderingExternalContext,
         };
         this.input = this.inputInstances.map((input) => {
             return input.render(this.renderingContext).toJSON();
         });
     }
-    saveContext(externalContext) {
+    saveContext({ scopeGlobal, ...externalContext }) {
+        if (scopeGlobal) {
+            this.renderContext(scopeGlobal);
+        }
         this.savePersistentContext();
         this.saveRenderingContext(externalContext);
     }

@@ -40,8 +40,74 @@ declare class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;
     private getContextProvidersInstances;
     savePersistentContext(): void;
+    renderContext(scopeGlobal: Record<string, unknown>): void;
     saveRenderingContext(externalContext: ExternalContext): void;
-    saveContext(externalContext: ExternalContext): void;
-    getHashObject(): any;
+    saveContext({ scopeGlobal, ...externalContext }: ExternalContext): void;
+    getHashObject(): {
+        application: {
+            _id?: string;
+            slug?: string;
+            systemName?: string;
+            schemaVersion?: string;
+            name: string;
+            isDefault?: boolean;
+            shortName: string;
+            summary: string;
+            version: string;
+            build: string;
+            isDefaultVersion?: boolean;
+            hasAdvancedComputeOptions?: boolean;
+            isLicensed?: boolean;
+            isUsingMaterial?: boolean;
+            runConfig?: {
+                commandTemplate: string;
+                outFileName: string;
+            };
+        };
+        executable: {
+            _id?: string;
+            slug?: string;
+            systemName?: string;
+            schemaVersion?: string;
+            name: string;
+            isDefault?: boolean;
+            applicationName: string;
+            applicationVersion: string;
+            hasAdvancedComputeOptions?: boolean;
+        };
+        flavor: {
+            _id?: string;
+            slug?: string;
+            systemName?: string;
+            schemaVersion?: string;
+            name: string;
+            isDefault?: boolean;
+            preProcessors: {
+                name: string;
+                [k: string]: unknown;
+            }[];
+            postProcessors: {
+                name: string;
+                [k: string]: unknown;
+            }[];
+            monitors: {
+                name: string;
+                [k: string]: unknown;
+            }[];
+            results: {
+                name: string;
+                [k: string]: unknown;
+            }[];
+            executableName: string;
+            applicationName: string;
+            applicationVersion: string;
+            input: {
+                templateId?: string;
+                templateName?: string;
+                name: string;
+            }[];
+        };
+        input: string;
+    };
 }
 export default ExecutionUnit;

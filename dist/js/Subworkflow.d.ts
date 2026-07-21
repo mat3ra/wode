@@ -8,13 +8,11 @@ import { type ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory } from "@mat3ra/mode";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
-import type { MaterialExternalContext } from "./context/mixins/MaterialContextMixin";
-import type { MaterialsExternalContext } from "./context/mixins/MaterialsContextMixin";
-import type { MaterialsSetExternalContext } from "./context/mixins/MaterialsSetContextMixin";
-import type { JobExternalContext, WorkflowExternalContext } from "./context/providers/by_application/espresso/QEPWXInputDataManager";
+import type { WorkflowExternalContext } from "./context/providers/by_application/espresso/QEPWXInputDataManager";
 import { type SubworkflowSchemaMixin } from "./generated/SubworkflowSchemaMixin";
 import { SubworkflowUnit } from "./units";
 import type { AnySubworkflowUnit } from "./units/factory";
+import type { WorkflowRenderContext } from "./Workflow";
 type ConvergenceConfig = {
     parameter: "N_k" | "N_k_nonuniform";
     parameterInitial: number | [number, number, number];
@@ -29,7 +27,7 @@ type ConvergenceConfig = {
 };
 interface Subworkflow extends Defaultable, NamedEntity, SubworkflowSchemaMixin, HashedEntity, Omit<ComputedEntityMixin, "compute"> {
 }
-type SubworkflowExternalContext = MaterialExternalContext & MaterialsExternalContext & MaterialsSetExternalContext & WorkflowExternalContext & JobExternalContext;
+type SubworkflowExternalContext = WorkflowRenderContext & WorkflowExternalContext;
 export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
 declare class Subworkflow extends InMemoryEntity<SubworkflowEntity> implements SubworkflowSchema {
     private ModelFactory;
