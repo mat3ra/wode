@@ -30,7 +30,7 @@ orderedEntityInSetMixin(OrderedMaterial.prototype);
 
 const customKpath = [
     { point: "L", steps: 4 },
-    { point: "Г", steps: 4 },
+    { point: "Γ", steps: 4 },
     { point: "X", steps: 4 },
     { point: "W", steps: 4 },
 ] as const;
