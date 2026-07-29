@@ -4,7 +4,7 @@ from mat3ra.wode.context.providers import PointsPathDataProvider
 KPATH_SINGLE = [{"point": "K", "steps": 20}]
 KPATH_FULL = [
     {"point": "K", "steps": 20},
-    {"point": "Г", "steps": 20},
+    {"point": "Γ", "steps": 20},
     {"point": "M", "steps": 20},
     {"point": "K", "steps": 1},
 ]

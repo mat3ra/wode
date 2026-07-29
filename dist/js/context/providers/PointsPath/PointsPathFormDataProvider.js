@@ -9,7 +9,7 @@ const made_1 = require("@mat3ra/made");
 const ApplicationContextMixin_1 = __importDefault(require("../../mixins/ApplicationContextMixin"));
 const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const JSONSchemaDataProvider_1 = __importDefault(require("../base/JSONSchemaDataProvider"));
-const defaultPoint = "Г";
+const defaultPoint = "Γ";
 const defaultSteps = 10;
 const jsonSchemaId = "context-providers-directory/points-path-data-provider";
 class MixinsContextProvider extends JSONSchemaDataProvider_1.default {

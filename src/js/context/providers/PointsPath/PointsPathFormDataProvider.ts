@@ -19,7 +19,7 @@ import materialContextMixin, {
 } from "../../mixins/MaterialContextMixin";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "../base/JSONSchemaDataProvider";
 
-const defaultPoint = "Г" as const;
+const defaultPoint = "Γ" as const;
 const defaultSteps = 10 as const;
 
 export type PointsPathFormDataProviderData = PointsPathDataProviderSchema;
