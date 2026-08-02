@@ -10,6 +10,8 @@ from .base.context_provider import ContextProvider
 
 DEFAULT_KPPRA = -1
 
+SCHEMA_FIELD_NAMES = set(PointsGridDataProviderSchema.model_fields)
+
 
 # TODO: GlobalSetting for default KPPRA value
 class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
@@ -25,6 +27,7 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     shifts: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0])
     gridMetricType: GridMetricType = Field(default=GridMetricType.KPPRA)
     gridMetricValue: float = Field(default=DEFAULT_KPPRA)
+    preferGridMetric: bool = Field(default=False)
 
     @property
     def is_edited_key(self) -> str:
@@ -32,19 +35,7 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
 
     @property
     def default_data(self) -> Dict[str, Any]:
-        data = {
-            "dimensions": self.dimensions,
-            "shifts": self.shifts,
-            "gridMetricType": self.grid_metric_type,
-            "divisor": self.divisor,
-        }
-        if self.grid_metric_value is not None:
-            data["gridMetricValue"] = self.grid_metric_value
-        if self.prefer_grid_metric is not None:
-            data["preferGridMetric"] = self.prefer_grid_metric
-        if self.reciprocal_vector_ratios is not None:
-            data["reciprocalVectorRatios"] = self.reciprocal_vector_ratios
-        return data
+        return self.model_dump(by_alias=True, exclude_none=True, include=SCHEMA_FIELD_NAMES)
 
     def get_reciprocal_vector_ratios(self, context: Optional[Dict[str, Any]] = None) -> Optional[List[float]]:
         effective_data = self._get_effective_data(context)
