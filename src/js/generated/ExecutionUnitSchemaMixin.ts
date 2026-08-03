@@ -1,9 +1,14 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { ExecutionUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    BaseInMemoryEntitySchema,
+    ExecutionUnitMixinSchema,
+} from "@mat3ra/esse/dist/js/types";
 
 export type ExecutionUnitSchemaMixin = ExecutionUnitMixinSchema;
 
-export type ExecutionUnitInMemoryEntity = InMemoryEntity & ExecutionUnitSchemaMixin;
+export type ExecutionUnitInMemoryEntity = InMemoryEntity<
+    BaseInMemoryEntitySchema & ExecutionUnitSchemaMixin
+>;
 
 export function executionUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,

@@ -1,9 +1,14 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { ConditionUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    BaseInMemoryEntitySchema,
+    ConditionUnitMixinSchema,
+} from "@mat3ra/esse/dist/js/types";
 
 export type ConditionUnitSchemaMixin = ConditionUnitMixinSchema;
 
-export type ConditionUnitInMemoryEntity = InMemoryEntity & ConditionUnitSchemaMixin;
+export type ConditionUnitInMemoryEntity = InMemoryEntity<
+    BaseInMemoryEntitySchema & ConditionUnitSchemaMixin
+>;
 
 export function conditionUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,

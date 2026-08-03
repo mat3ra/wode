@@ -1,9 +1,14 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { AssignmentUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    AssignmentUnitMixinSchema,
+    BaseInMemoryEntitySchema,
+} from "@mat3ra/esse/dist/js/types";
 
 export type AssignmentUnitSchemaMixin = AssignmentUnitMixinSchema;
 
-export type AssignmentUnitInMemoryEntity = InMemoryEntity & AssignmentUnitSchemaMixin;
+export type AssignmentUnitInMemoryEntity = InMemoryEntity<
+    BaseInMemoryEntitySchema & AssignmentUnitSchemaMixin
+>;
 
 export function assignmentUnitSchemaMixin<T extends InMemoryEntity>(
     item: InMemoryEntity,
