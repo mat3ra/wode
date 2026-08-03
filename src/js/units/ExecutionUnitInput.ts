@@ -48,14 +48,24 @@ class ExecutionUnitInput extends InMemoryEntity<ExecutionUnitInputEntity> implem
             const rendered = nunjucks.compile(this.template.content, env).render(renderingContext);
 
             this.rendered = rendered || this.template.content;
-
-            return this;
         } catch (error) {
+            // Can happen transiently right after switching to a multi-material workflow (e.g.
+            // interface left/right units keyed by MATERIAL_INDEX "1"/"2"), before the job's
+            // materials have been updated to match: `input.perMaterial[MATERIAL_INDEX]` is
+            // undefined until enough materials are assigned. This throwing used to propagate out
+            // of `ExecutionUnit.render()` and up through the JOB_WORKFLOW_SYNC/JOB_UPDATE
+            // reducers, aborting the whole dispatch - so the workflow selection itself silently
+            // never applied to the job (job-designer's `onSelectWorkflowsSubmit` just logs the
+            // rejected promise). Fall back to the raw template so the reducer can complete;
+            // render() runs again on the next job/material update and renders correctly once
+            // materials line up.
             console.error("Error rendering template", this.template.content);
             console.error("Rendering context: ", JSON.stringify(renderingContext));
             console.error("Error", error);
-            throw error;
+            this.rendered = this.template.content;
         }
+
+        return this;
     }
 }
 

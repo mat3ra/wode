@@ -50,7 +50,6 @@
         "@mat3ra/standata": "2026.5.28-0",
         "@mat3ra/tsconfig": "^2024.6.3-0",
         "@mat3ra/utils": "^2026.7.9-0",
-        "@types/nunjucks": "^3.2.6",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
         "chai": "^4.3.4",
