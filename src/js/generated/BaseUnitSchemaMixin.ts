@@ -43,6 +43,12 @@ export function baseUnitSchemaMixin<T extends InMemoryEntity>(
         set enableRender(value: WorkflowBaseUnitMixinSchema["enableRender"]) {
             this.setProp("enableRender", value);
         },
+        get status() {
+            return this.prop("status");
+        },
+        set status(value: WorkflowBaseUnitMixinSchema["status"]) {
+            this.setProp("status", value);
+        },
     };
 
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));

@@ -110,7 +110,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -121,6 +120,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         type?: "io";
         subtype: "input" | "output" | "dataFrame";
         source: "api" | "object_storage";
@@ -168,7 +168,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -179,6 +178,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         type?: "condition";
         input: {
             scope: string;
@@ -213,7 +213,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -224,6 +223,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         type?: "assertion";
         statement: string;
         errorMessage?: string;
@@ -251,7 +251,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -262,6 +261,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         type: "execution";
         application: {
             _id?: string;
@@ -677,7 +677,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -688,6 +687,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         scope?: string;
         type?: "assignment";
         input?: {
@@ -720,7 +720,6 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: string;
         statusTrack?: {
             trackedAt: number;
             status: string;
@@ -731,6 +730,7 @@ declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         type?: "error";
         reason: string;
     } | undefined;

@@ -9,7 +9,7 @@ const TaggableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/TaggableMixi
 const utils_1 = require("@mat3ra/utils");
 const enums_1 = require("../enums");
 const BaseUnitSchemaMixin_1 = require("../generated/BaseUnitSchemaMixin");
-const StatusSchemaMixin_1 = require("../generated/StatusSchemaMixin");
+const StatusTrackSchemaMixin_1 = require("../generated/StatusTrackSchemaMixin");
 const RuntimeItemsUILogicMixin_1 = require("./mixins/RuntimeItemsUILogicMixin");
 class BaseUnitCore extends entity_1.InMemoryEntity {
     /**
@@ -65,7 +65,7 @@ class BaseUnitCore extends entity_1.InMemoryEntity {
 (0, RuntimeItemsMixin_1.runtimeItemsMixin)(BaseUnitCore.prototype);
 (0, RuntimeItemsUILogicMixin_1.runtimeItemsUILogicMixin)(BaseUnitCore.prototype);
 (0, BaseUnitSchemaMixin_1.baseUnitSchemaMixin)(BaseUnitCore.prototype);
-(0, StatusSchemaMixin_1.statusSchemaMixin)(BaseUnitCore.prototype);
+(0, StatusTrackSchemaMixin_1.statusTrackSchemaMixin)(BaseUnitCore.prototype);
 (0, NamedEntityMixin_1.namedEntityMixin)(BaseUnitCore.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(BaseUnitCore);
 class BaseUnit extends BaseUnitCore {

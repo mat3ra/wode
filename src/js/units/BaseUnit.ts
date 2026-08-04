@@ -26,7 +26,10 @@ import { Utils } from "@mat3ra/utils";
 
 import { UnitStatus } from "../enums";
 import { type BaseUnitSchemaMixin, baseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
-import { type StatusSchemaMixin, statusSchemaMixin } from "../generated/StatusSchemaMixin";
+import {
+    type StatusTrackSchemaMixin,
+    statusTrackSchemaMixin,
+} from "../generated/StatusTrackSchemaMixin";
 import {
     type RuntimeItemsUILogic,
     runtimeItemsUILogicMixin,
@@ -39,7 +42,7 @@ export type UnitEntity<S extends Schema = Schema> = S & BaseInMemoryEntitySchema
 interface BaseUnitCore
     extends BaseUnitSchemaMixin,
         NamedEntity,
-        StatusSchemaMixin,
+        StatusTrackSchemaMixin,
         Defaultable,
         Taggable,
         HashedEntity,
@@ -111,7 +114,7 @@ hashedEntityMixin(BaseUnitCore.prototype);
 runtimeItemsMixin(BaseUnitCore.prototype);
 runtimeItemsUILogicMixin(BaseUnitCore.prototype);
 baseUnitSchemaMixin(BaseUnitCore.prototype);
-statusSchemaMixin(BaseUnitCore.prototype);
+statusTrackSchemaMixin(BaseUnitCore.prototype);
 namedEntityMixin(BaseUnitCore.prototype);
 defaultableEntityMixin(BaseUnitCore);
 

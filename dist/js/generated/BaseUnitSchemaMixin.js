@@ -34,6 +34,12 @@ function baseUnitSchemaMixin(item) {
         set enableRender(value) {
             this.setProp("enableRender", value);
         },
+        get status() {
+            return this.prop("status");
+        },
+        set status(value) {
+            this.setProp("status", value);
+        },
     };
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
 }
