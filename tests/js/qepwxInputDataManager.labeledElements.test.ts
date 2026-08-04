@@ -8,7 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import { MaterialHashed } from "@mat3ra/made";
+import { MaterialConstrainedHashed } from "@mat3ra/made";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
@@ -16,7 +16,7 @@ import QEPWXInputDataManager from "../../src/js/context/providers/by_application
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends MaterialHashed implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends MaterialConstrainedHashed implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 

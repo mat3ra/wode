@@ -8,7 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import { MaterialHashed } from "@mat3ra/made";
+import { MaterialConstrainedHashed } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
@@ -21,7 +21,7 @@ import { assertNotNull } from "./assertNotNull";
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends MaterialHashed implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends MaterialConstrainedHashed implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 

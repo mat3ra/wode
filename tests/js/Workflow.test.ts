@@ -13,7 +13,7 @@ import type {
     ErrorUnitSchema,
     ExecutionUnitSchema,
 } from "@mat3ra/esse/dist/js/types";
-import { MaterialHashed } from "@mat3ra/made";
+import { MaterialConstrainedHashed } from "@mat3ra/made";
 import { ApplicationRegistry, WorkflowStandata } from "@mat3ra/standata";
 import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
@@ -43,7 +43,7 @@ function invalidExecutionUnit(flowchartId: string) {
 
 interface OrderedMaterial extends OrderedInMemoryEntityInSet, InMemoryEntityInSet {}
 
-class OrderedMaterial extends MaterialHashed implements OrderedInMemoryEntityInSet {
+class OrderedMaterial extends MaterialConstrainedHashed implements OrderedInMemoryEntityInSet {
     declare static createDefault: () => OrderedMaterial;
 }
 
