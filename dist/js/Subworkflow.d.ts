@@ -1,8 +1,9 @@
 import { Application } from "@mat3ra/ade";
-import { type DefaultableInMemoryEntity, type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import type { BaseInMemoryEntitySchema, JobSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
 import { type ComputedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { Model, ModelFactory } from "@mat3ra/mode";
@@ -24,10 +25,12 @@ type ConvergenceConfig = {
     maxOccurrences: number;
     externalContext: SubworkflowExternalContext;
 };
-interface Subworkflow extends DefaultableInMemoryEntity, NamedInMemoryEntity, SubworkflowSchemaMixin, HashedEntity, Omit<ComputedEntityMixin, "compute"> {
+interface Subworkflow extends Defaultable, NamedEntity, SubworkflowSchemaMixin, HashedEntity, Omit<ComputedEntityMixin, "compute"> {
 }
 type SubworkflowExternalContext = WorkflowRenderContext & WorkflowExternalContext;
-declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
+export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
+type Schema = SubworkflowEntity;
+declare class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     private ModelFactory;
     private applicationInstance;
     unitsInstances: AnySubworkflowUnit[];
@@ -35,10 +38,8 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
     properties: string[];
     repetition: number;
     static createDefault: () => Subworkflow;
-    toJSON: () => SubworkflowSchema & AnyObject;
-    _json: SubworkflowSchema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
-    constructor(config: SubworkflowSchema, _ModelFactory?: typeof ModelFactory);
+    constructor(config: NoInfer<S>, _ModelFactory?: typeof ModelFactory);
     static get defaultConfig(): {
         _id: any;
         name: string;
@@ -109,18 +110,18 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "io";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        type?: "io";
         subtype: "input" | "output" | "dataFrame";
         source: "api" | "object_storage";
         input: ({
@@ -167,18 +168,18 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "condition";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        type?: "condition";
         input: {
             scope: string;
             name: string;
@@ -212,18 +213,18 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "assertion";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        type?: "assertion";
         statement: string;
         errorMessage?: string;
     } | {
@@ -250,18 +251,18 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "execution";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        type: "execution";
         application: {
             _id?: string;
             slug?: string;
@@ -676,19 +677,19 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "assignment";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
         scope?: string;
+        type?: "assignment";
         input?: {
             scope: string;
             name: string;
@@ -719,18 +720,18 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
             [k: string]: unknown;
         }[];
         tags?: string[];
-        status?: "idle" | "active" | "warning" | "error" | "finished";
         statusTrack?: {
             trackedAt: number;
             status: string;
             repetition?: number;
         }[];
         isDraft?: boolean;
-        type: "error";
         head?: boolean;
         flowchartId: string;
         next?: string;
         enableRender?: boolean;
+        status?: "idle" | "active" | "warning" | "error" | "finished";
+        type?: "error";
         reason: string;
     } | undefined;
     findUnitKeyById(id: string): string;

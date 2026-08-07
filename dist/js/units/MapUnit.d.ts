@@ -1,5 +1,4 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { MapUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { UnitType } from "../enums";
 import { type MapUnitSchemaMixin } from "../generated/MapUnitSchemaMixin";
@@ -21,12 +20,10 @@ export declare const defaultMapConfig: {
     preProcessors: never[];
     postProcessors: never[];
 };
-type Base = typeof BaseUnit<Schema> & Constructor<MapUnitSchemaMixin>;
 export type MapUnitConfig = Partial<Omit<Schema, "type">>;
-declare const MapUnit_base: Base;
-declare class MapUnit extends MapUnit_base implements Schema {
-    toJSON: () => Schema & AnyObject;
-    _json: Schema & AnyObject;
+interface MapUnit extends MapUnitSchemaMixin, Taggable {
+}
+declare class MapUnit extends BaseUnit<Schema> implements Schema {
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: MapUnitConfig);
     setWorkflowId(id: string): void;

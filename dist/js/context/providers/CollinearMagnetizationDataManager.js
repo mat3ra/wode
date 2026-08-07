@@ -25,7 +25,7 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.default
         this.entityName = "unit";
         this.initMaterialContextMixin(externalContext);
         this.uniqueElementsWithLabels = [
-            ...new Set(((_b = (_a = this.material) === null || _a === void 0 ? void 0 : _a.Basis) === null || _b === void 0 ? void 0 : _b.elementsWithLabelsArray) || []),
+            ...new Set(((_b = (_a = this.material) === null || _a === void 0 ? void 0 : _a.getBasis()) === null || _b === void 0 ? void 0 : _b.elementsWithLabelsArray) || []),
         ];
         this.firstElement =
             ((_c = this.uniqueElementsWithLabels) === null || _c === void 0 ? void 0 : _c.length) > 0 ? this.uniqueElementsWithLabels[0] : "";

@@ -17,10 +17,14 @@ const factory_1 = require("./convergence/factory");
 const enums_1 = require("./enums");
 const SubworkflowSchemaMixin_1 = require("./generated/SubworkflowSchemaMixin");
 const units_1 = require("./units");
+function isAssignmentUnitSchema(unit) {
+    return unit.type === enums_1.UnitType.assignment;
+}
 class Subworkflow extends entity_1.InMemoryEntity {
     static get jsonSchema() {
         return JSONSchemasInterface_1.default.getSchemaById("workflow/subworkflow");
     }
+    // NoInfer: keep default S (or an explicit type arg) instead of inferring S from the config literal.
     constructor(config, _ModelFactory = mode_1.ModelFactory) {
         super(config);
         this.properties = [];
@@ -93,9 +97,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         this.model = model.toJSON();
     }
     buildExternalContext(context) {
-        const subworkflowContext = this.units
-            .filter((u) => u.type === enums_1.UnitType.assignment)
-            .reduce((acc, u) => {
+        const subworkflowContext = this.units.filter(isAssignmentUnitSchema).reduce((acc, u) => {
             return {
                 ...acc,
                 [u.operand]: u.value,
@@ -187,9 +189,7 @@ class Subworkflow extends entity_1.InMemoryEntity {
         return `units.${index}`;
     }
     findAssignmentUnitWithTag(tag) {
-        return this.units
-            .filter((unit) => unit.type === enums_1.UnitType.assignment)
-            .find((unit) => { var _a; return (_a = unit.tags) === null || _a === void 0 ? void 0 : _a.includes(tag); });
+        return this.units.filter(isAssignmentUnitSchema).find((unit) => { var _a; return (_a = unit.tags) === null || _a === void 0 ? void 0 : _a.includes(tag); });
     }
     get hasConvergence() {
         return !!this.convergenceParam && !!this.convergenceResult;

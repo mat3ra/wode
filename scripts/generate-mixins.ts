@@ -19,7 +19,7 @@ import type { JSONSchema7 } from "json-schema";
  */
 const OUTPUT_PATHS = {
     "workflow/unit/mixins/base": "src/js/generated/BaseUnitSchemaMixin.ts",
-    "system/status": "src/js/generated/StatusSchemaMixin.ts",
+    "system/status-track": "src/js/generated/StatusTrackSchemaMixin.ts",
     "workflow/unit/mixins/assertion": "src/js/generated/AssertionUnitSchemaMixin.ts",
     "workflow/unit/mixins/assignment": "src/js/generated/AssignmentUnitSchemaMixin.ts",
     "workflow/unit/mixins/condition": "src/js/generated/ConditionUnitSchemaMixin.ts",

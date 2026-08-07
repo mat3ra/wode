@@ -23,6 +23,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import { repairWorkflow } from "../../src/js/utils/repair";
+import type { WorkflowEntity } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import workflowHashes from "../fixtures/workflow_hashes.json";
 
@@ -61,7 +62,7 @@ describe("Workflow", () => {
             );
             expect(workflow.toJSON().units).to.have.lengthOf(Workflow.defaultConfig.units.length);
             expect(workflow._id).to.be.a("string");
-            expect(workflow._id.length).to.be.above(0);
+            expect(workflow._id?.length).to.be.above(0);
         });
     });
 
@@ -133,7 +134,6 @@ describe("Workflow", () => {
                 },
             ];
             const workflow = new Workflow(config);
-            const secondSubworkflow = new Subworkflow(config.subworkflows[1]);
             const thirdSubworkflow = new Subworkflow({
                 ...defaultSub,
                 _id: "third-sw-id",
@@ -144,7 +144,7 @@ describe("Workflow", () => {
             expect(workflow.toJSON().subworkflows).to.have.lengthOf(3);
             expect(workflow.toJSON().units).to.have.lengthOf(3);
 
-            workflow.removeSubworkflow(secondSubworkflow.id);
+            workflow.removeSubworkflow("second-sw-id");
 
             expect(workflow.toJSON().subworkflows).to.have.lengthOf(2);
             expect(workflow.toJSON().units).to.have.lengthOf(2);
@@ -234,7 +234,6 @@ describe("Workflow", () => {
             ).to.be.above(0);
 
             const material = OrderedMaterial.createDefault();
-            material.hash = material.calculateHash();
             const context: WorkflowRenderContext = {
                 material,
                 materials: [material, material, material],
@@ -542,6 +541,25 @@ describe("Workflow", () => {
                 subworkflow: workflowConfig.subworkflows[0],
             });
             expect(() => new Workflow(result)).to.not.throw();
+        });
+    });
+
+    describe("generic schema wrapper", () => {
+        type WiderWorkflowSchema = WorkflowEntity & { webappOnly?: string };
+
+        class WiderWorkflow extends Workflow<WiderWorkflowSchema> {}
+
+        it("allows subclasses to widen _json typing and storage", () => {
+            const workflow = new WiderWorkflow(structuredClone(Workflow.defaultConfig));
+
+            workflow._json.webappOnly = "webapp-value";
+            expect(workflow._json.webappOnly).to.equal("webapp-value");
+
+            expect(workflow.toJSON().name).to.equal(Workflow.defaultConfig.name);
+            expect(workflow._json.webappOnly).to.equal("webapp-value");
+
+            workflow._json.webappOnly = "updated";
+            expect(workflow._json.webappOnly).to.equal("updated");
         });
     });
 });

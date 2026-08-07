@@ -82,7 +82,7 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             constrainType: "atomic direction" as const,
         };
         this.uniqueElementsWithLabels = [
-            ...new Set(this.material?.Basis?.elementsWithLabelsArray || []),
+            ...new Set(this.material?.getBasis()?.elementsWithLabelsArray || []),
         ];
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {

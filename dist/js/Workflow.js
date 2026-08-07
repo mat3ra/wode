@@ -44,11 +44,15 @@ class Workflow extends entity_1.InMemoryEntity {
         };
         return new this(config);
     }
+    // NoInfer: keep default S (or an explicit type arg) instead of inferring S from the config literal.
     constructor(config) {
         var _a;
+        // Strip applicationName (fromSubworkflow helper); not part of WorkflowEntity.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { applicationName, ...rest } = config;
         super({
-            ...config,
-            _id: config._id || utils_1.Utils.uuid.getUUID(),
+            ...rest,
+            _id: rest._id || utils_1.Utils.uuid.getUUID(),
         });
         this.repetition = 0;
         this.totalRepetitions = 1;
@@ -60,7 +64,7 @@ class Workflow extends entity_1.InMemoryEntity {
         return this.requiredProp("workflows");
     }
     set workflows(value) {
-        this.setProp("workflows", value);
+        this._json.workflows = value;
     }
     addSubworkflow(subworkflow, head = false, index = -1) {
         const subworkflowUnit = subworkflow.getAsUnit();

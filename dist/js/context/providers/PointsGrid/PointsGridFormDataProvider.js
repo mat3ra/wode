@@ -10,6 +10,13 @@ const made_1 = require("@mat3ra/made");
 const MaterialContextMixin_1 = __importDefault(require("../../mixins/MaterialContextMixin"));
 const JSONSchemaFormDataProvider_1 = __importDefault(require("../base/JSONSchemaFormDataProvider"));
 const settings_1 = require("../settings");
+class MixinsContextProvider extends JSONSchemaFormDataProvider_1.default {
+    constructor(contextItem, externalContext) {
+        super(contextItem, externalContext);
+        this.initMaterialContextMixin(externalContext);
+    }
+}
+(0, MaterialContextMixin_1.default)(MixinsContextProvider.prototype);
 const vector = (defaultValue, isStringType = false) => {
     const isArray = Array.isArray(defaultValue);
     return {
@@ -25,14 +32,13 @@ const vector = (defaultValue, isStringType = false) => {
 };
 const defaultShift = 0;
 const defaultShifts = [defaultShift, defaultShift, defaultShift];
-class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
+class PointsGridFormDataProvider extends MixinsContextProvider {
     constructor(contextItem, externalContext, divisor) {
         super(contextItem, externalContext);
         this.domain = "important";
         this.entityName = "unit";
         this.jsonSchemaId = "context-providers-directory/points-grid-data-provider";
         this.divisor = divisor;
-        this.initMaterialContextMixin(externalContext);
         this.initInstanceFields();
     }
     initInstanceFields() {
@@ -224,7 +230,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
     calculateDimensions(gridMetricType, gridMetricValue) {
         switch (gridMetricType) {
             case "KPPRA": {
-                const nAtoms = this.material ? this.material.Basis.nAtoms : 1;
+                const nAtoms = this.material ? this.material.getBasis().nAtoms : 1;
                 return this.reciprocalLattice.getDimensionsFromPointsCount(gridMetricValue / nAtoms);
             }
             case "spacing":
@@ -236,7 +242,7 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
     calculateGridMetric(gridMetricType, dimensions) {
         switch (gridMetricType) {
             case "KPPRA": {
-                const nAtoms = this.material ? this.material.Basis.nAtoms : 1;
+                const nAtoms = this.material ? this.material.getBasis().nAtoms : 1;
                 return dimensions.reduce((a, b) => a * b) * nAtoms;
             }
             case "spacing":
@@ -278,5 +284,4 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         return super.setData(data);
     }
 }
-(0, MaterialContextMixin_1.default)(PointsGridFormDataProvider.prototype);
 exports.default = PointsGridFormDataProvider;
