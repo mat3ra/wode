@@ -14,19 +14,7 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     abstract readonly name: N;
     readonly domain: "important";
     readonly entityName: "unit";
-    /**
-     * The resolved k/q/i-grid (KPPRA-derived default included) must always be persisted, even when
-     * the user never touched it — a downstream unit (e.g. `assign-precision-for-material`) reads
-     * `context["kgrid"]` unconditionally. See SOF-7990.
-     *
-     * On this unedited default path, `gridMetricValue` in the persisted record is the *nominal*
-     * KPPRA setting (`getDefaultData()`), not one recomputed from `dimensions` — so e.g. a default
-     * `dimensions: [2, 2, 2]` can sit next to `gridMetricValue: 5` even though the true KPPRA of
-     * that grid is higher. That is intentional (it keeps the reported value identical to what was
-     * reported before this fix, when the field was absent and callers fell back to the same
-     * setting), not a bug you're looking at. The edited path is the opposite: `setData()` derives
-     * `gridMetricValue` from the dimensions the user chose, so the two fields there do agree.
-     */
+    /** Persist the resolved default even when unedited — downstream units read `context["kgrid"]` unconditionally (SOF-7990). */
     readonly isPersistedWhenNotEdited = true;
     readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
     dimensions: Data["dimensions"];

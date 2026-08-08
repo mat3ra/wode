@@ -42,8 +42,7 @@ declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
     setDefaultInput(): void;
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter): void;
     private getContextProvidersInstances;
-    /** An item survives into `this.context` if the user edited it, or its provider opts into
-     * persisting its resolved default unedited (`isPersistedWhenNotEdited`, e.g. grids — SOF-7990). */
+    /** Keeps edited items, plus unedited ones whose provider opts in (`isPersistedWhenNotEdited`). */
     savePersistentContext(): void;
     renderContext(scopeGlobal: Record<string, unknown>): void;
     saveRenderingContext(externalContext: ExternalContext): void;

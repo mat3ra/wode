@@ -224,8 +224,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             });
     }
 
-    /** An item survives into `this.context` if the user edited it, or its provider opts into
-     * persisting its resolved default unedited (`isPersistedWhenNotEdited`, e.g. grids — SOF-7990). */
+    /** Keeps edited items, plus unedited ones whose provider opts in (`isPersistedWhenNotEdited`). */
     savePersistentContext() {
         this.context = this.contextProvidersInstances
             .filter((provider) => provider.isEdited || provider.isPersistedWhenNotEdited)
