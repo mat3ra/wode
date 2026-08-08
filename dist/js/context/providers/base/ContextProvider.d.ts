@@ -54,6 +54,12 @@ DataForRendering = S["data"]> {
     extraData?: S["extraData"];
     readonly externalContext: EC;
     isEdited: boolean;
+    /**
+     * When true, `ExecutionUnit.savePersistentContext` persists this provider's item even when
+     * `isEdited` is false — i.e. the resolved default (already used for rendering) is also stored,
+     * not just user overrides. Default false: only explicitly edited items are persisted.
+     */
+    readonly isPersistedWhenNotEdited: boolean;
     constructor(contextItem: Partial<S>, externalContext: EC);
     setIsEdited(isEdited: boolean): void;
     getData(): S["data"];

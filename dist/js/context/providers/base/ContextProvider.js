@@ -41,6 +41,12 @@ const parseNumericStrings = (_key, value) => {
  */
 class ContextProvider {
     constructor(contextItem, externalContext) {
+        /**
+         * When true, `ExecutionUnit.savePersistentContext` persists this provider's item even when
+         * `isEdited` is false — i.e. the resolved default (already used for rendering) is also stored,
+         * not just user overrides. Default false: only explicitly edited items are persisted.
+         */
+        this.isPersistedWhenNotEdited = false;
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;
         if (contextItem.data !== undefined) {

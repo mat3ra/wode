@@ -17,6 +17,7 @@ import type { JSONSchema7 } from "json-schema";
 
 import { ExecutionUnit, Workflow } from "../../src/js";
 import KGridFormDataManager from "../../src/js/context/providers/PointsGrid/KGridFormDataManager";
+import { globalSettings } from "../../src/js/context/providers/settings";
 import type { WorkflowRenderContext } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 import { assertNotNull } from "./assertNotNull";
@@ -39,6 +40,19 @@ function createWorkflowRenderContext(): WorkflowRenderContext {
         materials: [material],
         jobHasParent: false,
     };
+}
+
+/** A material whose reciprocal lattice is anisotropic, so its default k-grid differs by axis
+ * (unlike the default material's isotropic [2,2,2]) — needed to prove a default grid is
+ * recomputed per material rather than pinned to whichever material was rendered first. */
+function createAnisotropicMaterial(): OrderedMaterial {
+    const config = OrderedMaterial.createDefault().toJSON();
+
+    delete config.lattice.vectors;
+    config.lattice.type = "TRI";
+    config.lattice.b *= 8;
+
+    return new OrderedMaterial(config);
 }
 
 function createKgridProvider(
@@ -190,6 +204,71 @@ describe("renderContext", () => {
 
             expect(getKgridContextData(executionUnit)?.dimensions).to.deep.equal([2, 2, 2]);
             expect(getKgridContextData(executionUnit)?.gridMetricValue).to.equal(16);
+        });
+
+        it("persists the resolved default kgrid on pw_scf with no explicit k-grid", () => {
+            const context = createWorkflowRenderContext();
+            const workflow = new Workflow(structuredClone(findTotalEnergyWorkflowConfig()));
+            const subworkflow = assertNotNull(workflow.subworkflowInstances[0]);
+            const executionUnit = subworkflow.unitsInstances.find(
+                (unit): unit is ExecutionUnit =>
+                    unit instanceof ExecutionUnit && unit.name === "pw_scf",
+            );
+
+            if (!executionUnit) {
+                throw new Error("expected pw_scf execution unit on Total Energy subworkflow");
+            }
+
+            // No convergence added, no scopeGlobal passed: the default (unedited) path.
+            workflow.render(context);
+
+            const kgridData = getKgridContextData(executionUnit);
+
+            expect(
+                kgridData,
+                "kgrid context item must be persisted on the default path",
+            ).to.not.equal(undefined);
+            // The default material is an isotropic 2-atom FCC cell, so its resolved default grid
+            // is exactly [2, 2, 2] (KPPRA 5 / divisor 1, 2 atoms) — pin the real vector, not just
+            // its shape, so a regression into calculateDimensions' unrecognised-metric branch
+            // (which returns [1, 1, 1]) would fail this test.
+            expect(kgridData?.dimensions).to.deep.equal([2, 2, 2]);
+            // The persisted default must equal exactly what rendering already used (item 3): the
+            // KPPRA-derived value, i.e. globalSettings.defaultKPPRA / divisor(kgrid) === defaultKPPRA / 1.
+            expect(kgridData?.gridMetricValue).to.equal(globalSettings.defaultKPPRA);
+            // The newly persisted item must satisfy the ESSE execution-unit schema, whose `context`
+            // array validates each entry against `workflow/unit/context/item`.
+            expect(() => executionUnit.validate()).to.not.throw();
+        });
+
+        it("recomputes the default kgrid per material instead of reusing a stale persisted default", () => {
+            // Regression caught in review: `ExecutionUnit` seeds a provider from its own persisted
+            // `context` regardless of `isEdited` (`getContextProvidersInstances` ->
+            // `createProvider`). Without discarding unedited `data` on construction, material A's
+            // persisted default would be read back as material B's input instead of recomputed.
+            const materialA = OrderedMaterial.createDefault();
+            materialA.hash = materialA.calculateHash();
+            const materialB = createAnisotropicMaterial();
+            const externalContext = { material: materialB, isUsingJinjaVariables: false };
+
+            const persistedA = new KGridFormDataManager(
+                { name: "kgrid" },
+                { material: materialA, isUsingJinjaVariables: false },
+            ).getContextItemData();
+
+            const fedStaleDefault = new KGridFormDataManager(persistedA, externalContext).getData();
+            const freshForB = new KGridFormDataManager(
+                { name: "kgrid" },
+                externalContext,
+            ).getData();
+
+            expect(fedStaleDefault.dimensions).to.deep.equal(freshForB.dimensions);
+            expect(fedStaleDefault.reciprocalVectorRatios).to.deep.equal(
+                freshForB.reciprocalVectorRatios,
+            );
+            // Material B's lattice is anisotropic (b scaled 8x), so this also confirms the
+            // assertions above are not vacuously comparing two identical (isotropic) grids.
+            expect(freshForB.dimensions).to.not.deep.equal([2, 2, 2]);
         });
     });
 });

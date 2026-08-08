@@ -20,7 +20,7 @@ import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 import type { WorkflowRenderContext } from "src/js/Workflow";
 
-import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
+import { ExecutionUnit, Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
 import { repairWorkflow } from "../../src/js/utils/repair";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
@@ -246,7 +246,10 @@ describe("Workflow", () => {
 
                 workflow.subworkflowInstances.forEach((subworkflow) => {
                     subworkflow.unitsInstances
-                        .filter((unit) => unit.type === UnitType.execution)
+                        .filter(
+                            (unit): unit is ExecutionUnit =>
+                                unit.type === UnitType.execution && unit instanceof ExecutionUnit,
+                        )
                         .forEach((unit) => {
                             expect(unit.renderingContext).to.deep.include({ ...context });
                             expect(unit.renderingContext).to.have.property("methodData");
@@ -256,7 +259,21 @@ describe("Workflow", () => {
                                 "workflowHasRelaxation",
                                 workflow.hasRelaxation,
                             );
-                            expect(unit.context).to.be.deep.equal([]);
+                            // Persisted context is exactly: edited items, plus opt-in-when-unedited
+                            // ones (SOF-7990). Read the opt-in set off the unit itself, not a
+                            // hard-coded name list, so this doesn't duplicate the flag under test.
+                            const alwaysPersistedNames = unit.contextProvidersInstances
+                                .filter((provider) => provider.isPersistedWhenNotEdited)
+                                .map((provider) => provider.name);
+                            const persistedNames = unit.context.map((item) => item.name);
+
+                            expect(persistedNames).to.include.members(alwaysPersistedNames);
+                            unit.context.forEach((item) => {
+                                expect(
+                                    item.isEdited || alwaysPersistedNames.includes(item.name),
+                                    `unexpected unedited, non-opt-in persisted context item: ${item.name}`,
+                                ).to.equal(true);
+                            });
                         });
                 });
             });

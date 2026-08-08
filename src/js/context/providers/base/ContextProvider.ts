@@ -89,6 +89,13 @@ abstract class ContextProvider<
 
     isEdited: boolean;
 
+    /**
+     * When true, `ExecutionUnit.savePersistentContext` persists this provider's item even when
+     * `isEdited` is false — i.e. the resolved default (already used for rendering) is also stored,
+     * not just user overrides. Default false: only explicitly edited items are persisted.
+     */
+    readonly isPersistedWhenNotEdited: boolean = false;
+
     constructor(contextItem: Partial<S>, externalContext: EC) {
         this.externalContext = externalContext;
         this.isEdited = contextItem.isEdited || false;

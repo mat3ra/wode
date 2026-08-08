@@ -145,9 +145,12 @@ class ExecutionUnit extends BaseUnit_1.default {
             return provider;
         });
     }
+    /** An item survives into `this.context` if the user edited it, or its provider opts into
+     * persisting its resolved default unedited (`isPersistedWhenNotEdited`, e.g. grids — SOF-7990). */
     savePersistentContext() {
-        const persistentItems = this.contextProvidersInstances.map((p) => p.getContextItemData());
-        this.context = persistentItems.filter((c) => c.isEdited);
+        this.context = this.contextProvidersInstances
+            .filter((provider) => provider.isEdited || provider.isPersistedWhenNotEdited)
+            .map((provider) => provider.getContextItemData());
     }
     renderContext(scopeGlobal) {
         this.contextProvidersInstances.forEach((provider) => {
@@ -158,7 +161,7 @@ class ExecutionUnit extends BaseUnit_1.default {
         // scopeGlobal resolves provider data only; do not pass it to input Jinja templates.
         // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omitted from Jinja context
         const { scopeGlobal, ...renderingExternalContext } = externalContext;
-        const renderingItems = this.contextProvidersInstances.map((p) => p.getContextItemDataForRendering());
+        const renderingItems = this.contextProvidersInstances.map((provider) => provider.getContextItemDataForRendering());
         this.renderingContext = {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...renderingExternalContext,

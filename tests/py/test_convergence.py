@@ -4,6 +4,7 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.standata.workflows import WorkflowStandata
 
 from mat3ra.wode import Workflow
+from mat3ra.wode.context.providers import PointsGridDataProvider
 
 
 def _build_total_energy_subworkflow():
@@ -159,6 +160,42 @@ def test_add_non_uniform_2d_energy_convergence():
             == "[[2,2,1][i] + math.floor(iteration * 2 * float(context['kgrid']['reciprocalVectorRatios'][i])) "
                "for i in range(2)] + [1]"
     )
+
+
+def test_add_non_uniform_energy_convergence_raises_value_error_when_kgrid_context_missing():
+    """
+    Regression for SOF-7990's bug class: with an un-rendered subworkflow (`pw_scf.context == []`,
+    the default before any render() has resolved a kgrid), and no explicit
+    reciprocal_vector_ratios, add_convergence must raise the documented ValueError, not an
+    AttributeError from a bare `.get(...)` on a missing context item.
+    """
+    subworkflow = _build_total_energy_subworkflow()
+    pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
+    assert pw_scf.context == []
+
+    with pytest.raises(ValueError, match="reciprocal_vector_ratios"):
+        subworkflow.add_convergence(
+            parameter=ConvergenceParameterNameEnum.N_k_nonuniform,
+            parameter_initial=[2, 2, 1],
+            parameter_increment=2,
+            reciprocal_vector_ratios=None,
+            result="total_energy",
+            result_initial=0,
+            condition="abs((prev_result-total_energy)/total_energy)",
+            operator="<",
+            tolerance=0.001,
+            max_occurrences=10,
+        )
+
+
+@pytest.mark.parametrize("is_edited", [True, False])
+def test_points_grid_data_provider_ignores_is_edited_for_reciprocal_vector_ratios(is_edited):
+    """Gate item 10 drops `is_edited=` when building `PointsGridDataProvider`; this is only safe
+    because `get_reciprocal_vector_ratios()` never consults it (`_get_effective_data` short-circuits
+    on `self.context` being unset). Assert the equivalence directly rather than by analysis alone."""
+    provider = PointsGridDataProvider(data={"reciprocalVectorRatios": [1.0, 0.5, 2.0]}, is_edited=is_edited)
+
+    assert provider.get_reciprocal_vector_ratios() == [1.0, 0.5, 2.0]
 
 
 def test_lattice_reciprocal_vector_ratios():
