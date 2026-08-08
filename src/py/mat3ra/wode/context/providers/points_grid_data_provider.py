@@ -4,7 +4,7 @@ from mat3ra.esse.models.context_providers_directory.points_grid_data_provider im
     GridMetricType,
     PointsGridDataProviderSchema,
 )
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .base.context_provider import ContextProvider
 
@@ -25,6 +25,17 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     shifts: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0])
     gridMetricType: GridMetricType = Field(default=GridMetricType.KPPRA)
     gridMetricValue: float = Field(default=DEFAULT_KPPRA)
+    n_atoms: int = Field(default=1, exclude=True)
+
+    @model_validator(mode="after")
+    def _derive_grid_metric_value_from_dimensions(self) -> "PointsGridDataProvider":
+        # Mirrors PointsGridFormDataProvider.setData() in JS: when dimensions are given
+        # explicitly but the metric is not, derive it instead of leaving the DEFAULT_KPPRA
+        # sentinel -- which is otherwise persisted as isEdited=True and locks the k-grid from
+        # further editing in the UI (its form schema requires gridMetricValue >= 1 for KPPRA).
+        if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
+            self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
+        return self
 
     @property
     def is_edited_key(self) -> str:
@@ -111,12 +122,14 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         raise NotImplementedError
 
     def calculate_dimensions(
-            self, grid_metric_type: str, grid_metric_value: float, units: str = "angstrom"
+        self, grid_metric_type: str, grid_metric_value: float, units: str = "angstrom"
     ) -> List[int]:
         raise NotImplementedError
 
     def calculate_grid_metric(self, grid_metric_type: str, dimensions: List[int], units: str = "angstrom") -> float:
-        raise NotImplementedError
+        if grid_metric_type == GridMetricType.KPPRA:
+            return dimensions[0] * dimensions[1] * dimensions[2] * self.n_atoms
+        raise NotImplementedError(f"calculate_grid_metric not implemented for {grid_metric_type}")
 
     def transform_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         raise NotImplementedError
