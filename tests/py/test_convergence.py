@@ -163,12 +163,9 @@ def test_add_non_uniform_2d_energy_convergence():
 
 
 def test_add_non_uniform_energy_convergence_raises_value_error_when_kgrid_context_missing():
-    """
-    Regression for SOF-7990's bug class: with an un-rendered subworkflow (`pw_scf.context == []`,
-    the default before any render() has resolved a kgrid), and no explicit
+    """With an un-rendered subworkflow (`pw_scf.context == []`) and no explicit
     reciprocal_vector_ratios, add_convergence must raise the documented ValueError, not an
-    AttributeError from a bare `.get(...)` on a missing context item.
-    """
+    AttributeError from a bare `.get(...)` on a missing context item."""
     subworkflow = _build_total_energy_subworkflow()
     pw_scf = subworkflow.get_unit_by_name(name="pw_scf")
     assert pw_scf.context == []

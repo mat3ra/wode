@@ -260,8 +260,8 @@ describe("Workflow", () => {
                                 workflow.hasRelaxation,
                             );
                             // Persisted context is exactly: edited items, plus opt-in-when-unedited
-                            // ones (SOF-7990). Read the opt-in set off the unit itself, not a
-                            // hard-coded name list, so this doesn't duplicate the flag under test.
+                            // ones. Read the opt-in set off the unit itself, not a hard-coded name
+                            // list, so this doesn't duplicate the flag under test.
                             const alwaysPersistedNames = unit.contextProvidersInstances
                                 .filter((provider) => provider.isPersistedWhenNotEdited)
                                 .map((provider) => provider.name);

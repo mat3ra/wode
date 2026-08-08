@@ -30,11 +30,11 @@ class PointsGridFormDataProvider extends JSONSchemaFormDataProvider_1.default {
         super(contextItem, externalContext);
         this.domain = "important";
         this.entityName = "unit";
-        /** Persist the resolved default even when unedited — downstream units read `context["kgrid"]` unconditionally (SOF-7990). */
+        /** Downstream units read `context["kgrid"]` unconditionally, so persist it even when unedited. */
         this.isPersistedWhenNotEdited = true;
         this.jsonSchemaId = "context-providers-directory/points-grid-data-provider";
         this.divisor = divisor;
-        // Unedited persisted data is a record, not an input — recompute per material (SOF-7990).
+        // Unedited persisted data is a record, not an input — recompute it per material.
         if (!this.isEdited) {
             this.data = undefined;
         }

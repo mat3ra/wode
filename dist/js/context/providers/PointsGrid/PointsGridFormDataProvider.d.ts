@@ -14,7 +14,7 @@ declare abstract class PointsGridFormDataProvider<N extends Schema["name"]> exte
     abstract readonly name: N;
     readonly domain: "important";
     readonly entityName: "unit";
-    /** Persist the resolved default even when unedited — downstream units read `context["kgrid"]` unconditionally (SOF-7990). */
+    /** Downstream units read `context["kgrid"]` unconditionally, so persist it even when unedited. */
     readonly isPersistedWhenNotEdited = true;
     readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
     dimensions: Data["dimensions"];

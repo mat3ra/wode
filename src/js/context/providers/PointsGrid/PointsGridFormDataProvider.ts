@@ -57,7 +57,7 @@ abstract class PointsGridFormDataProvider<
 
     readonly entityName = "unit" as const;
 
-    /** Persist the resolved default even when unedited — downstream units read `context["kgrid"]` unconditionally (SOF-7990). */
+    /** Downstream units read `context["kgrid"]` unconditionally, so persist it even when unedited. */
     readonly isPersistedWhenNotEdited = true;
 
     readonly jsonSchemaId = "context-providers-directory/points-grid-data-provider";
@@ -92,7 +92,7 @@ abstract class PointsGridFormDataProvider<
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext, divisor: number) {
         super(contextItem, externalContext);
         this.divisor = divisor;
-        // Unedited persisted data is a record, not an input — recompute per material (SOF-7990).
+        // Unedited persisted data is a record, not an input — recompute it per material.
         if (!this.isEdited) {
             this.data = undefined;
         }
