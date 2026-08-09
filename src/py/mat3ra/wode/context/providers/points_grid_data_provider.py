@@ -29,7 +29,6 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
 
     @model_validator(mode="after")
     def _derive_grid_metric_value_from_dimensions(self) -> "PointsGridDataProvider":
-        # Mirrors JS's setData(): derive from dimensions when only dimensions are given.
         if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
             self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
         return self

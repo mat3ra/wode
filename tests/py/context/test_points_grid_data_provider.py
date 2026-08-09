@@ -11,9 +11,6 @@ SHIFTS_CUSTOM = [0.5, 0.5, 0.5]
 DIVISOR_DEFAULT = 1
 DIVISOR_CUSTOM = 2
 GRID_METRIC_TYPE_DEFAULT = GridMetricType.KPPRA
-# Explicit dimensions with no explicit metric are derived (dims product * n_atoms, n_atoms=1 here),
-# not left at DEFAULT_KPPRA -- that sentinel would otherwise be persisted as isEdited=True and lock
-# the k-grid from further editing in the UI (its form schema requires gridMetricValue >= 1).
 GRID_METRIC_VALUE_DERIVED = DIMENSIONS_CUSTOM[0] * DIMENSIONS_CUSTOM[1] * DIMENSIONS_CUSTOM[2]
 
 # Expected data structures
