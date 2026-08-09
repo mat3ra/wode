@@ -29,10 +29,7 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
 
     @model_validator(mode="after")
     def _derive_grid_metric_value_from_dimensions(self) -> "PointsGridDataProvider":
-        # Mirrors PointsGridFormDataProvider.setData() in JS: when dimensions are given
-        # explicitly but the metric is not, derive it instead of leaving the DEFAULT_KPPRA
-        # sentinel -- which is otherwise persisted as isEdited=True and locks the k-grid from
-        # further editing in the UI (its form schema requires gridMetricValue >= 1 for KPPRA).
+        # Mirrors JS's setData(): derive from dimensions when only dimensions are given.
         if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
             self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
         return self

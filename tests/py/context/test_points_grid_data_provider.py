@@ -121,10 +121,6 @@ def test_points_grid_data_provider_get_reciprocal_vector_ratios_from_context():
 
 
 def test_points_grid_data_provider_derives_grid_metric_value_when_only_dimensions_given():
-    """The notebook path -- PointsGridDataProvider(dimensions=X, isEdited=True) -- must not
-    persist DEFAULT_KPPRA as if it were a deliberate value; that sentinel fails the UI's own
-    form validation (gridMetricValue >= 1 for KPPRA) and permanently locks the k-grid from
-    further edits once isEdited=True is stored alongside it."""
     provider = PointsGridDataProvider(dimensions=[4, 4, 4], isEdited=True)
 
     assert provider.get_data()["gridMetricValue"] == 64
@@ -144,8 +140,6 @@ def test_points_grid_data_provider_derives_grid_metric_value_using_n_atoms():
 
 
 def test_points_grid_data_provider_untouched_default_keeps_sentinel():
-    """With neither dimensions nor a metric given, DEFAULT_KPPRA is the honest answer -- there
-    is nothing to derive a value from."""
     provider = PointsGridDataProvider()
 
     assert provider.get_data()["gridMetricValue"] == DEFAULT_KPPRA
