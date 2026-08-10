@@ -41,8 +41,8 @@
     "devDependencies": {
         "@exabyte-io/eslint-config": "2025.5.13-0",
         "@mat3ra/ade": "https://github.com/Exabyte-io/ade/archive/9a7a6a9f08181cc1ae0eaa7d6ab375dbb7ef4a74.tar.gz",
-        "@mat3ra/code": "https://github.com/Exabyte-io/code/archive/3676047aad7d15bbbaebbfaafec35b8664a2308b.tar.gz",
-        "@mat3ra/esse": "https://github.com/mat3ra/esse/archive/fee483acad9051c4ff98fb898cdac54576d19480.tar.gz",
+        "@mat3ra/code": "https://github.com/mat3ra/code/archive/2969ef2d77bf835af4b854376ce91cefd2cb4bc4.tar.gz",
+        "@mat3ra/esse": "https://github.com/mat3ra/esse/archive/13eb236299a2d5f3a43e75d1fe9e121deb674c0e.tar.gz",
         "@mat3ra/ide": "2026.5.28-0",
         "@mat3ra/made": "https://github.com/mat3ra/made/archive/fb51737de68e6477ffcbf0cc67ce45c4ffc7e974.tar.gz",
         "@mat3ra/mode": "https://github.com/Exabyte-io/mode/archive/ee41e2e9c41131b84c13983864af61cdcc8c2c93.tar.gz",

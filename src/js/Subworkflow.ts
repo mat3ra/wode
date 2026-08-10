@@ -135,7 +135,8 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             postProcessors: [],
             monitors: [],
             results: [],
-            flowchartId: "",
+            // Concrete id for graph linking ("" is a valid string but not a usable node id).
+            flowchartId: Utils.uuid.getUUID(),
         });
     }
 

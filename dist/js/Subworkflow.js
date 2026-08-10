@@ -66,7 +66,8 @@ class Subworkflow extends entity_1.InMemoryEntity {
             postProcessors: [],
             monitors: [],
             results: [],
-            flowchartId: "",
+            // Concrete id for graph linking ("" is a valid string but not a usable node id).
+            flowchartId: utils_1.Utils.uuid.getUUID(),
         });
     }
     setApplication(application) {
