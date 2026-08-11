@@ -96,7 +96,11 @@ def test_points_grid_data_provider_get_data(init_params, expected_data):
     "init_params,expected_data",
     [
         (
-            {"dimensions": DIMENSIONS_CUSTOM, "is_edited": True, "material": _material_stub(NUMBER_OF_ATOMS_DEFAULT, RATIOS_DEFAULT)},
+            {
+                "dimensions": DIMENSIONS_CUSTOM,
+                "is_edited": True,
+                "material": _material_stub(NUMBER_OF_ATOMS_DEFAULT, RATIOS_DEFAULT),
+            },
             KGRID_DATA,
         ),
     ],
