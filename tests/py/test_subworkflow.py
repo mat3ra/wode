@@ -1,12 +1,6 @@
-import pytest
 from types import SimpleNamespace
 
-
-def _material_stub(number_of_atoms, reciprocal_vector_ratios):
-    return SimpleNamespace(
-        basis=SimpleNamespace(number_of_atoms=number_of_atoms),
-        lattice=SimpleNamespace(reciprocal_vector_ratios=reciprocal_vector_ratios),
-    )
+import pytest
 from mat3ra.ade.application import Application
 from mat3ra.mode.method import Method
 from mat3ra.mode.model import Model
@@ -16,6 +10,13 @@ from mat3ra.standata.workflows import WorkflowStandata
 
 from mat3ra.wode import Subworkflow, Unit, Workflow, ExecutionUnit
 from mat3ra.wode.context.providers import PointsGridDataProvider
+
+def _material_stub(number_of_atoms, reciprocal_vector_ratios):
+    return SimpleNamespace(
+        basis=SimpleNamespace(number_of_atoms=number_of_atoms),
+        lattice=SimpleNamespace(reciprocal_vector_ratios=reciprocal_vector_ratios),
+    )
+
 
 SUBWORKFLOW_NAME = "Total Energy"
 SUBWORKFLOW_APPLICATION = Application(**ApplicationStandata.get_by_name_first_match("espresso"))
