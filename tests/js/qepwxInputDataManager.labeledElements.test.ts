@@ -36,7 +36,7 @@ describe("QEPWXInputDataManager with labeled elements", () => {
     it("returns correct atomic mass for labeled elements", () => {
         const material = OrderedMaterial.createDefault();
         material.setBasis({
-            ...material.Basis.toJSON(),
+            ...material.getBasis().toJSON(),
             labels: [
                 { id: 0, value: 1 },
                 { id: 1, value: 2 },

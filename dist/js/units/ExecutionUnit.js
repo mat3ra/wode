@@ -36,9 +36,9 @@ class ExecutionUnit extends BaseUnit_1.default {
     }
     setApplication({ application, executable, flavor, executableName, flavorName, }) {
         var _a, _b;
-        const currentExecutable = this.prop("executable");
-        const currentFlavor = this.prop("flavor");
-        this.setProp("application", application);
+        const currentExecutable = this._json.executable;
+        const currentFlavor = this._json.flavor;
+        this.application = application;
         this.setExecutable({
             executableName: (_a = executableName !== null && executableName !== void 0 ? executableName : executable === null || executable === void 0 ? void 0 : executable.name) !== null && _a !== void 0 ? _a : currentExecutable === null || currentExecutable === void 0 ? void 0 : currentExecutable.name,
             flavorName: (_b = flavorName !== null && flavorName !== void 0 ? flavorName : flavor === null || flavor === void 0 ? void 0 : flavor.name) !== null && _b !== void 0 ? _b : currentFlavor === null || currentFlavor === void 0 ? void 0 : currentFlavor.name,
@@ -53,7 +53,7 @@ class ExecutionUnit extends BaseUnit_1.default {
         if (!executable) {
             throw new Error(`Executable ${executableName} not found`);
         }
-        this.setProp("executable", executable);
+        this.executable = executable;
         this.setFlavor(flavorName);
     }
     setFlavor(flavorName) {
@@ -68,14 +68,14 @@ class ExecutionUnit extends BaseUnit_1.default {
         this.defaultPreProcessors = flavor.preProcessors;
         this.defaultPostProcessors = flavor.postProcessors;
         // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
-        const previousFlavor = this.prop("flavor");
+        const previousFlavor = this._json.flavor;
         if ((previousFlavor === null || previousFlavor === void 0 ? void 0 : previousFlavor.name) !== flavor.name) {
             this.results = flavor.results;
             this.monitors = flavor.monitors;
             this.preProcessors = flavor.preProcessors;
             this.postProcessors = flavor.postProcessors;
         }
-        this.setProp("flavor", flavor);
+        this.flavor = flavor;
         this.setDefaultInput();
     }
     /**

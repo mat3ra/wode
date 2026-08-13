@@ -45,7 +45,6 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
         expect(standataWorkflows.length).to.be.above(0);
 
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         // Enough entries for `input.perMaterial[MATERIAL_INDEX]` on multi-material standata
         // workflows (e.g. Valence Band Offset uses indices "0", "1", "2").
         const context: WorkflowRenderContext = {
@@ -122,7 +121,6 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
 
     it("constructs KGridFormDataManager when persisted data uses spacing metric (init before setData)", () => {
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const externalContext: WorkflowRenderContext = {
             material,
             materials: [material],
@@ -150,7 +148,6 @@ describe("ExecutionUnit contextProvidersInstances + render()", () => {
 
     it("enables spacing value input in uiSchema when preferGridMetric is set via setData", () => {
         const material = OrderedMaterial.createDefault();
-        material.hash = material.calculateHash();
         const externalContext: WorkflowRenderContext = {
             material,
             materials: [material],

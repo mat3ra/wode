@@ -1,8 +1,7 @@
 import { Template } from "@mat3ra/ade";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { TemplateSchema } from "@mat3ra/esse/dist/js/types";
+import type { BaseInMemoryEntitySchema, TemplateSchema } from "@mat3ra/esse/dist/js/types";
 import { setupNunjucksEnvironment } from "@mat3ra/standata";
 import nunjucks from "nunjucks";
 
@@ -12,7 +11,7 @@ import {
 } from "../generated/ExecutionUnitInputSchemaMixin";
 
 type Schema = ExecutionUnitInputSchemaMixin;
-type JSON = Schema & AnyObject;
+type ExecutionUnitInputEntity = Schema & BaseInMemoryEntitySchema;
 type ConstructorConfig = Schema | (Omit<Schema, "template"> & { template: Template });
 
 const env = setupNunjucksEnvironment(new nunjucks.Environment());
@@ -20,13 +19,7 @@ const env = setupNunjucksEnvironment(new nunjucks.Environment());
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ExecutionUnitInput extends ExecutionUnitInputSchemaMixin {}
 
-class ExecutionUnitInput extends InMemoryEntity implements Schema {
-    declare _json: JSON;
-
-    declare toJSON: () => JSON;
-
-    declare toJSONQuick: () => JSON;
-
+class ExecutionUnitInput extends InMemoryEntity<ExecutionUnitInputEntity> implements Schema {
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/input/-inputItem");
     }

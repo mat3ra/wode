@@ -1,5 +1,4 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { type AnyContextProvider, type ExternalContext } from "../context/providers";
 import type ConvergenceParameter from "../convergence/ConvergenceParameter";
@@ -7,20 +6,18 @@ import { type ExecutionUnitSchemaMixin } from "../generated/ExecutionUnitSchemaM
 import BaseUnit from "./BaseUnit";
 import ExecutionUnitInput from "./ExecutionUnitInput";
 type Schema = ExecutionUnitSchema;
-type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
 export type ExecutionUnitConfig = Omit<Partial<Schema>, "application"> & SetApplicationProps;
 type SetApplicationProps = Pick<Schema, "application"> & Pick<Partial<Schema>, "executable" | "flavor"> & SetExecutableProps;
 type SetExecutableProps = {
     executableName?: string;
     flavorName?: string;
 };
-declare const ExecutionUnit_base: Base;
-declare class ExecutionUnit extends ExecutionUnit_base implements Schema {
+interface ExecutionUnit extends ExecutionUnitSchemaMixin, Taggable {
+}
+declare class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     inputInstances: ExecutionUnitInput[];
     renderingContext: Partial<ExternalContext>;
     contextProvidersInstances: AnyContextProvider[];
-    toJSON: () => Schema & AnyObject;
-    _json: Schema & AnyObject;
     static get jsonSchema(): import("json-schema").JSONSchema7 | undefined;
     constructor(config: ExecutionUnitConfig);
     setApplication({ application, executable, flavor, executableName, flavorName, }: SetApplicationProps): void;
