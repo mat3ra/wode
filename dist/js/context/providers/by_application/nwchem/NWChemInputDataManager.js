@@ -21,6 +21,7 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
         this.isEdited = false;
         this.contextProviderName = "nwchem-total-energy";
         this.initMaterialContextMixin(externalContext);
+        this.workflowHasRelaxation = externalContext.workflowHasRelaxation;
         const jsonSchema = JSONSchemasInterface_1.default.getSchemaById(jsonSchemaId);
         if (!jsonSchema) {
             throw new Error("Failed to get JSON schema");
@@ -32,6 +33,7 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
      */
     getDefaultData() {
         const basis = this.material.Basis;
+        const { workflowHasRelaxation } = this;
         const NTYP = basis.uniqueElements.length;
         const ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS = basis.atomicPositions.join("\n") || "";
         const ATOMIC_SPECIES = basis.uniqueElements
@@ -50,6 +52,12 @@ class NWChemInputDataManager extends JSONSchemaDataProvider_1.default {
             ATOMIC_SPECIES,
             FUNCTIONAL: "B3LYP",
             CARTESIAN: basis.toCartesian !== undefined,
+            // Continue from the previous unit's RTDB, which carries its optimized geometry. Units of
+            // one job share a work_dir, so nwchem.db is already there. Deliberately NOT
+            // `jobHasParent || ...` as espresso does: rupy's nwchem prepare_restart symlinks only the
+            // parent's perm/, while nwchem.db sits at the work-dir root, so a child job would render
+            // `restart` with no database to restart from.
+            RESTART: Boolean(workflowHasRelaxation),
             contextProviderName: this.contextProviderName,
         };
     }

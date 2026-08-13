@@ -357,6 +357,7 @@ declare class Subworkflow extends InMemoryEntity implements SubworkflowSchema {
                 ATOMIC_SPECIES: string;
                 FUNCTIONAL: string;
                 CARTESIAN: boolean;
+                RESTART?: boolean;
             } | {
                 IBRAV: number;
                 RESTART_MODE: "from_scratch" | "restart";
