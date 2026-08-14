@@ -5,7 +5,6 @@ import type {
     InputContextItemSchema,
     QEPwxContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
-import type { Material } from "@mat3ra/made";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
 import path from "path";
@@ -13,6 +12,7 @@ import path from "path";
 import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
+    type OrderedMaterial,
 } from "../../../mixins/MaterialContextMixin";
 import materialsContextMixin, {
     type MaterialsContextMixin,
@@ -94,8 +94,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         this.jsonSchema = jsonSchema;
     }
 
-    private buildQEPWXContext(material: Material): Data {
-        const { Basis: basis, Lattice: lattice } = material;
+    private buildQEPWXContext(material: OrderedMaterial): Data {
+        const basis = material.getBasis();
+        const lattice = material.getLattice();
         const { jobHasParent, workflowHasRelaxation } = this;
 
         const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {

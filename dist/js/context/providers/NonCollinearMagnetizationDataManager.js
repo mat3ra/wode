@@ -46,7 +46,7 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider_1.defa
             constrainType: "atomic direction",
         };
         this.uniqueElementsWithLabels = [
-            ...new Set(((_p = (_o = this.material) === null || _o === void 0 ? void 0 : _o.Basis) === null || _p === void 0 ? void 0 : _p.elementsWithLabelsArray) || []),
+            ...new Set(((_p = (_o = this.material) === null || _o === void 0 ? void 0 : _o.getBasis()) === null || _p === void 0 ? void 0 : _p.elementsWithLabelsArray) || []),
         ];
         const jsonSchema = JSONSchemasInterface_1.default.getPatchedSchemaById(jsonSchemaId, {
             isExistingChargeDensity: { default: defaultData.isExistingChargeDensity },

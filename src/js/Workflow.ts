@@ -1,4 +1,4 @@
-import { type NamedInMemoryEntity, InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
     type Defaultable,
     defaultableEntityMixin,
@@ -11,11 +11,17 @@ import {
     type HashedEntity,
     hashedEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
-import { namedEntityMixin } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import {
+    type NamedEntity,
+    namedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { Taggable, taggableMixin } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ApplicationSchema, SubworkflowSchema } from "@mat3ra/esse/dist/js/types";
+import type {
+    ApplicationSchema,
+    BaseInMemoryEntitySchema,
+    SubworkflowSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import type { MetaPropertyHolder } from "@mat3ra/prode";
@@ -43,9 +49,13 @@ import {
 import defaultWorkflowConfig from "./workflows/default";
 import type { WorkflowSchema } from "./workflows/types";
 
+export type WorkflowEntity = WorkflowSchema & BaseInMemoryEntitySchema;
+
+type Schema = WorkflowEntity;
+
 interface Workflow
     extends Defaultable,
-        NamedInMemoryEntity,
+        NamedEntity,
         WorkflowSchemaMixin,
         Taggable,
         HashedEntity,
@@ -63,12 +73,10 @@ export type WorkflowRenderContext = MaterialExternalContext &
         scopeGlobal?: Record<string, unknown>;
     };
 
-class Workflow extends InMemoryEntity implements WorkflowSchema {
+class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements WorkflowSchema {
     declare createDefault: () => Workflow;
 
     static readonly defaultConfig = defaultWorkflowConfig;
-
-    declare _json: WorkflowSchema & AnyObject;
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow");
@@ -107,11 +115,15 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         return new this(config);
     }
 
-    constructor(config: WorkflowSchema & { applicationName?: string }) {
+    // NoInfer: keep default S (or an explicit type arg) instead of inferring S from the config literal.
+    constructor(config: NoInfer<S> & { applicationName?: string }) {
+        // Strip applicationName (fromSubworkflow helper); not part of WorkflowEntity.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { applicationName, ...rest } = config;
         super({
-            ...config,
-            _id: config._id || Utils.uuid.getUUID(),
-        });
+            ...rest,
+            _id: (rest as Partial<Schema>)._id || Utils.uuid.getUUID(),
+        } as S);
 
         this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow(x));
         this.workflowInstances = this.workflows?.map((x) => new Workflow(x)) || [];
@@ -119,11 +131,11 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
     }
 
     get workflows() {
-        return this.requiredProp<WorkflowSchema[]>("workflows");
+        return this.requiredProp("workflows");
     }
 
     set workflows(value: WorkflowSchema[]) {
-        this.setProp("workflows", value);
+        (this._json as Schema).workflows = value;
     }
 
     addSubworkflow(subworkflow: Subworkflow, head = false, index = -1) {
@@ -207,7 +219,7 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
         return getHumanReadableUsedModels(this);
     }
 
-    toJSON(): WorkflowSchema & AnyObject {
+    toJSON(): S {
         return {
             ...super.toJSON(),
             name: this.name,
@@ -215,7 +227,7 @@ class Workflow extends InMemoryEntity implements WorkflowSchema {
             units: this.unitInstances.map((x) => x.toJSON()),
             subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
             workflows: this.workflowInstances.map((x) => x.toJSON()),
-        };
+        } as S;
     }
 
     getHumanReadableProperties() {

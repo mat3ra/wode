@@ -72,7 +72,7 @@ class NWChemInputDataManager extends JSONSchemaDataProvider<Schema, ExternalCont
      * TODO: Create ability for user to define CHARGE, MULT, BASIS and FUNCTIONAL parameters.
      */
     getDefaultData() {
-        const basis = this.material.Basis;
+        const basis = this.material.getBasis();
         const { workflowHasRelaxation } = this;
 
         const NTYP = basis.uniqueElements.length;

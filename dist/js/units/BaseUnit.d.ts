@@ -1,22 +1,19 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
-import { HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
+import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import { type RuntimeItems } from "@mat3ra/code/dist/js/entity/mixins/RuntimeItemsMixin";
-import { Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import type { NameResultSchema } from "@mat3ra/code/dist/js/utils/object";
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { StatusSchema, WorkflowBaseUnitSchema } from "@mat3ra/esse/dist/js/types";
+import type { BaseInMemoryEntitySchema, StatusSchema, WorkflowBaseUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { type BaseUnitSchemaMixin } from "../generated/BaseUnitSchemaMixin";
-import { type StatusSchemaMixin } from "../generated/StatusSchemaMixin";
+import { type StatusTrackSchemaMixin } from "../generated/StatusTrackSchemaMixin";
 import { type RuntimeItemsUILogic } from "./mixins/RuntimeItemsUILogicMixin";
 type Schema = WorkflowBaseUnitSchema;
-type Base = typeof InMemoryEntity & Constructor<NamedEntity> & Constructor<Defaultable> & Constructor<Taggable> & Constructor<HashedEntity> & Constructor<RuntimeItems> & Constructor<RuntimeItemsUILogic> & Constructor<BaseUnitSchemaMixin> & Constructor<StatusSchemaMixin>;
-declare const BaseUnit_base: Base;
-declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implements Schema {
-    toJSON: () => Schema & AnyObject;
-    _json: Schema & AnyObject;
+export type UnitEntity<S extends Schema = Schema> = S & BaseInMemoryEntitySchema;
+interface BaseUnitCore extends BaseUnitSchemaMixin, NamedEntity, StatusTrackSchemaMixin, Defaultable, Taggable, HashedEntity, RuntimeItems, RuntimeItemsUILogic {
+}
+declare class BaseUnitCore extends InMemoryEntity<UnitEntity<Schema>> {
     defaultResults: NameResultSchema[];
     defaultMonitors: NameResultSchema[];
     defaultPostProcessors: NameResultSchema[];
@@ -25,7 +22,7 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     /**
      * @param config — `flowchartId` is optional; when absent, a new UUID is generated.
      */
-    constructor(config: Partial<S> & Pick<S, "name">);
+    constructor(config: Partial<Schema> & Pick<Schema, "name">);
     get lastStatusUpdate(): {
         trackedAt: number;
         status: string;
@@ -35,5 +32,9 @@ declare class BaseUnit<S extends Schema = Schema> extends BaseUnit_base implemen
     isInStatus(status: StatusSchema["status"]): boolean;
     clone(extraContext: object): this;
     setRepetition(repetition: number): void;
+}
+declare class BaseUnit<S extends Schema = Schema> extends BaseUnitCore {
+    _json: UnitEntity<S>;
+    toJSON: (exclude?: (keyof UnitEntity<S>)[]) => UnitEntity<S>;
 }
 export default BaseUnit;

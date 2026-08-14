@@ -1,4 +1,3 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { JSONSchema } from "@mat3ra/esse/dist/js/esse/utils";
 import type { PathContextItemSchema, PointsPathDataProviderRenderingSchema, PointsPathDataProviderSchema } from "@mat3ra/esse/dist/js/types";
 import { type ApplicationContextMixin, type ApplicationExternalContext } from "../../mixins/ApplicationContextMixin";
@@ -11,9 +10,9 @@ type Data = PointsPathFormDataProviderData;
 type RenderingData = PointsPathFormDataProviderRenderingData;
 type Schema = PathContextItemSchema;
 type ExternalContext = PointsPathFormDataProviderExternalContext;
-type Base = typeof JSONSchemaDataProvider<Schema, ExternalContext, RenderingData> & Constructor<MaterialContextMixin> & Constructor<ApplicationContextMixin>;
-declare const MixinsContextProvider_base: Base;
-declare abstract class MixinsContextProvider extends MixinsContextProvider_base {
+interface MixinsContextProvider extends MaterialContextMixin, ApplicationContextMixin {
+}
+declare abstract class MixinsContextProvider extends JSONSchemaDataProvider<Schema, ExternalContext, RenderingData> {
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext);
 }
 declare abstract class PointsPathFormDataProvider<N extends Schema["name"]> extends MixinsContextProvider {

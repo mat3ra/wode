@@ -39,7 +39,7 @@ class MapUnit extends BaseUnit_1.default {
         super(schema);
     }
     setWorkflowId(id) {
-        this.setProp("workflowId", id);
+        this.workflowId = id;
     }
 }
 (0, MapUnitSchemaMixin_1.mapUnitSchemaMixin)(MapUnit.prototype);
