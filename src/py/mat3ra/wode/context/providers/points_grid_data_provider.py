@@ -195,9 +195,7 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     ) -> List[int]:
         raise NotImplementedError
 
-    def calculate_grid_metric(
-        self, grid_metric_type: GridMetricType, dimensions: List[int], units: str = "angstrom"
-    ) -> float:
+    def calculate_grid_metric(self, grid_metric_type: GridMetricType, dimensions: List[int]) -> float:
         if grid_metric_type == GridMetricType.KPPRA:
             return math.prod(dimensions) * self.get_number_of_atoms()
         raise NotImplementedError(f"calculate_grid_metric not implemented for {grid_metric_type}")
