@@ -1,6 +1,5 @@
-import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
+import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
-import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ExecutionUnitInputItemSchema, ExecutionUnitSchema } from "@mat3ra/esse/dist/js/types";
 import { ApplicationRegistry, applicationVersionSatisfiesSupportedRange } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
@@ -21,8 +20,6 @@ import ExecutionUnitInput from "./ExecutionUnitInput";
 
 type Schema = ExecutionUnitSchema;
 
-type Base = typeof BaseUnit & Constructor<ExecutionUnitSchemaMixin>;
-
 export type ExecutionUnitConfig = Omit<Partial<Schema>, "application"> & SetApplicationProps;
 
 type SetApplicationProps = Pick<Schema, "application"> &
@@ -34,16 +31,14 @@ type SetExecutableProps = {
     flavorName?: string;
 };
 
-class ExecutionUnit extends (BaseUnit as Base) implements Schema {
+interface ExecutionUnit extends ExecutionUnitSchemaMixin, Taggable {}
+
+class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     inputInstances: ExecutionUnitInput[] = [];
 
     renderingContext: Partial<ExternalContext> = {};
 
     contextProvidersInstances: AnyContextProvider[] = [];
-
-    declare toJSON: () => Schema & AnyObject;
-
-    declare _json: Schema & AnyObject;
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/execution");
@@ -75,10 +70,10 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         executableName,
         flavorName,
     }: SetApplicationProps) {
-        const currentExecutable = this.prop<Schema["executable"]>("executable");
-        const currentFlavor = this.prop<Schema["flavor"]>("flavor");
+        const currentExecutable = this._json.executable;
+        const currentFlavor = this._json.flavor;
 
-        this.setProp("application", application);
+        this.application = application;
         this.setExecutable({
             executableName: executableName ?? executable?.name ?? currentExecutable?.name,
             flavorName: flavorName ?? flavor?.name ?? currentFlavor?.name,
@@ -96,7 +91,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             throw new Error(`Executable ${executableName} not found`);
         }
 
-        this.setProp("executable", executable);
+        this.executable = executable;
         this.setFlavor(flavorName);
     }
 
@@ -115,7 +110,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
         this.defaultPostProcessors = flavor.postProcessors;
 
         // flavor is missing on the first run, so do not use getter this.flavor with requiredProperty
-        const previousFlavor = this.prop<Schema["flavor"]>("flavor");
+        const previousFlavor = this._json.flavor;
 
         if (previousFlavor?.name !== flavor.name) {
             this.results = flavor.results;
@@ -124,7 +119,7 @@ class ExecutionUnit extends (BaseUnit as Base) implements Schema {
             this.postProcessors = flavor.postProcessors;
         }
 
-        this.setProp("flavor", flavor);
+        this.flavor = flavor;
         this.setDefaultInput();
     }
 
