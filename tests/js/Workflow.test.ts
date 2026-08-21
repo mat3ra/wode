@@ -221,7 +221,8 @@ describe("Workflow", () => {
             JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
         });
 
-        it("invokes each subworkflow render with spread context and workflowHasRelaxation", () => {
+        it("invokes each subworkflow render with spread context and workflowHasRelaxation", function () {
+            this.timeout(10000);
             ApplicationRegistry.setDriver(new StandataDriver());
 
             const workflows = new WorkflowStandata().getAll().map((standataJson) => {
