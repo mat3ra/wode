@@ -25,9 +25,8 @@ dependencies = [
     "mat3ra-esse",
     "mat3ra-mode",
     "mat3ra-ade",
-    "mat3ra-made",
-    # `made.basis` imports `scipy.spatial` at module level, so `Material` needs it.
-    "scipy",
+    # `tools` carries scipy, which `made.basis` imports at module level for `Material`.
+    "mat3ra-made[tools]",
     "mat3ra-standata",
 ]
 

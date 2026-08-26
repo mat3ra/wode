@@ -32,7 +32,6 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
 
     @model_validator(mode="after")
     def _derive_grid_metric_and_ratios(self) -> "PointsGridDataProvider":
-        """Derive both from the material, leaving an explicitly passed `gridMetricValue` alone."""
         if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
             self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
         if self.reciprocalVectorRatios is None and self.material is not None:
@@ -47,7 +46,6 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
     )
 
     def get_number_of_atoms(self) -> int:
-        """A method, not a property: it raises when there is no material to read."""
         if self.material is None:
             raise ValueError(self._MATERIAL_REQUIRED)
         return self.material.basis.number_of_atoms

@@ -10,7 +10,6 @@ from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPR
 
 
 def _material_stub(number_of_atoms, reciprocal_vector_ratios):
-    """A real `Material` whose orthorhombic lattice yields the requested ratios."""
     a, b, c = (2.0 / ratio for ratio in reciprocal_vector_ratios)
     return Material.create(
         {
@@ -200,7 +199,6 @@ def test_points_grid_data_provider_rounds_ratios_to_three_figures_like_js():
 
 
 def test_points_grid_data_provider_rejects_a_non_material():
-    """`material` is typed to `Material`, so pydantic rejects a wrong shape at construction."""
     with pytest.raises(ValidationError):
         PointsGridDataProvider(dimensions=[4, 4, 4], material={"basis": 1, "lattice": 2})
 
@@ -212,7 +210,6 @@ def test_points_grid_data_provider_untouched_default_keeps_sentinel():
 
 
 def test_standata_material_drives_derivation():
-    """A stock material, to catch a rename on the made side that a hand-built one would not."""
     from mat3ra.standata.materials import Materials
 
     material = Material.create(Materials.get_by_name_first_match("Silicon"))
