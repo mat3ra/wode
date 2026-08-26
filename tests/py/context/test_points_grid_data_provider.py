@@ -1,20 +1,36 @@
-from types import SimpleNamespace
-
 import pytest
 from pydantic import ValidationError
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import (
     GridMetricType,
     PointsGridDataProviderSchema,
 )
+from mat3ra.made.material import Material
 from mat3ra.wode.context.providers import PointsGridDataProvider
-from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPRA, MaterialLike
+from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPRA
 
 
 def _material_stub(number_of_atoms, reciprocal_vector_ratios):
-    """Stands in for `mat3ra.made.Material`, which needs scipy -- not a wode test dependency."""
-    return SimpleNamespace(
-        basis=SimpleNamespace(number_of_atoms=number_of_atoms),
-        lattice=SimpleNamespace(reciprocal_vector_ratios=reciprocal_vector_ratios),
+    """A real `Material` whose orthorhombic lattice yields the requested ratios."""
+    a, b, c = (2.0 / ratio for ratio in reciprocal_vector_ratios)
+    return Material.create(
+        {
+            "name": "test",
+            "lattice": {
+                "a": a,
+                "b": b,
+                "c": c,
+                "alpha": 90,
+                "beta": 90,
+                "gamma": 90,
+                "type": "ORC",
+                "units": {"length": "angstrom", "angle": "degree"},
+            },
+            "basis": {
+                "elements": [{"id": i, "value": "Si"} for i in range(number_of_atoms)],
+                "coordinates": [{"id": i, "value": [i * 0.1] * 3} for i in range(number_of_atoms)],
+                "units": "crystal",
+            },
+        }
     )
 
 # Test data constants
@@ -147,13 +163,7 @@ def test_points_grid_data_provider_raises_when_atom_count_is_unknown():
 
 
 def test_material_derived_ratios_land_in_the_schema_field():
-    """
-    Derivation must populate the ESSE field, not just the emitted dict.
-
-    A schema-driven `default_data` (`model_dump(include=<schema fields>, exclude_none=True)`, as on
-    fix/points-grid-context-schema-drift) reads the field, so deriving at read time only would drop
-    the ratios again and silently restore the k-grid edit lock.
-    """
+    """Must populate the ESSE field: a schema-driven `default_data` reads it, not the dict."""
     material = _material_stub(number_of_atoms=2, reciprocal_vector_ratios=[1.0, 0.5, 0.25])
 
     provider = PointsGridDataProvider(dimensions=[4, 4, 4], material=material, isEdited=True)
@@ -189,10 +199,10 @@ def test_points_grid_data_provider_rounds_ratios_to_three_figures_like_js():
     assert provider.get_data()["reciprocalVectorRatios"] == [1.0, 0.816, 0.612]
 
 
-def test_points_grid_data_provider_raises_actionable_error_for_wrong_shaped_material():
-    """`isinstance` against a Protocol is not recursive, so a bad shape only fails on access."""
-    with pytest.raises(ValidationError, match="KPPRA"):
-        PointsGridDataProvider(dimensions=[4, 4, 4], material=SimpleNamespace(basis=1, lattice=2))
+def test_points_grid_data_provider_rejects_a_non_material():
+    """`material` is typed to `Material`, so pydantic rejects a wrong shape at construction."""
+    with pytest.raises(ValidationError):
+        PointsGridDataProvider(dimensions=[4, 4, 4], material={"basis": 1, "lattice": 2})
 
 
 def test_points_grid_data_provider_untouched_default_keeps_sentinel():
@@ -201,19 +211,11 @@ def test_points_grid_data_provider_untouched_default_keeps_sentinel():
     assert provider.get_data()["gridMetricValue"] == DEFAULT_KPPRA
 
 
-def test_real_material_satisfies_the_protocol_and_drives_derivation():
-    """
-    Every other test uses a stub built to satisfy `MaterialLike`, so it cannot catch a rename on
-    the made side -- which would leave wode green and break every notebook call site.
-
-    Skipped where scipy is absent: `mat3ra-made` ships it only under its `tools` extra.
-    """
-    pytest.importorskip("scipy")
-    from mat3ra.made.material import Material
+def test_standata_material_drives_derivation():
+    """A stock material, to catch a rename on the made side that a hand-built one would not."""
     from mat3ra.standata.materials import Materials
 
     material = Material.create(Materials.get_by_name_first_match("Silicon"))
-    assert isinstance(material, MaterialLike)
 
     data = PointsGridDataProvider(dimensions=[4, 4, 4], material=material, isEdited=True).get_data()
 
