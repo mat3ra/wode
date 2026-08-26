@@ -156,13 +156,11 @@ def test_points_grid_data_provider_get_reciprocal_vector_ratios_from_context():
 
 
 def test_points_grid_data_provider_raises_when_atom_count_is_unknown():
-    """KPPRA is per reciprocal atom: assuming one atom silently under-reports it by that count."""
     with pytest.raises(ValidationError, match="KPPRA"):
         PointsGridDataProvider(dimensions=[4, 4, 4], isEdited=True)
 
 
 def test_material_derived_ratios_land_in_the_schema_field():
-    """Must populate the ESSE field: a schema-driven `default_data` reads it, not the dict."""
     material = _material_stub(number_of_atoms=2, reciprocal_vector_ratios=[1.0, 0.5, 0.25])
 
     provider = PointsGridDataProvider(dimensions=[4, 4, 4], material=material, isEdited=True)
@@ -190,7 +188,6 @@ def test_points_grid_data_provider_respects_explicit_grid_metric_value():
 
 
 def test_points_grid_data_provider_rounds_ratios_to_three_figures_like_js():
-    """JS rounds to 3 s.f.; unrounded floats would diverge from what the UI persists."""
     material = _material_stub(2, [1.0, 0.8164965809277261, 0.6123724356957945])
 
     provider = PointsGridDataProvider(dimensions=[4, 4, 4], material=material, isEdited=True)

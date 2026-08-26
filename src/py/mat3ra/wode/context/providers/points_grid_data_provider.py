@@ -15,12 +15,7 @@ DEFAULT_KPPRA = -1
 
 # TODO: GlobalSetting for default KPPRA value
 class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
-    """
-    Context provider for k-point/q-point grid configuration.
-
-    KPPRA and reciprocal vector ratios are derived from `material`, never guessed: assuming a
-    single atom would under-report the metric by the atom count.
-    """
+    """Context provider for k-point/q-point grid configuration."""
 
     name: str = Field(default="kgrid")
     divisor: int = Field(default=1)
@@ -35,15 +30,12 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
             self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
         if self.reciprocalVectorRatios is None and self.material is not None:
-            # Rounded like JS, so a job's context matches what the UI writes for the same material.
+            # rounded like JS, so job context matches what the UI writes
             ratios = self.material.lattice.reciprocal_vector_ratios
             self.reciprocalVectorRatios = [round(float(r), 3) for r in ratios]
         return self
 
-    _MATERIAL_REQUIRED = (
-        "KPPRA is defined per reciprocal atom and the reciprocal vector ratios come from the "
-        "lattice, so both need the material. Pass material=<mat3ra.made.Material>"
-    )
+    _MATERIAL_REQUIRED = "KPPRA and reciprocal vector ratios come from material=<mat3ra.made.Material>"
 
     def get_number_of_atoms(self) -> int:
         if self.material is None:

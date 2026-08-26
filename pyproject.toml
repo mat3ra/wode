@@ -26,8 +26,7 @@ dependencies = [
     "mat3ra-mode",
     "mat3ra-ade",
     "mat3ra-made",
-    # `made.basis` imports `scipy.spatial` at module level, so `Material` needs it. Not
-    # `made[tools]`: that also pins pymatgen==2024.4.13, which will not build on 3.13.
+    # for `made.basis`; not `made[tools]`, whose pymatgen pin breaks on 3.13
     "scipy",
     "mat3ra-standata",
 ]
