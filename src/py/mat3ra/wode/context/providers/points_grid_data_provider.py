@@ -1,10 +1,12 @@
+import math
 from typing import Any, Dict, List, Optional
 
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import (
     GridMetricType,
     PointsGridDataProviderSchema,
 )
-from pydantic import Field
+from mat3ra.made.material import Material
+from pydantic import Field, model_validator
 
 from .base.context_provider import ContextProvider
 
@@ -13,18 +15,32 @@ DEFAULT_KPPRA = -1
 
 # TODO: GlobalSetting for default KPPRA value
 class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
-    """
-    Context provider for k-point/q-point grid configuration.
-
-    Handles grid dimensions and shifts for reciprocal space sampling.
-    """
+    """Context provider for k-point/q-point grid configuration."""
 
     name: str = Field(default="kgrid")
     divisor: int = Field(default=1)
-    dimensions: List[int] = Field(default_factory=lambda: [1, 1, 1])
+    dimensions: List[int] = Field(default_factory=lambda: [1, 1, 1], min_length=3, max_length=3)
     shifts: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0])
     gridMetricType: GridMetricType = Field(default=GridMetricType.KPPRA)
     gridMetricValue: float = Field(default=DEFAULT_KPPRA)
+    material: Optional[Material] = Field(default=None, exclude=True)
+
+    @model_validator(mode="after")
+    def _derive_grid_metric_and_ratios(self) -> "PointsGridDataProvider":
+        if "dimensions" in self.model_fields_set and "gridMetricValue" not in self.model_fields_set:
+            self.gridMetricValue = self.calculate_grid_metric(self.gridMetricType, self.dimensions)
+        if self.reciprocalVectorRatios is None and self.material is not None:
+            # rounded like JS, so job context matches what the UI writes
+            ratios = self.material.lattice.reciprocal_vector_ratios
+            self.reciprocalVectorRatios = [round(float(r), 3) for r in ratios]
+        return self
+
+    _MATERIAL_REQUIRED = "KPPRA and reciprocal vector ratios come from material=<mat3ra.made.Material>"
+
+    def get_number_of_atoms(self) -> int:
+        if self.material is None:
+            raise ValueError(self._MATERIAL_REQUIRED)
+        return self.material.basis.number_of_atoms
 
     @property
     def is_edited_key(self) -> str:
@@ -111,12 +127,14 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
         raise NotImplementedError
 
     def calculate_dimensions(
-            self, grid_metric_type: str, grid_metric_value: float, units: str = "angstrom"
+        self, grid_metric_type: GridMetricType, grid_metric_value: float, units: str = "angstrom"
     ) -> List[int]:
         raise NotImplementedError
 
-    def calculate_grid_metric(self, grid_metric_type: str, dimensions: List[int], units: str = "angstrom") -> float:
-        raise NotImplementedError
+    def calculate_grid_metric(self, grid_metric_type: GridMetricType, dimensions: List[int]) -> float:
+        if grid_metric_type == GridMetricType.KPPRA:
+            return math.prod(dimensions) * self.get_number_of_atoms()
+        raise NotImplementedError(f"calculate_grid_metric not implemented for {grid_metric_type}")
 
     def transform_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         raise NotImplementedError
