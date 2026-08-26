@@ -51,9 +51,9 @@ KGRID_DATA = {
     "kgrid": {
         "dimensions": DIMENSIONS_CUSTOM,
         "shifts": SHIFTS_DEFAULT,
-        "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
         "gridMetricValue": GRID_METRIC_VALUE_DERIVED,
+        "preferGridMetric": False,
         "reciprocalVectorRatios": RATIOS_DEFAULT,
     },
     "isKgridEdited": True,
@@ -63,8 +63,8 @@ KGRID_TEMPLATE_DATA = {
     "kgrid": {
         "dimensions": ["{{N_k}}", "{{N_k}}", "{{N_k}}"],
         "shifts": SHIFTS_DEFAULT,
-        "divisor": DIVISOR_DEFAULT,
         "gridMetricType": GRID_METRIC_TYPE_DEFAULT,
+        "preferGridMetric": False,
         "gridMetricValue": DEFAULT_KPPRA,
         "reciprocalVectorRatios": [1.0, 0.667, 0.5],
     },
@@ -124,6 +124,15 @@ def test_points_grid_data_provider_yield_data(init_params, expected_data):
     kgrid_context_provider = PointsGridDataProvider(**init_params)
     actual_data = kgrid_context_provider.yield_data()
     assert actual_data == expected_data
+
+
+def test_default_data_conforms_to_esse_schema():
+    """Emitted data must validate against ESSE and carry no extra keys -- guards field drift."""
+    material = _material_stub(NUMBER_OF_ATOMS_DEFAULT, RATIOS_DEFAULT)
+    data = PointsGridDataProvider(dimensions=DIMENSIONS_CUSTOM, material=material).get_data()
+
+    PointsGridDataProviderSchema.model_validate(data)  # raises on missing/wrong required fields
+    assert set(data).issubset(set(PointsGridDataProviderSchema.model_fields))  # no subclass-only keys
 
 
 def test_points_grid_data_provider_get_reciprocal_vector_ratios_from_provider_data():
