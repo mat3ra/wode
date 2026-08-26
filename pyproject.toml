@@ -26,7 +26,6 @@ dependencies = [
     "mat3ra-mode",
     "mat3ra-ade",
     "mat3ra-made",
-    # for `made.basis`; not `made[tools]`, whose pymatgen pin breaks on 3.13
     "scipy",
     "mat3ra-standata",
 ]
