@@ -10,14 +10,14 @@ import materialContextMixin, {
     type MaterialContextMixin,
     type MaterialExternalContext,
 } from "../../../mixins/MaterialContextMixin";
-import type { UnitContext } from "../../base/ContextProvider";
+import type {
+    JobExternalContext,
+    UnitContext,
+    WorkflowExternalContext,
+} from "../../base/ContextProvider";
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
 } from "../../base/JSONSchemaDataProvider";
-import type {
-    JobExternalContext,
-    WorkflowExternalContext,
-} from "../espresso/QEPWXInputDataManager";
 
 type Data = NWChemTotalEnergyContextProviderSchema;
 type Schema = InputContextItemSchema & { data: Data };
