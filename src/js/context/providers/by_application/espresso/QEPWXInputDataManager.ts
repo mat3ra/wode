@@ -67,7 +67,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
     static createFromUnitContext(unitContext: UnitContext, externalContext: ExternalContext) {
         const contextItem = this.findContextItem<Schema>(unitContext, "input");
 
-        return new QEPWXInputDataManager(contextItem, externalContext);
+        return new this(contextItem, externalContext);
     }
 
     readonly jsonSchema: JSONSchema7;
@@ -90,17 +90,26 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         this.jsonSchema = jsonSchema;
     }
 
-    private buildQEPWXContext(material: OrderedMaterial): Data {
+    /**
+     * The reference to the pseudopotential file written into the input: pw.x resolves it inside
+     * `pseudo_dir`, so only the file name is used. Applications reading the files from elsewhere
+     * override this.
+     */
+    protected getPseudopotentialReference(element: AtomicElementValue) {
+        const pseudo = (this.methodData?.pseudo || []).find((p) => p.element === element);
+        return pseudo?.filename || path.basename(pseudo?.path || "");
+    }
+
+    protected buildQEPWXContext(material: OrderedMaterial): Data {
         const basis = material.getBasis();
         const lattice = material.getLattice();
         const { jobHasParent, workflowHasRelaxation } = this;
 
         const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {
-            const pseudo = (this.methodData?.pseudo || []).find((p) => p.element === symbol);
             return {
                 X: symbol,
                 Mass_X: PERIODIC_TABLE[symbol].atomic_mass,
-                PseudoPot_X: pseudo?.filename || path.basename(pseudo?.path || ""),
+                PseudoPot_X: this.getPseudopotentialReference(symbol),
             };
         });
 
@@ -109,13 +118,10 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
             const symbolWithoutLabel = symbol.replace(/\d$/, "") as AtomicElementValue;
             const label = symbol.match(/\d$/g) ? symbol.match(/\d$/g)?.[0] : "";
-            const pseudo = (this.methodData?.pseudo || []).find(
-                (p) => p.element === symbolWithoutLabel,
-            );
             return {
                 X: `${symbolWithoutLabel}${label}`,
                 Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
-                PseudoPot_X: pseudo?.filename || path.basename(pseudo?.path || ""),
+                PseudoPot_X: this.getPseudopotentialReference(symbolWithoutLabel),
             };
         });
 
