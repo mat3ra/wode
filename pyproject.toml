@@ -19,6 +19,8 @@ classifiers = [
     "Topic :: Software Development",
 ]
 dependencies = [
+    "ase",
+    "jinja2",
     "numpy",
     "mat3ra-code",
     "mat3ra-utils",

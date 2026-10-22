@@ -1,9 +1,9 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
+from jinja2 import Environment
 from mat3ra.ade.template import Template
 from mat3ra.code.entity import InMemoryEntitySnakeCase
-from mat3ra.utils.extra.jinja import render_jinja_with_error_handling
 from pydantic import BaseModel, Field, field_validator
 
 try:
@@ -67,6 +67,9 @@ class ExecutionUnitInput(ExecutionUnitInputItemSchema, InMemoryEntitySnakeCase):
 
         cleaned_context = deepcopy(rendering_context)
         cleaned_context.pop("job", None)
-        rendered = render_jinja_with_error_handling(self.template.content, **cleaned_context)
-        self.rendered = rendered or self.template.content
+        environment = Environment(
+            finalize=lambda value: int(value) if isinstance(value, float) and value.is_integer() else value
+        )
+        environment.filters["sprintf"] = lambda value, pattern: pattern % value
+        self.rendered = environment.from_string(self.template.content).render(**cleaned_context)
         return self

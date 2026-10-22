@@ -38,6 +38,24 @@ git clone https://github.com/Exabyte-io/wode.git
 ```
 
 
+## Python input rendering
+
+`workflow.render({"material": material})` renders execution-unit inputs from their
+STANDATA templates. It does not execute assignment units, loops, or applications.
+Rendered text is stored in each input's `rendered` field; template contents and
+manually edited inputs are preserved. Raw runtime placeholders remain for the job runner.
+
+The initial Python provider registry supports single-material QE SCF inputs:
+`QEPWXInputDataManager`, `KGridFormDataManager`, and `PlanewaveCutoffDataManager`.
+Supply `model.method.data.pseudo` entries with `element` and `filename` or `path`,
+and execution-unit context entries named `cutoffs` and `kgrid` for positive cutoffs
+and explicit grid dimensions (grid-metric calculation is not implemented).
+An `input` context entry can override generated input fields. MADE supplies crystal
+coordinates and angstrom cell vectors without modifying the caller's material.
+Other providers, multi-material workflows, constrained atoms, and labeled species
+raise errors; this is not yet complete parity with JavaScript rendering. Template
+errors also propagate instead of being stored as executable input text.
+
 ## Contributions
 
 This repository is an [open-source](LICENSE.md) work-in-progress and we welcome contributions.

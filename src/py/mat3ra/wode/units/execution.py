@@ -10,6 +10,7 @@ from mat3ra.utils import (
 from mat3ra.utils.extra.jinja import replace_in_text
 from pydantic import Field, SerializeAsAny, field_validator
 
+from ..context.providers.factory import create_provider
 from .execution_unit_input import ExecutionUnitInput
 from .unit import Unit
 
@@ -66,6 +67,20 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
 
     def clear_context(self) -> None:
         self.context = []
+
+    def render(self, external_context: Dict[str, Any]) -> None:
+        """Render declared inputs without executing the unit or changing its templates."""
+        rendering_context = dict(external_context)
+        provider_names = dict.fromkeys(
+            provider.name_str
+            for item in self.input
+            if not item.isManuallyChanged
+            for provider in item.template.context_providers
+        )
+        for name in provider_names:
+            create_provider(name, self.context, external_context).merge_context_data(rendering_context)
+        for item in self.input:
+            item.render(rendering_context)
 
     def replace_in_input_content(self, pattern: str, replacement: str, input_name=None) -> None:
         for item in self.input:
