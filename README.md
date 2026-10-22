@@ -54,7 +54,8 @@ An `input` context entry can override generated input fields. MADE supplies crys
 coordinates and angstrom cell vectors without modifying the caller's material.
 For multimaterial workflows, supply `materials` in addition to the primary `material`.
 The QE provider builds `input.perMaterial` with the same conversion for each material.
-STANDATA's SCF templates convert `MATERIAL_INDEX` to an integer and select the input;
+STANDATA's new `pw_scf_volume_scaled` template converts `MATERIAL_INDEX` to an integer
+and selects the input; ordinary `pw_scf` retains its existing behavior.
 WoDe passes assignment values through unchanged. The renderer does not create or
 execute a loop. Common input overrides apply to each material. Other providers,
 constrained atoms, labeled species, and grid-metric calculation remain unsupported.

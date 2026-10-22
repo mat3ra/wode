@@ -28,7 +28,7 @@ dependencies = [
     "mat3ra-ade",
     "mat3ra-made",
     "scipy",
-    "mat3ra-standata @ git+https://github.com/mat3ra/standata.git@a9076ea4d536a324f81a91d30908e914a4f499b9",
+    "mat3ra-standata @ git+https://github.com/mat3ra/standata.git@c5caaa66c868d8b9852116c67604ddb1ce2e69d9",
 ]
 
 [project.optional-dependencies]

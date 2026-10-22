@@ -14,8 +14,14 @@ def material():
 
 
 @pytest.fixture
-def workflow():
-    definition = deepcopy(WorkflowStandata.find_by_application_and_name("espresso", "Total Energy"))
+def workflow(request):
+    definition = deepcopy(
+        WorkflowStandata.find_by_application_and_name("espresso", getattr(request, "param", "Total Energy"))
+    )
+    # Rendering tests exercise the execution input, independently of the EOS loop.
+    definition["subworkflows"][0]["units"] = [
+        unit for unit in definition["subworkflows"][0]["units"] if unit["type"] == "execution"
+    ]
     method = definition["subworkflows"][0]["model"]["method"]
     method["subtype"] = "paw"
     method["data"]["pseudo"] = [{"element": "Si", "path": "$PSEUDO_DIRECTORY/Si.upf"}]
@@ -88,6 +94,7 @@ def test_nested_workflow_rendering(workflow, material):
 
 
 @pytest.mark.parametrize("indices", [("0", "1"), (0, 1)])
+@pytest.mark.parametrize("workflow", ["Equation of State"], indirect=True)
 def test_multi_material_inputs_select_matching_geometry_and_species(workflow, material, indices):
     second_definition = material.to_dict()
     for element in second_definition["basis"]["elements"]:
@@ -114,6 +121,7 @@ def test_multi_material_inputs_select_matching_geometry_and_species(workflow, ma
 
 
 @pytest.mark.parametrize("index", ["2", 2])
+@pytest.mark.parametrize("workflow", ["Equation of State"], indirect=True)
 def test_out_of_range_material_selection_fails_in_template(workflow, material, index):
     workflow.subworkflows[0].units.append(
         Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=index)
