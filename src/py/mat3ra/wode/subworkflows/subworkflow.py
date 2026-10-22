@@ -96,6 +96,19 @@ class Subworkflow(
     def method_data(self):
         return self.model.method.data
 
+    def render(self, external_context: dict) -> None:
+        context = {
+            **external_context,
+            "application": self.application.to_dict(),
+            "methodData": self.method_data.model_dump(mode="json", by_alias=True),
+            "subworkflowContext": {
+                unit.operand: unit.value for unit in self.units if unit.type == "assignment"
+            },
+        }
+        for unit in self.units:
+            if isinstance(unit, ExecutionUnit):
+                unit.render(context)
+
     def get_hash_object(self) -> dict:
         return {
             "application": self.application.calculate_hash(),

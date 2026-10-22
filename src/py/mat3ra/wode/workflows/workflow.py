@@ -36,6 +36,8 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
         application_name = (
             application.get("name") if isinstance(application, dict) else (application.name if application else None)
         )
+        if application_name is None:
+            return None
         subworkflow_standata = SubworkflowStandata()
         relaxation_data = subworkflow_standata.get_relaxation_by_application(application_name)
         return Subworkflow(**relaxation_data) if relaxation_data else None
@@ -43,6 +45,16 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
     @property
     def has_relaxation(self) -> bool:
         return self._find_relaxation_subworkflow() is not None
+
+    def render(self, external_context: Dict[str, Any]) -> None:
+        """Render inputs for a material; workflow execution belongs to the job runtime."""
+        context = {**external_context, "workflowHasRelaxation": self.has_relaxation}
+        for subworkflow in self.subworkflows:
+            subworkflow.render(context)
+        for index, definition in enumerate(self.workflows):
+            workflow = Workflow(**definition)
+            workflow.render(external_context)
+            self.workflows[index] = workflow.to_dict()
 
     def add_subworkflow(self, subworkflow: Subworkflow, head: bool = False, index: int = -1):
         self._add_to_list(self.subworkflows, subworkflow, head, index)
@@ -65,7 +77,10 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
         target_unit.set_context(new_context or [])
 
     def _find_relaxation_subworkflow(self) -> Optional[Subworkflow]:
-        target_name = self.relaxation_subworkflow.name
+        relaxation = self.relaxation_subworkflow
+        if relaxation is None:
+            return None
+        target_name = relaxation.name
 
         return next(
             (swf for swf in self.subworkflows if swf.name == target_name),

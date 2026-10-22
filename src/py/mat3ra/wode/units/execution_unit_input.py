@@ -67,6 +67,11 @@ class ExecutionUnitInput(ExecutionUnitInputItemSchema, InMemoryEntitySnakeCase):
 
         cleaned_context = deepcopy(rendering_context)
         cleaned_context.pop("job", None)
-        rendered = render_jinja_with_error_handling(self.template.content, **cleaned_context)
-        self.rendered = rendered or self.template.content
+        self.rendered = render_jinja_with_error_handling(
+            self.template.content,
+            filters={"sprintf": lambda value, pattern: pattern % value},
+            finalize=lambda value: int(value) if isinstance(value, float) and value.is_integer() else value,
+            raise_errors=True,
+            **cleaned_context,
+        )
         return self
