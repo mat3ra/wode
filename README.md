@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/%40mat3ra%2Fwode.svg)](https://badge.fury.io/js/%40mat3ra%2Fwode)
 [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-# wode
+# WoDe
 
 WOrkflow DEfinitions - houses the definitions for:
 
@@ -45,16 +45,27 @@ STANDATA templates. It does not execute assignment units, loops, or applications
 Rendered text is stored in each input's `rendered` field; template contents and
 manually edited inputs are preserved. Raw runtime placeholders remain for the job runner.
 
-The initial Python provider registry supports single-material QE SCF inputs:
+The initial Python provider registry supports QE SCF inputs:
 `QEPWXInputDataManager`, `KGridFormDataManager`, and `PlanewaveCutoffDataManager`.
 Supply `model.method.data.pseudo` entries with `element` and `filename` or `path`,
 and execution-unit context entries named `cutoffs` and `kgrid` for positive cutoffs
 and explicit grid dimensions (grid-metric calculation is not implemented).
 An `input` context entry can override generated input fields. MADE supplies crystal
 coordinates and angstrom cell vectors without modifying the caller's material.
-Other providers, multi-material workflows, constrained atoms, and labeled species
-raise errors; this is not yet complete parity with JavaScript rendering. Template
-errors also propagate instead of being stored as executable input text.
+For multimaterial workflows, supply `materials` in addition to the primary `material`.
+The QE provider builds `input.perMaterial` with the same conversion for each material.
+STANDATA's `MATERIAL_INDEX` assignment selects the geometry and grid context for each
+subworkflow; the renderer does not create or execute a loop. Common input overrides
+apply to each material. Other providers, constrained atoms, labeled species, and
+grid-metric calculation remain unsupported.
+
+Rendering uses `mat3ra.utils.extra.jinja.render_jinja_with_error_handling` with a
+call-local `sprintf` filter and number formatter. WoDe opts into exceptions so template
+errors cannot be stored as executable input. Existing utils callers retain their
+default diagnostic-string behavior.
+
+This draft pins [utils #56](https://github.com/mat3ra/utils/pull/56) by commit.
+Release that helper change first and replace the Git pin before publishing WoDe.
 
 ## Contributions
 

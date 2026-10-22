@@ -20,10 +20,9 @@ classifiers = [
 ]
 dependencies = [
     "ase",
-    "jinja2",
     "numpy",
     "mat3ra-code",
-    "mat3ra-utils",
+    "mat3ra-utils[extra] @ git+https://github.com/mat3ra/utils.git@e7de42970819c4ae9840ae15220cb6e492284546",
     "mat3ra-esse",
     "mat3ra-mode",
     "mat3ra-ade",

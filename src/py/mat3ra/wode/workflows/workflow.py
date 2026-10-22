@@ -48,8 +48,6 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
 
     def render(self, external_context: Dict[str, Any]) -> None:
         """Render inputs for a material; workflow execution belongs to the job runtime."""
-        if self.isMultiMaterial:
-            raise NotImplementedError("Python rendering currently supports single-material workflows")
         context = {**external_context, "workflowHasRelaxation": self.has_relaxation}
         for subworkflow in self.subworkflows:
             subworkflow.render(context)

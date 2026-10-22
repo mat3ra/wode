@@ -4,6 +4,7 @@ import pytest
 from jinja2 import TemplateError
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.standata.workflows import WorkflowStandata
+from mat3ra.wode.units.unit import Unit
 from mat3ra.wode.workflows.workflow import Workflow
 
 
@@ -86,10 +87,38 @@ def test_nested_workflow_rendering(workflow, material):
     assert "Si 28.085000 Si.upf" in item["rendered"]
 
 
-def test_multi_material_is_explicitly_unsupported(workflow, material):
+def test_multi_material_inputs_select_matching_geometry_and_species(workflow, material):
+    second_definition = material.to_dict()
+    for element in second_definition["basis"]["elements"]:
+        element["value"] = "Ge"
+    second_definition["basis"]["coordinates"][1]["value"] = [0.375, 0.375, 0.375]
+    second_material = Material.create(second_definition)
+    originals = [material.to_dict(), second_material.to_dict()]
     workflow.isMultiMaterial = True
-    with pytest.raises(NotImplementedError, match="single-material"):
-        workflow.render({"material": material})
+    workflow.subworkflows.append(workflow.subworkflows[0].model_copy(deep=True))
+    for index, subworkflow in enumerate(workflow.subworkflows):
+        subworkflow.model.method.data.pseudo.append({"element": "Ge", "filename": "Ge.upf"})
+        subworkflow.units.append(
+            Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=str(index))
+        )
+        subworkflow.units[0].add_context({"name": "input", "data": {"RESTART_MODE": "restart"}})
+    workflow.render({"material": material, "materials": [material, second_material]})
+    first_input, second_input = [subworkflow.units[0].input[0].rendered for subworkflow in workflow.subworkflows]
+    assert "Si.upf" in first_input and "Ge.upf" not in first_input
+    assert "Ge.upf" in second_input and "Si.upf" not in second_input
+    assert "Si     0.250000000    0.250000000    0.250000000" in first_input
+    assert "Ge     0.375000000    0.375000000    0.375000000" in second_input
+    assert all("restart_mode = 'restart'" in content for content in (first_input, second_input))
+    assert originals == [material.to_dict(), second_material.to_dict()]
+
+
+@pytest.mark.parametrize("index", ["-1", "2", 0.5])
+def test_invalid_material_selection_fails(workflow, material, index):
+    workflow.subworkflows[0].units.append(
+        Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=index)
+    )
+    with pytest.raises(ValueError, match="MATERIAL_INDEX"):
+        workflow.render({"material": material, "materials": [material, material]})
 
 
 @pytest.mark.parametrize("field,value", [("constraints", [False, True, True]), ("labels", 1)])

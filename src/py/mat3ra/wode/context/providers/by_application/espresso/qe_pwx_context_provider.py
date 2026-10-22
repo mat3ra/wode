@@ -18,8 +18,24 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
 
     @classmethod
     def from_context(cls, external_context: Dict[str, Any], data: Dict[str, Any]) -> "QEPWXContextProvider":
-        """Build single-material SCF input using MADE geometry and method pseudopotentials."""
-        material = external_context["material"].model_copy(deep=True)
+        """Build primary and per-material SCF input using the same geometry conversion."""
+        materials = external_context.get("materials") or [external_context["material"]]
+        common_data = {key: value for key, value in data.items() if key != "perMaterial"}
+        per_material = [
+            cls(**{**cls._build_input(material, external_context), **common_data}).default_data
+            for material in materials
+        ]
+        return cls(
+            **{
+                **cls._build_input(external_context["material"], external_context),
+                "perMaterial": per_material,
+                **data,
+            }
+        )
+
+    @staticmethod
+    def _build_input(material, external_context: Dict[str, Any]) -> Dict[str, Any]:
+        material = material.model_copy(deep=True)
         if material.lattice.units.length.value != "angstrom":
             raise ValueError("QE input rendering requires lattice lengths in angstrom")
         material.to_crystal()
@@ -51,7 +67,7 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
             }
             for identifier, element in zip(basis.elements.ids, basis.elements.values)
         ]
-        defaults = {
+        return {
             "IBRAV": 0,
             "RESTART_MODE": "restart"
             if external_context.get("jobHasParent") or external_context.get("workflowHasRelaxation")
@@ -68,7 +84,6 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
             "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), material.lattice.vector_arrays)),
             "contextProviderName": "qe-pwx",
         }
-        return cls(**{**defaults, **data})
 
     @property
     def default_data(self) -> Dict[str, Any]:
