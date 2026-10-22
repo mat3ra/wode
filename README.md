@@ -61,7 +61,7 @@ execute a loop. Common input overrides apply to each material. Other providers,
 constrained atoms, labeled species, and grid-metric calculation remain unsupported.
 
 The template conversion comes from [STANDATA #168](https://github.com/mat3ra/standata/pull/168),
-temporarily pinned by commit. Replace that pin with its published version before releasing WoDe.
+released in `mat3ra-standata>=2026.10.22.post1`.
 
 Rendering uses `mat3ra.utils.extra.jinja.render_jinja_with_error_handling` with a
 call-local `sprintf` filter and number formatter. WoDe opts into exceptions so template
