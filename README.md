@@ -54,10 +54,13 @@ An `input` context entry can override generated input fields. MADE supplies crys
 coordinates and angstrom cell vectors without modifying the caller's material.
 For multimaterial workflows, supply `materials` in addition to the primary `material`.
 The QE provider builds `input.perMaterial` with the same conversion for each material.
-STANDATA's `MATERIAL_INDEX` assignment selects the geometry and grid context for each
-subworkflow; the renderer does not create or execute a loop. Common input overrides
-apply to each material. Other providers, constrained atoms, labeled species, and
-grid-metric calculation remain unsupported.
+STANDATA's SCF templates convert `MATERIAL_INDEX` to an integer and select the input;
+WoDe passes assignment values through unchanged. The renderer does not create or
+execute a loop. Common input overrides apply to each material. Other providers,
+constrained atoms, labeled species, and grid-metric calculation remain unsupported.
+
+The template conversion comes from [STANDATA #168](https://github.com/mat3ra/standata/pull/168),
+temporarily pinned by commit. Replace that pin with its published version before releasing WoDe.
 
 Rendering uses `mat3ra.utils.extra.jinja.render_jinja_with_error_handling` with a
 call-local `sprintf` filter and number formatter. WoDe opts into exceptions so template

@@ -8,7 +8,8 @@ from mat3ra.standata.workflows import WorkflowStandata
 
 from mat3ra.wode import Subworkflow, Unit, Workflow
 
-WORKFLOW_HASHES_PATH = os.path.join(os.path.dirname(__file__), "../fixtures/workflow_hashes.json")
+# Python uses the catalog with integer material-index conversion; JS pins an older catalog.
+WORKFLOW_HASHES_PATH = os.path.join(os.path.dirname(__file__), "../fixtures/workflow_hashes_python.json")
 
 BAND_GAP_WORKFLOW_NAME = "Band Gap"
 

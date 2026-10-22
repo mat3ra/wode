@@ -87,7 +87,8 @@ def test_nested_workflow_rendering(workflow, material):
     assert "Si 28.085000 Si.upf" in item["rendered"]
 
 
-def test_multi_material_inputs_select_matching_geometry_and_species(workflow, material):
+@pytest.mark.parametrize("indices", [("0", "1"), (0, 1)])
+def test_multi_material_inputs_select_matching_geometry_and_species(workflow, material, indices):
     second_definition = material.to_dict()
     for element in second_definition["basis"]["elements"]:
         element["value"] = "Ge"
@@ -99,10 +100,10 @@ def test_multi_material_inputs_select_matching_geometry_and_species(workflow, ma
     for index, subworkflow in enumerate(workflow.subworkflows):
         subworkflow.model.method.data.pseudo.append({"element": "Ge", "filename": "Ge.upf"})
         subworkflow.units.append(
-            Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=str(index))
+            Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=indices[index])
         )
         subworkflow.units[0].add_context({"name": "input", "data": {"RESTART_MODE": "restart"}})
-    workflow.render({"material": material, "materials": [material, second_material]})
+    workflow.render({"material": second_material, "materials": [material, second_material]})
     first_input, second_input = [subworkflow.units[0].input[0].rendered for subworkflow in workflow.subworkflows]
     assert "Si.upf" in first_input and "Ge.upf" not in first_input
     assert "Ge.upf" in second_input and "Si.upf" not in second_input
@@ -112,12 +113,12 @@ def test_multi_material_inputs_select_matching_geometry_and_species(workflow, ma
     assert originals == [material.to_dict(), second_material.to_dict()]
 
 
-@pytest.mark.parametrize("index", ["-1", "2", 0.5])
-def test_invalid_material_selection_fails(workflow, material, index):
+@pytest.mark.parametrize("index", ["2", 2])
+def test_out_of_range_material_selection_fails_in_template(workflow, material, index):
     workflow.subworkflows[0].units.append(
         Unit(type="assignment", name="material-index", operand="MATERIAL_INDEX", value=index)
     )
-    with pytest.raises(ValueError, match="MATERIAL_INDEX"):
+    with pytest.raises(TemplateError):
         workflow.render({"material": material, "materials": [material, material]})
 
 

@@ -105,16 +105,6 @@ class Subworkflow(
                 unit.operand: unit.value for unit in self.units if unit.type == "assignment"
             },
         }
-        material_index = context["subworkflowContext"].get("MATERIAL_INDEX")
-        if material_index is not None:
-            # STANDATA stores these assignment literals as strings; Jinja lists need integers.
-            if isinstance(material_index, str):
-                material_index = int(material_index)
-            materials = external_context.get("materials") or [external_context["material"]]
-            if not isinstance(material_index, int) or not 0 <= material_index < len(materials):
-                raise ValueError("MATERIAL_INDEX must select an available material")
-            context["subworkflowContext"]["MATERIAL_INDEX"] = material_index
-            context["material"] = materials[material_index]
         for unit in self.units:
             if isinstance(unit, ExecutionUnit):
                 unit.render(context)
