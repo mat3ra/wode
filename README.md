@@ -64,8 +64,8 @@ call-local `sprintf` filter and number formatter. WoDe opts into exceptions so t
 errors cannot be stored as executable input. Existing utils callers retain their
 default diagnostic-string behavior.
 
-This draft pins [utils #56](https://github.com/mat3ra/utils/pull/56) by commit.
-Release that helper change first and replace the Git pin before publishing WoDe.
+The shared renderer requires `mat3ra-utils[extra]>=2026.10.22.post0`, the published
+release containing [utils #56](https://github.com/mat3ra/utils/pull/56).
 
 ## Contributions
 

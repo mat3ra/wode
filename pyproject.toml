@@ -22,7 +22,7 @@ dependencies = [
     "ase",
     "numpy",
     "mat3ra-code",
-    "mat3ra-utils[extra] @ git+https://github.com/mat3ra/utils.git@e7de42970819c4ae9840ae15220cb6e492284546",
+    "mat3ra-utils[extra]>=2026.10.22.post0",
     "mat3ra-esse",
     "mat3ra-mode",
     "mat3ra-ade",
