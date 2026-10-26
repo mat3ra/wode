@@ -1,10 +1,10 @@
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from ase.data import atomic_masses, atomic_numbers
 from mat3ra.esse.models.context_providers_directory.by_application.qe_pwx_context_provider import (
     QEPwxContextProviderSchema,
 )
+from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 
 from ..executable_context_provider import ExecutableContextProvider
 
@@ -53,7 +53,7 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
             filename = pseudopotential.get("filename") or PurePosixPath(pseudopotential.get("path", "")).name
             if not filename:
                 raise ValueError(f"Missing pseudopotential for {element}")
-            species.append({"X": element, "Mass_X": atomic_masses[atomic_numbers[element]], "PseudoPot_X": filename})
+            species.append({"X": element, "Mass_X": get_atomic_mass_from_element(element), "PseudoPot_X": filename})
         coordinates = dict(zip(basis.coordinates.ids, basis.coordinates.values))
         positions = [
             {
