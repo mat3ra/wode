@@ -1,7 +1,6 @@
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from ase.data import atomic_masses, atomic_numbers
 from mat3ra.esse.models.context_providers_directory.by_application.qe_pwx_context_provider import (
     QEPwxContextProviderSchema,
 )
@@ -35,6 +34,8 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
 
     @staticmethod
     def _build_input(material, external_context: Dict[str, Any]) -> Dict[str, Any]:
+        from ase.data import atomic_masses, atomic_numbers
+
         material = material.model_copy(deep=True)
         if material.lattice.units.length.value != "angstrom":
             raise ValueError("QE input rendering requires lattice lengths in angstrom")

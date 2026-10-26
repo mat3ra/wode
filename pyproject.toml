@@ -19,7 +19,6 @@ classifiers = [
     "Topic :: Software Development",
 ]
 dependencies = [
-    "ase",
     "numpy",
     "mat3ra-code",
     "mat3ra-utils[extra]>=2026.10.22.post0",
@@ -40,10 +39,14 @@ dev = [
     "mypy",
     "pip-tools",
 ]
+espresso = [
+    "ase",
+]
 tests = [
     "coverage[toml]>=5.3",
     "pytest",
     "pytest-cov",
+    "mat3ra-wode[espresso]",
 ]
 all = [
     "mat3ra-wode[tests]",
