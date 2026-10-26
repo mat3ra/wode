@@ -26,6 +26,7 @@ dependencies = [
     "mat3ra-mode",
     "mat3ra-ade",
     "mat3ra-made",
+    "mat3ra-periodic-table",
     "scipy",
     "mat3ra-standata>=2026.10.22.post1",
 ]
@@ -39,14 +40,10 @@ dev = [
     "mypy",
     "pip-tools",
 ]
-espresso = [
-    "ase",
-]
 tests = [
     "coverage[toml]>=5.3",
     "pytest",
     "pytest-cov",
-    "mat3ra-wode[espresso]",
 ]
 all = [
     "mat3ra-wode[tests]",

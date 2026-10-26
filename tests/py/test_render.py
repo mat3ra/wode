@@ -37,7 +37,7 @@ def test_render_standata_input_without_changing_material_or_template(workflow, m
     item = workflow.subworkflows[0].units[0].input[0]
     template = item.template.to_dict()
     workflow.render({"material": material})
-    assert "Si 28.085000 Si.upf" in item.rendered
+    assert "Si 28.085500 Si.upf" in item.rendered
     assert "Si     0.250000000    0.250000000    0.250000000" in item.rendered
     assert "ecutwfc = 24" in item.rendered
     assert "ecutrho = 192" in item.rendered
@@ -90,7 +90,7 @@ def test_nested_workflow_rendering(workflow, material):
     outer = Workflow(name="Nested", workflows=[workflow.to_dict()])
     outer.render({"material": material})
     item = outer.workflows[0]["subworkflows"][0]["units"][0]["input"][0]
-    assert "Si 28.085000 Si.upf" in item["rendered"]
+    assert "Si 28.085500 Si.upf" in item["rendered"]
 
 
 @pytest.mark.parametrize("indices", [("0", "1"), (0, 1)])
