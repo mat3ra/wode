@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/%40mat3ra%2Fwode.svg)](https://badge.fury.io/js/%40mat3ra%2Fwode)
 [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-# wode
+# WoDe
 
 WOrkflow DEfinitions - houses the definitions for:
 
@@ -37,6 +37,39 @@ For development:
 git clone https://github.com/Exabyte-io/wode.git
 ```
 
+
+## Python input rendering
+
+`workflow.render({"material": material})` renders execution-unit inputs from their
+STANDATA templates. It does not execute assignment units, loops, or applications.
+Rendered text is stored in each input's `rendered` field; template contents and
+manually edited inputs are preserved. Raw runtime placeholders remain for the job runner.
+
+The initial Python provider registry supports QE SCF inputs:
+`QEPWXInputDataManager`, `KGridFormDataManager`, and `PlanewaveCutoffDataManager`.
+Supply `model.method.data.pseudo` entries with `element` and `filename` or `path`,
+and execution-unit context entries named `cutoffs` and `kgrid` for positive cutoffs
+and explicit grid dimensions (grid-metric calculation is not implemented).
+An `input` context entry can override generated input fields. MADE supplies crystal
+coordinates and angstrom cell vectors without modifying the caller's material.
+For multimaterial workflows, supply `materials` in addition to the primary `material`.
+The QE provider builds `input.perMaterial` with the same conversion for each material.
+STANDATA's new `pw_scf_volume_scaled` template converts `MATERIAL_INDEX` to an integer
+and selects the input; ordinary `pw_scf` retains its existing behavior.
+WoDe passes assignment values through unchanged. The renderer does not create or
+execute a loop. Common input overrides apply to each material. Other providers,
+constrained atoms, labeled species, and grid-metric calculation remain unsupported.
+
+The template conversion comes from [STANDATA #168](https://github.com/mat3ra/standata/pull/168),
+released in `mat3ra-standata>=2026.10.22.post1`.
+
+Rendering uses `mat3ra.utils.extra.jinja.render_jinja_with_error_handling` with a
+call-local `sprintf` filter and number formatter. WoDe opts into exceptions so template
+errors cannot be stored as executable input. Existing utils callers retain their
+default diagnostic-string behavior.
+
+The shared renderer requires `mat3ra-utils[extra]>=2026.10.22.post0`, the published
+release containing [utils #56](https://github.com/mat3ra/utils/pull/56).
 
 ## Contributions
 
