@@ -12,7 +12,7 @@ const espressoUltrasoftSiliconPseudopotential = {
     hash: "9d3353ad597f4669d598900a4a25d674",
     filename: "si_pbe_gbrv_1.0.upf",
     path: "/export/share/pseudo/si/gga/pbe/gbrv/1.0/us/si_pbe_gbrv_1.0.upf",
-    apps: ["espresso"],
+    apps: ["espresso", "q3"],
     exchangeCorrelation: { functional: "pbe", approximation: "gga" },
     name: "pseudopotential",
     source: "gbrv",
@@ -68,7 +68,7 @@ describe("Subworkflow.updateMethodData", () => {
         ]);
     });
 
-    it("selects a pseudopotential reused from a compatible application", () => {
+    it("selects a pseudopotential whose apps include q3", () => {
         const subworkflow = createSubworkflow("q3");
 
         subworkflow.updateMethodData([material], metaProperties);
@@ -78,7 +78,7 @@ describe("Subworkflow.updateMethodData", () => {
         ]);
     });
 
-    it("selects nothing for an application with no compatible pseudopotentials", () => {
+    it("selects nothing when apps does not include the application", () => {
         const subworkflow = createSubworkflow("vasp");
 
         subworkflow.updateMethodData([material], metaProperties);
