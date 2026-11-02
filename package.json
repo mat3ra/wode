@@ -18,7 +18,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Exabyte-io/wode.git"
+        "url": "https://github.com/mat3ra/wode.git"
     },
     "main": "dist/js/index.js",
     "files": [
@@ -28,10 +28,10 @@
     ],
     "author": "Exabyte Inc.",
     "bugs": {
-        "url": "https://github.com/Exabyte-io/wode/issues"
+        "url": "https://github.com/mat3ra/wode/issues"
     },
     "license": "Apache-2.0",
-    "homepage": "https://github.com/Exabyte-io/wode",
+    "homepage": "https://github.com/mat3ra/wode",
     "dependencies": {
         "@exabyte-io/periodic-table.js": "2022.6.8-0",
         "@types/json-schema": "^7.0.15",
@@ -40,32 +40,32 @@
         "underscore.string": "^3.3.6"
     },
     "devDependencies": {
-        "@exabyte-io/eslint-config": "2025.5.13-0",
         "@mat3ra/ade": "2026.8.18-0",
         "@mat3ra/code": "2026.8.18-0",
+        "@mat3ra/eslint-config": "^2026.7.12-0",
         "@mat3ra/esse": "2026.8.18-2",
         "@mat3ra/ide": "2026.10.8-0",
         "@mat3ra/made": "2026.8.18-0",
         "@mat3ra/mode": "2026.8.18-0",
-        "@mat3ra/prode": "https://github.com/mat3ra/prode/releases/download/wip-37e3764/prode.tgz",
-        "@mat3ra/standata": "https://github.com/mat3ra/standata/releases/download/wip-8967fb5/standata.tgz",
+        "@mat3ra/prode": "https://github.com/mat3ra/prode/releases/download/wip-6db2d07/prode.tgz",
+        "@mat3ra/standata": "https://github.com/mat3ra/standata/releases/download/wip-e191f8c/standata.tgz",
         "@mat3ra/tsconfig": "^2024.6.3-0",
         "@mat3ra/utils": "2026.8.18-1",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
         "chai": "^4.3.4",
         "eslint": "^7.32.0",
-        "eslint-config-airbnb": "^19.0.2",
-        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-airbnb": "^19.0.4",
+        "eslint-config-prettier": "^8.10.2",
         "eslint-import-resolver-exports": "^1.0.0-beta.5",
         "eslint-import-resolver-meteor": "^0.4.0",
-        "eslint-import-resolver-node": "^0.3.9",
-        "eslint-plugin-import": "^2.25.3",
-        "eslint-plugin-jsdoc": "^37.1.0",
-        "eslint-plugin-jsx-a11y": "^6.5.1",
-        "eslint-plugin-mui-path-imports": "0.0.15",
-        "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "^7.30.0",
+        "eslint-import-resolver-node": "^0.4.0",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-jsdoc": "^50.8.0",
+        "eslint-plugin-jsx-a11y": "^6.10.2",
+        "eslint-plugin-mui-path-imports": "^0.0.15",
+        "eslint-plugin-prettier": "^4.2.5",
+        "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-simple-import-sort": "^7.0.0",
         "husky": "^7.0.4",
         "lint-staged": "^12.1.2",
