@@ -205,6 +205,15 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     setDefaultInput({ reusePersistedInput = true }: { reusePersistedInput?: boolean } = {}) {
         const driverTemplates = new ApplicationRegistry().getInput(this.application, this.flavor);
         const persistedItems = reusePersistedInput ? this.matchPersistedInput(driverTemplates) : [];
+        // Files the user added in the UI are claimed by no slot. They are appended, never
+        // interleaved: a row ahead of the driver rows would shift the positions
+        // `matchPersistedInput` falls back on to recognize a renamed file.
+        const addedItems = reusePersistedInput
+            ? this.input.filter(
+                  (item) =>
+                      !persistedItems.includes(item) && this.isPersistedInputItemCompatible(item),
+              )
+            : [];
 
         this.inputInstances = driverTemplates.map((driverTemplate, index) => {
             const persistedItem = persistedItems[index];
@@ -215,6 +224,7 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
 
             return ExecutionUnitInput.createFromTemplate(driverTemplate);
         });
+        this.inputInstances.push(...addedItems.map((item) => new ExecutionUnitInput(item)));
 
         this.input = this.inputInstances.map((input) => input.toJSON());
     }
