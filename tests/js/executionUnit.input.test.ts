@@ -52,4 +52,17 @@ describe("ExecutionUnit added input files", () => {
         const names = inputNames(new ExecutionUnit(unit.toJSON()));
         expect(names).to.deep.equal(["my_script.py", "requirements.txt", "new_file.txt"]);
     });
+
+    it("drops an added input file authored for another application", () => {
+        const unit = new ExecutionUnit({ application: pythonApplication });
+        const addedItem = addedInputItem(unit);
+        const staleItem = {
+            ...addedItem,
+            template: { ...addedItem.template, name: "stale.txt", applicationName: "espresso" },
+        };
+        unit.input = [...unit.input, staleItem, addedItem];
+
+        const names = inputNames(new ExecutionUnit(unit.toJSON()));
+        expect(names).to.deep.equal(["script.py", "requirements.txt", "new_file.txt"]);
+    });
 });
