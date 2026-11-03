@@ -28,7 +28,7 @@ describe("ExecutionUnit added input files", () => {
             content: "",
             contextProviders: [],
             applicationName: unit.application.name,
-            applicationVersion: unit.application.version,
+            applicationVersion: "*",
             executableName: unit.executable.name,
         },
         isManuallyChanged: true,
@@ -53,16 +53,22 @@ describe("ExecutionUnit added input files", () => {
         expect(names).to.deep.equal(["my_script.py", "requirements.txt", "new_file.txt"]);
     });
 
-    it("drops an added input file authored for another application", () => {
-        const unit = new ExecutionUnit({ application: pythonApplication });
+    it("drops an added input file the unit's application version no longer satisfies", () => {
+        const registry = new ApplicationRegistry();
+        const unit = new ExecutionUnit({
+            application: registry.findApplication({ name: "espresso", version: "7.5" }),
+        });
+        const driverNames = inputNames(unit);
         const addedItem = addedInputItem(unit);
-        const staleItem = {
-            ...addedItem,
-            template: { ...addedItem.template, name: "stale.txt", applicationName: "espresso" },
-        };
-        unit.input = [...unit.input, staleItem, addedItem];
+        unit.input = [
+            ...unit.input,
+            { ...addedItem, template: { ...addedItem.template, applicationVersion: "7.5" } },
+        ];
 
-        const names = inputNames(new ExecutionUnit(unit.toJSON()));
-        expect(names).to.deep.equal(["script.py", "requirements.txt", "new_file.txt"]);
+        unit.setApplication({
+            application: registry.findApplication({ name: "espresso", version: "6.3" }),
+        });
+
+        expect(inputNames(unit)).to.deep.equal(driverNames);
     });
 });
