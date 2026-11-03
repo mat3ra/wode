@@ -16,6 +16,7 @@ import QEPWXInputDataManager, {
     type MethodDataExternalContext,
 } from "./by_application/espresso/QEPWXInputDataManager";
 import NWChemInputDataManager from "./by_application/nwchem/NWChemInputDataManager";
+import Q3InputDataManager from "./by_application/q3/Q3InputDataManager";
 import VASPInputDataManager from "./by_application/vasp/VASPInputDataManager";
 import VASPNEBInputDataManager from "./by_application/vasp/VASPNEBInputDataManager";
 import CollinearMagnetizationDataManager from "./CollinearMagnetizationDataManager";
@@ -65,6 +66,7 @@ export const PROVIDER_REGISTRY = {
     NonCollinearMagnetizationDataManager,
     QEPWXInputDataManager,
     QENEBInputDataManager,
+    Q3InputDataManager,
     VASPInputDataManager,
     VASPNEBInputDataManager,
     NWChemInputDataManager,
@@ -135,6 +137,7 @@ export function createProvider(
 // Re-export all provider classes for convenience
 export {
     BoundaryConditionsFormDataManager,
+    Q3InputDataManager,
     QENEBInputDataManager,
     QEPWXInputDataManager,
     NWChemInputDataManager,

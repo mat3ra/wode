@@ -22,7 +22,7 @@ import type {
 import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { type PseudopotentialMethod, Model, ModelFactory } from "@mat3ra/mode";
-import type { MetaPropertyHolder } from "@mat3ra/prode";
+import { type MetaPropertyHolder } from "@mat3ra/prode";
 import { ApplicationRegistry, setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -64,6 +64,23 @@ function isAssignmentUnitSchema(
     unit: SubworkflowSchema["units"][number],
 ): unit is AssignmentUnitSchema {
     return unit.type === UnitType.assignment;
+}
+
+/**
+ * Selects the pseudopotential meta-properties whose apps list includes this application.
+ */
+function selectMetaPropertiesForApplication(
+    metaProperties: MetaPropertyHolder[],
+    elements: string[],
+    appName: string,
+) {
+    return metaProperties
+        .filter((metaProperty) => {
+            // @ts-ignore TODO: fix types
+            const { element, apps } = metaProperty.data;
+            return elements.includes(element) && apps.includes(appName);
+        })
+        .map((metaProperty) => metaProperty.property);
 }
 
 export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
@@ -342,15 +359,11 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         const uniqueElements = [...new Set(materials.map((m) => m.uniqueElements).flat())];
         const appName = this.application.name;
 
-        const methodDataItems = metaProperties
-            .filter((metaProperty) => {
-                return (
-                    // @ts-ignore TODO: fix types
-                    uniqueElements.includes(metaProperty.data.element) &&
-                    metaProperty.data.apps.includes(appName)
-                );
-            })
-            .map((metaProperty) => metaProperty.property);
+        const methodDataItems = selectMetaPropertiesForApplication(
+            metaProperties,
+            uniqueElements,
+            appName,
+        );
 
         if (method.type !== "pseudopotential" || !methodDataItems.length) {
             return;

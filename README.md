@@ -21,7 +21,7 @@ a single JS file so that workflow configurations can be accessed in the browser 
 in a NodeJS process.
 
 The relevant data parameterizing supported entities is housed in the
-[Standata](https://github.com/Exabyte-io/standata) repository.
+[Standata](https://github.com/mat3ra/standata) repository.
 
 ## Installation
 
@@ -34,7 +34,7 @@ npm install @mat3ra/wode
 For development:
 
 ```bash
-git clone https://github.com/Exabyte-io/wode.git
+git clone https://github.com/mat3ra/wode.git
 ```
 
 
@@ -78,7 +78,7 @@ This repository is an [open-source](LICENSE.md) work-in-progress and we welcome 
 We regularly deploy the latest code containing all accepted contributions online as part of the
 [Mat3ra.com](https://mat3ra.com) platform, so contributors will see their code in action there.
 
-See [ESSE](https://github.com/Exabyte-io/esse) for additional context regarding the data schemas used here.
+See [ESSE](https://github.com/mat3ra/esse) for additional context regarding the data schemas used here.
 
 Useful commands for development:
 
@@ -154,7 +154,7 @@ Workflows defined as configuration conform to the following specification:
   - `method: Object` - a method specification
     - `name: String` - a named method class exported from MeDe
     - `config: Optional[Object]` - see `Config` defined below
-  - `model: Object` - a model specification 
+  - `model: Object` - a model specification
     - `name: String` - a named model class exported from MeDe
     - `config: Optional[Object]` - see `Config` defined below
   - `config: Optional[Object]` - see `Config` defined below

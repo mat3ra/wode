@@ -11,7 +11,7 @@ import ContextProvider, {
     type UnitContext,
 } from "./base/ContextProvider";
 
-type ApplicationName = "vasp" | "espresso";
+type ApplicationName = "vasp" | "espresso" | "q3";
 
 type Schema = CutoffsContextItemSchema;
 type PlanewaveExternalContext = BaseExternalContext & ApplicationExternalContext;
@@ -21,13 +21,14 @@ interface PlanewaveCutoffDataManager extends ApplicationContextMixin {}
 
 // Type guard to check if a string is a valid ApplicationName
 function isApplicationName(name: string): name is ApplicationName {
-    return name === "vasp" || name === "espresso";
+    return name === "vasp" || name === "espresso" || name === "q3";
 }
 
 // TODO: create a task to move this handling to standata
 const cutoffConfig: Record<ApplicationName, { wavefunction?: number; density?: number }> = {
     vasp: { wavefunction: undefined, density: undefined },
     espresso: { wavefunction: 40, density: 200 },
+    q3: { wavefunction: 30, density: 240 },
 };
 
 const defaultData = {
