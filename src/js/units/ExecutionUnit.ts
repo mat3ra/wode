@@ -205,6 +205,13 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     setDefaultInput({ reusePersistedInput = true }: { reusePersistedInput?: boolean } = {}) {
         const driverTemplates = new ApplicationRegistry().getInput(this.application, this.flavor);
         const persistedItems = reusePersistedInput ? this.matchPersistedInput(driverTemplates) : [];
+        // `matchPersistedInput` returns rows of `this.input` itself, so identity is the match.
+        const addedItems = reusePersistedInput
+            ? this.input.filter(
+                  (item) =>
+                      !persistedItems.includes(item) && this.isPersistedInputItemCompatible(item),
+              )
+            : [];
 
         this.inputInstances = driverTemplates.map((driverTemplate, index) => {
             const persistedItem = persistedItems[index];
@@ -215,6 +222,7 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
 
             return ExecutionUnitInput.createFromTemplate(driverTemplate);
         });
+        this.inputInstances.push(...addedItems.map((item) => new ExecutionUnitInput(item)));
 
         this.input = this.inputInstances.map((input) => input.toJSON());
     }
