@@ -205,11 +205,7 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
     setDefaultInput({ reusePersistedInput = true }: { reusePersistedInput?: boolean } = {}) {
         const driverTemplates = new ApplicationRegistry().getInput(this.application, this.flavor);
         const persistedItems = reusePersistedInput ? this.matchPersistedInput(driverTemplates) : [];
-        // Files the user added in the UI are claimed by no slot - claimed by identity, which holds
-        // only as long as `matchPersistedInput` returns the rows of `this.input` themselves and not
-        // copies; copies would silently duplicate every driver row here. Added rows are appended,
-        // never interleaved: a row ahead of the driver rows would shift the positions
-        // `matchPersistedInput` falls back on to recognize a renamed file.
+        // `matchPersistedInput` returns rows of `this.input` itself, so identity is the match.
         const addedItems = reusePersistedInput
             ? this.input.filter(
                   (item) =>
