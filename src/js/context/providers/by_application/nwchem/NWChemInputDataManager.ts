@@ -74,7 +74,6 @@ class NWChemInputDataManager extends JSONSchemaDataProvider<Schema, ExternalCont
     getDefaultData() {
         const basis = this.material.getBasis();
         const { workflowHasRelaxation } = this;
-        basis.labels = [];
 
         const NTYP = basis.uniqueElements.length;
         const ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS = basis.atomicPositions.join("\n") || "";

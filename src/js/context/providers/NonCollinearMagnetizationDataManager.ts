@@ -11,7 +11,7 @@ import materialContextMixin, {
 } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
-import { getAtomicSpeciesOfAtoms } from "./by_application/espresso/QEPWXInputDataManager";
+import { getStartingMagnetizationOfSpecies } from "./CollinearMagnetizationDataManager";
 
 type Data = NonCollinearMagnetizationContextProviderSchema;
 type Schema = NonCollinearMagnetizationContextItemSchema;
@@ -78,13 +78,8 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             lambda: 0.0,
             constrainType: "atomic direction" as const,
         };
-        this.startingMagnetization = [
-            ...new Set(getAtomicSpeciesOfAtoms(this.material.getBasis())),
-        ].map(({ name, startingMagnetization }, index) => ({
-            index: index + 1,
-            atomicSpecies: name,
-            value: startingMagnetization,
-        }));
+        this.startingMagnetization = getStartingMagnetizationOfSpecies(this.material.getBasis());
+        if (this.data) this.data.startingMagnetization = this.startingMagnetization;
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             isExistingChargeDensity: { default: defaultData.isExistingChargeDensity },
@@ -144,10 +139,6 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
                 z: defaultData.fixedMagnetizationZ,
             },
         };
-    }
-
-    protected patchForRendering(data: Data): Data {
-        return { ...data, startingMagnetization: this.startingMagnetization };
     }
 
     get uiSchemaStyled() {

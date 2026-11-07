@@ -3,6 +3,7 @@ import type {
     CollinearMagnetizationContextItemSchema,
     CollinearMagnetizationContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
+import type { ConstrainedBasis } from "@mat3ra/made";
 import type { JSONSchema7 } from "json-schema";
 
 import materialContextMixin, {
@@ -11,7 +12,6 @@ import materialContextMixin, {
 } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
-import { getAtomicSpeciesOfAtoms } from "./by_application/espresso/QEPWXInputDataManager";
 
 type Data = CollinearMagnetizationContextProviderSchema;
 type Schema = CollinearMagnetizationContextItemSchema;
@@ -26,6 +26,16 @@ const defaultData = {
 };
 
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
+
+export function getStartingMagnetizationOfSpecies(
+    basis: ConstrainedBasis,
+): Data["startingMagnetization"] {
+    return basis.uniqueAtomicSpecies.map(({ name, startingMagnetization }, index) => ({
+        index: index + 1,
+        atomicSpecies: name,
+        value: startingMagnetization,
+    }));
+}
 
 class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "collinearMagnetization" as const;
@@ -50,13 +60,8 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.startingMagnetization = [
-            ...new Set(getAtomicSpeciesOfAtoms(this.material.getBasis())),
-        ].map(({ name, startingMagnetization }, index) => ({
-            index: index + 1,
-            atomicSpecies: name,
-            value: startingMagnetization,
-        }));
+        this.startingMagnetization = getStartingMagnetizationOfSpecies(this.material.getBasis());
+        if (this.data) this.data.startingMagnetization = this.startingMagnetization;
 
         this.isTotalMagnetization = this.data?.isTotalMagnetization || false;
 
@@ -84,10 +89,6 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
         };
     }
 
-    protected patchForRendering(data: Data): Data {
-        return { ...data, startingMagnetization: this.startingMagnetization };
-    }
-
     get uiSchemaStyled() {
         return {
             startingMagnetization: {
@@ -100,6 +101,11 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
                     },
                 },
                 "ui:readonly": true,
+                "ui:options": {
+                    addable: false,
+                    orderable: false,
+                    removable: false,
+                },
             },
             isTotalMagnetization: {},
             totalMagnetization: {

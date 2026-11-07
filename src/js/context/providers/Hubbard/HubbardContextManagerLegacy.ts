@@ -6,7 +6,6 @@ import type {
 import type { JSONSchema7 } from "json-schema";
 
 import type { UnitContext } from "../base/ContextProvider";
-import { getAtomicSpeciesOfAtoms } from "../by_application/espresso/QEPWXInputDataManager";
 import HubbardContextProvider, { type HubbardExternalContext } from "./HubbardContextProvider";
 
 type Schema = HubbardLegacyContextItemSchema;
@@ -64,6 +63,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
         }
 
         this.jsonSchema = jsonSchema;
+        if (this.data) this.setData(this.data as Data);
     }
 
     getDefaultData(): Data {
@@ -77,27 +77,18 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
     }
 
     setData(data: Data) {
-        const hubbardUValues = data.map((row) => {
-            const atomicSpeciesIndex =
-                this.uniqueElementsWithLabels?.length > 0
-                    ? this.uniqueElementsWithLabels.indexOf(row.atomicSpecies || "") + 1
-                    : undefined;
-
-            return {
-                ...row,
-                atomicSpeciesIndex,
-            };
-        }) as Data;
-
-        super.setData(hubbardUValues);
+        super.setData(this.withSpeciesIndex(data));
     }
 
     protected patchForRendering(data: Data): Data {
-        const species = [...new Set(getAtomicSpeciesOfAtoms(this.material.getBasis()))];
-        return data.flatMap((row) =>
-            species.flatMap(({ element }, index) =>
-                element === row.atomicSpecies ? [{ ...row, atomicSpeciesIndex: index + 1 }] : [],
-            ),
-        ) as Data;
+        return this.withSpeciesIndex(this.expandToSpecies(data) as Data);
+    }
+
+    private withSpeciesIndex(data: Data): Data {
+        const names = this.uniqueAtomicSpecies.map(({ name }) => name);
+        return data.map((row) => ({
+            ...row,
+            atomicSpeciesIndex: names.indexOf(row.atomicSpecies || "") + 1,
+        })) as Data;
     }
 }

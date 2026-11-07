@@ -4,6 +4,7 @@ import type {
     HubbardUContextItemSchema,
     HubbardVContextItemSchema,
 } from "@mat3ra/esse/dist/js/types";
+import type { ConstrainedBasis } from "@mat3ra/made";
 
 import materialContextMixin, {
     type MaterialContextMixin,
@@ -47,6 +48,8 @@ abstract class HubbardContextProvider<
 
     protected readonly uniqueElementsWithLabels: string[];
 
+    protected readonly uniqueAtomicSpecies: ConstrainedBasis["uniqueAtomicSpecies"];
+
     protected readonly firstElement: string;
 
     protected readonly secondSpecies: string;
@@ -88,6 +91,17 @@ abstract class HubbardContextProvider<
             this.uniqueElementsWithLabels?.length > 1
                 ? this.uniqueElementsWithLabels[1]
                 : this.firstElement;
+
+        this.uniqueAtomicSpecies = this.material.getBasis().uniqueAtomicSpecies;
+    }
+
+    /** Rows are entered per element; QE takes them per species, so a row applies to each one. */
+    protected expandToSpecies<Row extends { atomicSpecies?: string }>(rows: Row[]): Row[] {
+        return rows.flatMap((row) =>
+            this.uniqueAtomicSpecies
+                .filter(({ element }) => element === row.atomicSpecies)
+                .map(({ name }) => ({ ...row, atomicSpecies: name })),
+        );
     }
 }
 
