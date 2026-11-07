@@ -135,7 +135,7 @@ def test_out_of_range_material_selection_fails_in_template(workflow, material, i
 def test_unsupported_geometry_fails(workflow, material, field, value):
     definition = material.to_dict()
     definition["basis"][field] = [{"id": 0, "value": value}]
-    with pytest.raises(NotImplementedError, match="constraints or atom labels"):
+    with pytest.raises(NotImplementedError, match="support constraints$"):
         workflow.render({"material": Material.create(definition)})
 
 
