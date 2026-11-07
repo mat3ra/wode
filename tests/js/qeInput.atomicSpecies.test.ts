@@ -138,6 +138,20 @@ describe("Atomic species from element and starting magnetization", () => {
         ]);
     });
 
+    it("refuses to render a stored Hubbard U row keyed by a labelled species", () => {
+        const row = { atomicOrbital: "3d", hubbardUValue: 4 };
+        const data = [
+            { ...row, atomicSpecies: "Fe1" },
+            { ...row, atomicSpecies: "Fe2" },
+            { atomicSpecies: "O", atomicOrbital: "2p", hubbardUValue: 2 },
+        ];
+        const provider = new HubbardUContextManager({ data }, externalContext);
+
+        expect(() => provider.getDataForRendering()).to.throw(
+            'Hubbard row "Fe1" is not an element of this material; enter Hubbard parameters per element: Fe, O',
+        );
+    });
+
     it("applies Hubbard U and J rows of an element to each of its species", () => {
         const row = { atomicSpecies: "Fe", atomicOrbital: "3d", value: 1 };
         const rowU = { ...row, paramType: "U" as const };

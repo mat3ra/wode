@@ -85,6 +85,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
     }
 
     private withSpeciesIndex(data: Data): Data {
+        // an element row takes its first species, which made names after the element
         const names = this.uniqueAtomicSpecies.map(({ name }) => name);
         return data.map((row) => ({
             ...row,

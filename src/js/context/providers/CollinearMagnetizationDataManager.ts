@@ -27,6 +27,7 @@ const defaultData = {
 
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
 
+/** One row per QE species of the basis, indexed as QE's starting_magnetization(i). */
 export function getStartingMagnetizationOfSpecies(
     basis: ConstrainedBasis,
 ): Data["startingMagnetization"] {

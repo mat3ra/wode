@@ -78,10 +78,9 @@ abstract class HubbardContextProvider<
     constructor(contextItem: Partial<S>, externalContext: EC) {
         super(contextItem, externalContext);
 
+        const basis = this.material.getBasis();
         this.uniqueElementsWithLabels = [
-            ...new Set(
-                (this.material.getBasis().elements || []).map((element) => String(element.value)),
-            ),
+            ...new Set((basis.elements || []).map((element) => String(element.value))),
         ];
 
         this.firstElement =
@@ -92,16 +91,23 @@ abstract class HubbardContextProvider<
                 ? this.uniqueElementsWithLabels[1]
                 : this.firstElement;
 
-        this.uniqueAtomicSpecies = this.material.getBasis().uniqueAtomicSpecies;
+        this.uniqueAtomicSpecies = basis.uniqueAtomicSpecies;
     }
 
     /** Rows are entered per element; QE takes them per species, so a row applies to each one. */
     protected expandToSpecies<Row extends { atomicSpecies?: string }>(rows: Row[]): Row[] {
-        return rows.flatMap((row) =>
-            this.uniqueAtomicSpecies
-                .filter(({ element }) => element === row.atomicSpecies)
-                .map(({ name }) => ({ ...row, atomicSpecies: name })),
-        );
+        return rows.flatMap((row) => {
+            const species = this.uniqueAtomicSpecies.filter(
+                ({ element }) => element === row.atomicSpecies,
+            );
+            if (!species.length) {
+                const elements = this.uniqueElementsWithLabels.join(", ");
+                throw new Error(
+                    `Hubbard row "${row.atomicSpecies}" is not an element of this material; enter Hubbard parameters per element: ${elements}`,
+                );
+            }
+            return species.map(({ name }) => ({ ...row, atomicSpecies: name }));
+        });
     }
 }
 
