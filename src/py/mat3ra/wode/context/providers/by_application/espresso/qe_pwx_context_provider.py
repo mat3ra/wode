@@ -42,22 +42,23 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
         basis = material.basis
         # STANDATA's SCF templates use Nunjucks loop assignment for constraints,
         # which does not have the same scope in Jinja. Do not silently drop them.
-        if any(not all(value) for value in basis.constraints.values) or any(basis.labels.values):
+        if any(not all(value) for value in basis.constraints.values):
             raise NotImplementedError("Python QE rendering does not yet support constraints or atom labels")
         pseudopotentials = {
             item["element"]: item for item in (external_context.get("methodData") or {}).get("pseudo", [])
         }
         species = []
-        for element in dict.fromkeys(basis.elements.values):
+        for item in basis.unique_atomic_species:
+            name, element = item["name"], item["element"]
             pseudopotential = pseudopotentials.get(element, {})
             filename = pseudopotential.get("filename") or PurePosixPath(pseudopotential.get("path", "")).name
             if not filename:
                 raise ValueError(f"Missing pseudopotential for {element}")
-            species.append({"X": element, "Mass_X": get_atomic_mass_from_element(element), "PseudoPot_X": filename})
+            species.append({"X": name, "Mass_X": get_atomic_mass_from_element(element), "PseudoPot_X": filename})
         coordinates = dict(zip(basis.coordinates.ids, basis.coordinates.values))
         positions = [
             {
-                "X": element,
+                "X": species_name,
                 "x": coordinates[identifier][0],
                 "y": coordinates[identifier][1],
                 "z": coordinates[identifier][2],
@@ -65,7 +66,7 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
                 "if_pos(2)": 1,
                 "if_pos(3)": 1,
             }
-            for identifier, element in zip(basis.elements.ids, basis.elements.values)
+            for identifier, species_name in zip(basis.elements.ids, basis.atomic_species_array)
         ]
         return {
             "IBRAV": 0,
