@@ -6,6 +6,7 @@ import type {
 import type { JSONSchema7 } from "json-schema";
 
 import type { UnitContext } from "../base/ContextProvider";
+import { getAtomicSpeciesOfAtoms } from "../by_application/espresso/QEPWXInputDataManager";
 import HubbardContextProvider, { type HubbardExternalContext } from "./HubbardContextProvider";
 
 type Schema = HubbardLegacyContextItemSchema;
@@ -89,5 +90,14 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
         }) as Data;
 
         super.setData(hubbardUValues);
+    }
+
+    protected patchForRendering(data: Data): Data {
+        const species = [...new Set(getAtomicSpeciesOfAtoms(this.material.getBasis()))];
+        return data.flatMap((row) =>
+            species.flatMap(({ element }, index) =>
+                element === row.atomicSpecies ? [{ ...row, atomicSpeciesIndex: index + 1 }] : [],
+            ),
+        ) as Data;
     }
 }

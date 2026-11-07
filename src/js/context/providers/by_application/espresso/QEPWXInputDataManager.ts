@@ -5,6 +5,7 @@ import type {
     InputContextItemSchema,
     QEPwxContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
+import type { ConstrainedBasis } from "@mat3ra/made/dist/js/basis/constrained_basis";
 import type { AtomicElementValue } from "@mat3ra/made/dist/js/basis/elements";
 import type { JSONSchema7 } from "json-schema";
 import path from "path";
@@ -44,6 +45,27 @@ type ExternalContext = JinjaExternalContext &
     JobExternalContext &
     MethodDataExternalContext &
     MaterialsExternalContext;
+
+type AtomicSpecies = { name: string; element: AtomicElementValue; startingMagnetization: number };
+
+/**
+ * Species of each atom: one per element and starting magnetization, named "Fe", "Fe1", "Fe2".
+ */
+export function getAtomicSpeciesOfAtoms(basis: ConstrainedBasis): AtomicSpecies[] {
+    const species: AtomicSpecies[] = [];
+    return basis.startingMagnetizationArray.map((startingMagnetization, index) => {
+        const element = basis.getElementByIndex(index);
+        const speciesOfElement = species.filter((item) => item.element === element);
+        const existing = speciesOfElement.find(
+            (item) => item.startingMagnetization === startingMagnetization,
+        );
+        if (existing) return existing;
+        const name = speciesOfElement.length ? `${element}${speciesOfElement.length}` : element;
+        if (name.length > 3) throw new Error(`Species name ${name} is longer than 3 characters`);
+        species.push({ name, element, startingMagnetization });
+        return species[species.length - 1];
+    });
+}
 
 interface QEPWXInputDataManager extends MaterialContextMixin, MaterialsContextMixin {}
 
@@ -105,23 +127,12 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         const lattice = material.getLattice();
         const { jobHasParent, workflowHasRelaxation } = this;
 
-        const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {
+        const speciesOfAtoms = getAtomicSpeciesOfAtoms(basis);
+        const ATOMIC_SPECIES = [...new Set(speciesOfAtoms)].map(({ name, element }) => {
             return {
-                X: symbol,
-                Mass_X: PERIODIC_TABLE[symbol].atomic_mass,
-                PseudoPot_X: this.getPseudopotentialReference(symbol),
-            };
-        });
-
-        const uniqueElementsWithLabels = [...new Set(basis.elementsWithLabelsArray)];
-
-        const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
-            const symbolWithoutLabel = symbol.replace(/\d$/, "") as AtomicElementValue;
-            const label = symbol.match(/\d$/g) ? symbol.match(/\d$/g)?.[0] : "";
-            return {
-                X: `${symbolWithoutLabel}${label}`,
-                Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
-                PseudoPot_X: this.getPseudopotentialReference(symbolWithoutLabel),
+                X: name,
+                Mass_X: PERIODIC_TABLE[element].atomic_mass,
+                PseudoPot_X: this.getPseudopotentialReference(element),
             };
         });
 
@@ -132,9 +143,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
-            ([element, label, coordinate, constraint]) => {
+            ([, , coordinate, constraint], index) => {
                 return {
-                    X: `${element}${label}`,
+                    X: speciesOfAtoms[index].name,
                     x: coordinate[0],
                     y: coordinate[1],
                     z: coordinate[2],
@@ -149,12 +160,14 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             IBRAV: 0,
             RESTART_MODE: jobHasParent || workflowHasRelaxation ? "restart" : "from_scratch",
             ATOMIC_SPECIES,
-            ATOMIC_SPECIES_WITH_LABELS,
+            ATOMIC_SPECIES_WITH_LABELS: ATOMIC_SPECIES,
             NAT: basis.atomicPositions.length,
-            NTYP: basis.uniqueElements.length,
-            NTYP_WITH_LABELS: uniqueElementsWithLabels.length,
+            NTYP: ATOMIC_SPECIES.length,
+            NTYP_WITH_LABELS: ATOMIC_SPECIES.length,
             ATOMIC_POSITIONS,
-            ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS: basis.atomicPositions.join("\n"),
+            ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS: speciesOfAtoms
+                .map(({ name }, index) => `${name} ${basis.getCoordinateValueByIndex(index)}`)
+                .join("\n"),
             CELL_PARAMETERS,
             contextProviderName: "qe-pwx" as const,
         };

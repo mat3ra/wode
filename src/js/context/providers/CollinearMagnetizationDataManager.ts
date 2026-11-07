@@ -11,6 +11,7 @@ import materialContextMixin, {
 } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
+import { getAtomicSpeciesOfAtoms } from "./by_application/espresso/QEPWXInputDataManager";
 
 type Data = CollinearMagnetizationContextProviderSchema;
 type Schema = CollinearMagnetizationContextItemSchema;
@@ -20,7 +21,6 @@ type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 interface CollinearMagnetizationDataManager extends MaterialContextMixin {}
 
 const defaultData = {
-    value: 0.0,
     isTotalMagnetization: false,
     totalMagnetization: 0.0,
 };
@@ -44,34 +44,23 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
 
     private readonly isTotalMagnetization: boolean;
 
-    private readonly firstElement: string;
-
-    private readonly uniqueElementsWithLabels: string[];
+    private readonly startingMagnetization: Data["startingMagnetization"];
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.uniqueElementsWithLabels = [
-            ...new Set(this.material?.getBasis()?.elementsWithLabelsArray || []),
-        ];
-
-        this.firstElement =
-            this.uniqueElementsWithLabels?.length > 0 ? this.uniqueElementsWithLabels[0] : "";
+        this.startingMagnetization = [
+            ...new Set(getAtomicSpeciesOfAtoms(this.material.getBasis())),
+        ].map(({ name, startingMagnetization }, index) => ({
+            index: index + 1,
+            atomicSpecies: name,
+            value: startingMagnetization,
+        }));
 
         this.isTotalMagnetization = this.data?.isTotalMagnetization || false;
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
-            "properties.startingMagnetization": {
-                maxItems: this.uniqueElementsWithLabels.length,
-            },
-            "properties.startingMagnetization.items.properties.atomicSpecies": {
-                enum: this.uniqueElementsWithLabels,
-                default: this.firstElement,
-            },
-            "properties.startingMagnetization.items.properties.value": {
-                default: defaultData.value,
-            },
             "properties.isTotalMagnetization": {
                 default: defaultData.isTotalMagnetization,
             },
@@ -89,28 +78,14 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
 
     getDefaultData(): Data {
         return {
-            startingMagnetization: [
-                {
-                    index: 1,
-                    atomicSpecies: this.firstElement,
-                    value: defaultData.value,
-                },
-            ],
+            startingMagnetization: this.startingMagnetization,
             isTotalMagnetization: defaultData.isTotalMagnetization,
             totalMagnetization: defaultData.totalMagnetization,
         };
     }
 
-    setData(data: Data) {
-        const startingMagnetization = data.startingMagnetization.map((row) => ({
-            ...row,
-            index: this.uniqueElementsWithLabels.indexOf(row.atomicSpecies) + 1,
-        }));
-
-        super.setData({
-            ...data,
-            startingMagnetization,
-        });
+    protected patchForRendering(data: Data): Data {
+        return { ...data, startingMagnetization: this.startingMagnetization };
     }
 
     get uiSchemaStyled() {
@@ -124,7 +99,7 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
                         "ui:classNames": "col-xs-6",
                     },
                 },
-                "ui:readonly": this.isTotalMagnetization,
+                "ui:readonly": true,
             },
             isTotalMagnetization: {},
             totalMagnetization: {
