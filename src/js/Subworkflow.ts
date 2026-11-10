@@ -22,7 +22,7 @@ import type {
 import { type ComputedEntityMixin, computedEntityMixin } from "@mat3ra/ide/dist/js/compute";
 import type { Material } from "@mat3ra/made";
 import { type PseudopotentialMethod, Model, ModelFactory } from "@mat3ra/mode";
-import { type MetaPropertyHolder, PseudopotentialMetaProperty } from "@mat3ra/prode";
+import { type MetaPropertyHolder } from "@mat3ra/prode";
 import { ApplicationRegistry, setUnitLinks } from "@mat3ra/standata";
 import { Utils } from "@mat3ra/utils";
 
@@ -80,8 +80,7 @@ function selectMetaPropertiesForApplication(
             const { element, apps } = metaProperty.data;
             return elements.includes(element) && apps.includes(appName);
         })
-        .map((metaProperty) => metaProperty.property)
-        .filter((property) => property instanceof PseudopotentialMetaProperty);
+        .map((metaProperty) => metaProperty.property);
 }
 
 export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;

@@ -4,7 +4,6 @@ import type {
     HubbardUContextItemSchema,
     HubbardVContextItemSchema,
 } from "@mat3ra/esse/dist/js/types";
-import type { ConstrainedBasis } from "@mat3ra/made";
 
 import materialContextMixin, {
     type MaterialContextMixin,
@@ -48,8 +47,6 @@ abstract class HubbardContextProvider<
 
     protected readonly uniqueElementsWithLabels: string[];
 
-    protected readonly uniqueAtomicSpecies: ConstrainedBasis["uniqueAtomicSpecies"];
-
     protected readonly firstElement: string;
 
     protected readonly secondSpecies: string;
@@ -78,9 +75,10 @@ abstract class HubbardContextProvider<
     constructor(contextItem: Partial<S>, externalContext: EC) {
         super(contextItem, externalContext);
 
-        const basis = this.material.getBasis();
         this.uniqueElementsWithLabels = [
-            ...new Set((basis.elements || []).map((element) => String(element.value))),
+            ...new Set(
+                (this.material.getBasis().elements || []).map((element) => String(element.value)),
+            ),
         ];
 
         this.firstElement =
@@ -90,16 +88,14 @@ abstract class HubbardContextProvider<
             this.uniqueElementsWithLabels?.length > 1
                 ? this.uniqueElementsWithLabels[1]
                 : this.firstElement;
-
-        this.uniqueAtomicSpecies = basis.uniqueAtomicSpecies;
     }
 
     /** Rows are entered per element; QE takes them per species, so a row applies to each one. */
     protected expandToSpecies<Row extends { atomicSpecies?: string }>(rows: Row[]): Row[] {
         return rows.flatMap((row) => {
-            const species = this.uniqueAtomicSpecies.filter(
-                ({ element }) => element === row.atomicSpecies,
-            );
+            const species = this.material
+                .getBasis()
+                .uniqueAtomicSpecies.filter(({ element }) => element === row.atomicSpecies);
             if (!species.length) {
                 const elements = this.uniqueElementsWithLabels.join(", ");
                 throw new Error(

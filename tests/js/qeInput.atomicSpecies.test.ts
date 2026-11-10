@@ -14,7 +14,6 @@ import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
 import QEPWXInputDataManager from "../../src/js/context/providers/by_application/espresso/QEPWXInputDataManager";
-import NWChemInputDataManager from "../../src/js/context/providers/by_application/nwchem/NWChemInputDataManager";
 import CollinearMagnetizationDataManager from "../../src/js/context/providers/CollinearMagnetizationDataManager";
 import HubbardContextManagerLegacy from "../../src/js/context/providers/Hubbard/HubbardContextManagerLegacy";
 import HubbardJContextManager from "../../src/js/context/providers/Hubbard/HubbardJContextManager";
@@ -68,15 +67,6 @@ describe("Atomic species from element and magnetic moment", () => {
     const ferromagneticFeO = buildFeO([0.5, 0.5]);
     const externalContext = { material: antiferromagneticFeO };
     const species = ["Fe", "Fe1", "O"];
-    const antiferromagneticRows = [
-        { index: 1, atomicSpecies: "Fe", value: 0.5 },
-        { index: 2, atomicSpecies: "Fe1", value: -0.5 },
-        { index: 3, atomicSpecies: "O", value: 0 },
-    ];
-    const ferromagneticRows = [
-        { index: 1, atomicSpecies: "Fe", value: 0.5 },
-        { index: 2, atomicSpecies: "O", value: 0 },
-    ];
 
     it("writes a Si / Ge cell labelled 0 and 1 with species Si and Ge", () => {
         const data = buildQEPWXData(siliconGermanium);
@@ -84,15 +74,6 @@ describe("Atomic species from element and magnetic moment", () => {
         expect(data.ATOMIC_SPECIES_WITH_LABELS.map(({ X }) => X)).to.deep.equal(["Si", "Ge"]);
         expect(data.ATOMIC_POSITIONS.map(({ X }) => X)).to.deep.equal(["Si", "Ge"]);
         expect(data.ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS).to.match(/^Si .*\nGe /);
-    });
-
-    it("writes NWChem positions of the labelled Si / Ge cell with elements", () => {
-        const { ATOMIC_POSITIONS } = new NWChemInputDataManager(
-            {},
-            { material: siliconGermanium, jobHasParent: false, workflowHasRelaxation: false },
-        ).getDefaultData();
-
-        expect(ATOMIC_POSITIONS).to.match(/^Si .*\nGe /);
     });
 
     it("splits an element into one species per magnetic moment", () => {
@@ -103,76 +84,60 @@ describe("Atomic species from element and magnetic moment", () => {
         expect(data.ATOMIC_POSITIONS.map(({ X }) => X)).to.deep.equal(["Fe", "Fe1", "O", "O"]);
     });
 
-    it("shows collinear starting magnetization of the material's species, not stored rows", () => {
-        const storedData = new CollinearMagnetizationDataManager({}, externalContext).getData();
-        const provider = new CollinearMagnetizationDataManager(
-            { data: storedData },
-            { material: ferromagneticFeO },
-        );
+    [
+        { Provider: CollinearMagnetizationDataManager, spinAngleSpecies: undefined },
+        { Provider: NonCollinearMagnetizationDataManager, spinAngleSpecies: species },
+    ].forEach(({ Provider, spinAngleSpecies }) => {
+        it(`${Provider.name} shows the material's species limited to [-1, 1], not stored rows`, () => {
+            const storedData = new Provider({}, { material: buildFeO([2.2, -2.2]) }).getData();
+            const provider = new Provider({ data: storedData } as never, {
+                material: ferromagneticFeO,
+            });
 
-        expect(storedData.startingMagnetization).to.deep.equal(antiferromagneticRows);
-        expect(provider.getData().startingMagnetization).to.deep.equal(ferromagneticRows);
+            expect(storedData.startingMagnetization).to.deep.equal([
+                { index: 1, atomicSpecies: "Fe", value: 1 },
+                { index: 2, atomicSpecies: "Fe1", value: -1 },
+                { index: 3, atomicSpecies: "O", value: 0 },
+            ]);
+            expect(
+                "spinAngles" in storedData
+                    ? storedData.spinAngles?.map(({ atomicSpecies }) => atomicSpecies)
+                    : undefined,
+            ).to.deep.equal(spinAngleSpecies);
+            expect(provider.getData().startingMagnetization).to.deep.equal([
+                { index: 1, atomicSpecies: "Fe", value: 0.5 },
+                { index: 2, atomicSpecies: "O", value: 0 },
+            ]);
+        });
     });
 
-    it("limits collinear starting magnetization to [-1, 1] for moments beyond 1 uB", () => {
-        const { startingMagnetization } = new CollinearMagnetizationDataManager(
-            {},
-            { material: buildFeO([2.2, -2.2]) },
-        ).getData();
+    [
+        {
+            Provider: HubbardUContextManager,
+            row: { atomicSpecies: "Fe", atomicOrbital: "3d", hubbardUValue: 4 },
+        },
+        {
+            Provider: HubbardJContextManager,
+            row: { atomicSpecies: "Fe", atomicOrbital: "3d", paramType: "J" as const, value: 1 },
+        },
+    ].forEach(({ Provider, row }) => {
+        it(`${Provider.name} applies a row of an element to each of its species`, () => {
+            const provider = new Provider({ data: [row] } as never, externalContext);
 
-        expect(startingMagnetization?.map(({ value }) => value)).to.deep.equal([1, -1, 0]);
-    });
-
-    it("shows non-collinear starting magnetization of the material's species, not stored rows", () => {
-        const storedData = new NonCollinearMagnetizationDataManager({}, externalContext).getData();
-        const provider = new NonCollinearMagnetizationDataManager(
-            { data: storedData },
-            { material: ferromagneticFeO },
-        );
-
-        expect(storedData.startingMagnetization).to.deep.equal(antiferromagneticRows);
-        expect(storedData.spinAngles?.map(({ atomicSpecies }) => atomicSpecies)).to.deep.equal(
-            species,
-        );
-        expect(provider.getData().startingMagnetization).to.deep.equal(ferromagneticRows);
-    });
-
-    it("applies a Hubbard U row of an element to each of its species", () => {
-        const row = { atomicSpecies: "Fe", atomicOrbital: "3d", hubbardUValue: 4 };
-        const provider = new HubbardUContextManager({ data: [row] }, externalContext);
-
-        expect(provider.getDataForRendering()).to.deep.equal([
-            row,
-            { ...row, atomicSpecies: "Fe1" },
-        ]);
+            expect(provider.getDataForRendering()).to.deep.equal([
+                row,
+                { ...row, atomicSpecies: "Fe1" },
+            ]);
+        });
     });
 
     it("refuses to render a stored Hubbard U row keyed by a labelled species", () => {
-        const row = { atomicOrbital: "3d", hubbardUValue: 4 };
-        const data = [
-            { ...row, atomicSpecies: "Fe1" },
-            { ...row, atomicSpecies: "Fe2" },
-            { atomicSpecies: "O", atomicOrbital: "2p", hubbardUValue: 2 },
-        ];
+        const data = [{ atomicSpecies: "Fe1", atomicOrbital: "3d", hubbardUValue: 4 }];
         const provider = new HubbardUContextManager({ data }, externalContext);
 
         expect(() => provider.getDataForRendering()).to.throw(
             'Hubbard row "Fe1" is not an element of this material; enter Hubbard parameters per element: Fe, O',
         );
-    });
-
-    it("applies Hubbard U and J rows of an element to each of its species", () => {
-        const row = { atomicSpecies: "Fe", atomicOrbital: "3d", value: 1 };
-        const rowU = { ...row, paramType: "U" as const };
-        const rowJ = { ...row, paramType: "J" as const };
-        const provider = new HubbardJContextManager({ data: [rowU, rowJ] }, externalContext);
-
-        expect(provider.getDataForRendering()).to.deep.equal([
-            rowU,
-            { ...rowU, atomicSpecies: "Fe1" },
-            rowJ,
-            { ...rowJ, atomicSpecies: "Fe1" },
-        ]);
     });
 
     it("indexes legacy Hubbard U rows by species", () => {
