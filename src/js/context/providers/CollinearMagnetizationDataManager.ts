@@ -34,7 +34,8 @@ export function getStartingMagnetizationOfSpecies(
     return basis.uniqueAtomicSpecies.map(({ name, magneticMoment }, index) => ({
         index: index + 1,
         atomicSpecies: name,
-        value: magneticMoment,
+        // QE reads starting_magnetization(i) as a fraction in [-1, 1], so a moment in uB is limited to it.
+        value: Math.min(1, Math.max(-1, magneticMoment)),
     }));
 }
 

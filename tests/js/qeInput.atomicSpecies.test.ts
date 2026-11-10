@@ -114,6 +114,15 @@ describe("Atomic species from element and magnetic moment", () => {
         expect(provider.getData().startingMagnetization).to.deep.equal(ferromagneticRows);
     });
 
+    it("limits collinear starting magnetization to [-1, 1] for moments beyond 1 uB", () => {
+        const { startingMagnetization } = new CollinearMagnetizationDataManager(
+            {},
+            { material: buildFeO([2.2, -2.2]) },
+        ).getData();
+
+        expect(startingMagnetization?.map(({ value }) => value)).to.deep.equal([1, -1, 0]);
+    });
+
     it("shows non-collinear starting magnetization of the material's species, not stored rows", () => {
         const storedData = new NonCollinearMagnetizationDataManager({}, externalContext).getData();
         const provider = new NonCollinearMagnetizationDataManager(
