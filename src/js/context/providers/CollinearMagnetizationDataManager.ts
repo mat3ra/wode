@@ -31,10 +31,10 @@ const jsonSchemaId = "context-providers-directory/collinear-magnetization-contex
 export function getStartingMagnetizationOfSpecies(
     basis: ConstrainedBasis,
 ): Data["startingMagnetization"] {
-    return basis.uniqueAtomicSpecies.map(({ name, startingMagnetization }, index) => ({
+    return basis.uniqueAtomicSpecies.map(({ name, magneticMoment }, index) => ({
         index: index + 1,
         atomicSpecies: name,
-        value: startingMagnetization,
+        value: magneticMoment,
     }));
 }
 

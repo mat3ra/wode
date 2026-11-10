@@ -36,18 +36,18 @@ const buildQEPWXData = (material: OrderedMaterial) =>
         { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
     ).getDefaultData();
 
-const buildFeO = (startingMagnetization: number[]) => {
+const buildFeO = (magneticMoments: number[]) => {
     const material = new OrderedMaterial(
         MaterialStandata.getRuntimeDataConfigs().find((config) => config.name.includes("FeO")),
     );
     material.setBasis({
         ...material.getBasis().toJSON(),
-        startingMagnetization: startingMagnetization.map((value, id) => ({ id, value })),
+        magneticMoments: magneticMoments.map((value, id) => ({ id, value })),
     });
     return material;
 };
 
-describe("Atomic species from element and starting magnetization", () => {
+describe("Atomic species from element and magnetic moment", () => {
     before(() => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
     });
@@ -95,7 +95,7 @@ describe("Atomic species from element and starting magnetization", () => {
         expect(ATOMIC_POSITIONS).to.match(/^Si .*\nGe /);
     });
 
-    it("splits an element into one species per starting magnetization", () => {
+    it("splits an element into one species per magnetic moment", () => {
         const data = buildQEPWXData(antiferromagneticFeO);
 
         expect(data.ATOMIC_SPECIES.map(({ X }) => X)).to.deep.equal(species);

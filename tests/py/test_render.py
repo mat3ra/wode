@@ -143,10 +143,10 @@ def test_unsupported_geometry_fails(workflow, material, field, value):
     "name,field,values,species,positions",
     [
         ("Silicon-Germanium", "labels", [0, 1], ["Si", "Ge"], ["Si", "Ge"]),
-        ("FeO", "startingMagnetization", [0.5, -0.5], ["Fe", "Fe1", "O"], ["Fe", "Fe1", "O", "O"]),
+        ("FeO", "magneticMoments", [0.5, -0.5], ["Fe", "Fe1", "O"], ["Fe", "Fe1", "O", "O"]),
     ],
 )
-def test_atomic_species_from_element_and_starting_magnetization(workflow, name, field, values, species, positions):
+def test_atomic_species_from_element_and_magnetic_moment(workflow, name, field, values, species, positions):
     definition = deepcopy(Materials.get_by_name_first_match(name))
     definition["basis"][field] = [{"id": index, "value": value} for index, value in enumerate(values)]
     workflow.subworkflows[0].model.method.data.pseudo = [
