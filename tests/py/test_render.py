@@ -3,6 +3,7 @@ from copy import deepcopy
 import pytest
 from jinja2 import TemplateError
 from mat3ra.made.material import Material, defaultMaterialConfig
+from mat3ra.standata.materials import Materials
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode.units.unit import Unit
 from mat3ra.wode.workflows.workflow import Workflow
@@ -130,12 +131,33 @@ def test_out_of_range_material_selection_fails_in_template(workflow, material, i
         workflow.render({"material": material, "materials": [material, material]})
 
 
-@pytest.mark.parametrize("field,value", [("constraints", [False, True, True]), ("labels", 1)])
+@pytest.mark.parametrize("field,value", [("constraints", [False, True, True])])
 def test_unsupported_geometry_fails(workflow, material, field, value):
     definition = material.to_dict()
     definition["basis"][field] = [{"id": 0, "value": value}]
-    with pytest.raises(NotImplementedError, match="constraints or atom labels"):
+    with pytest.raises(NotImplementedError, match="support constraints$"):
         workflow.render({"material": Material.create(definition)})
+
+
+@pytest.mark.parametrize(
+    "name,field,values,species,positions",
+    [
+        ("Silicon-Germanium", "labels", [0, 1], ["Si", "Ge"], ["Si", "Ge"]),
+        ("FeO", "magneticMoments", [0.5, -0.5], ["Fe", "Fe1", "O"], ["Fe", "Fe1", "O", "O"]),
+    ],
+)
+def test_atomic_species_from_element_and_magnetic_moment(workflow, name, field, values, species, positions):
+    definition = deepcopy(Materials.get_by_name_first_match(name))
+    definition["basis"][field] = [{"id": index, "value": value} for index, value in enumerate(values)]
+    workflow.subworkflows[0].model.method.data.pseudo = [
+        {"element": element, "filename": f"{element}.upf"} for element in ("Si", "Ge", "Fe", "O")
+    ]
+    workflow.render({"material": Material.create(definition)})
+    rendered = workflow.subworkflows[0].units[0].input[0].rendered
+    species_lines = rendered.split("ATOMIC_SPECIES\n")[1].split("\n\n")[0].splitlines()
+    position_lines = rendered.split("ATOMIC_POSITIONS crystal\n")[1].split("\n\n")[0].splitlines()
+    assert [line.split()[0] for line in species_lines] == species
+    assert [line.split()[0] for line in position_lines] == positions
 
 
 def test_missing_pseudopotential_fails(workflow, material):

@@ -3,6 +3,7 @@ import type {
     CollinearMagnetizationContextItemSchema,
     CollinearMagnetizationContextProviderSchema,
 } from "@mat3ra/esse/dist/js/types";
+import type { ConstrainedBasis } from "@mat3ra/made";
 import type { JSONSchema7 } from "json-schema";
 
 import materialContextMixin, {
@@ -20,12 +21,23 @@ type ExternalContext = JinjaExternalContext & MaterialExternalContext;
 interface CollinearMagnetizationDataManager extends MaterialContextMixin {}
 
 const defaultData = {
-    value: 0.0,
     isTotalMagnetization: false,
     totalMagnetization: 0.0,
 };
 
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
+
+/** One row per QE species of the basis, indexed as QE's starting_magnetization(i). */
+export function getStartingMagnetizationOfSpecies(
+    basis: ConstrainedBasis,
+): Data["startingMagnetization"] {
+    return basis.uniqueAtomicSpecies.map(({ name, magneticMoment }, index) => ({
+        index: index + 1,
+        atomicSpecies: name,
+        // QE reads starting_magnetization(i) as a fraction in [-1, 1], so a moment in uB is limited to it.
+        value: Math.min(1, Math.max(-1, magneticMoment)),
+    }));
+}
 
 class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "collinearMagnetization" as const;
@@ -44,34 +56,18 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
 
     private readonly isTotalMagnetization: boolean;
 
-    private readonly firstElement: string;
-
-    private readonly uniqueElementsWithLabels: string[];
+    private readonly startingMagnetization: Data["startingMagnetization"];
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.uniqueElementsWithLabels = [
-            ...new Set(this.material?.getBasis()?.elementsWithLabelsArray || []),
-        ];
-
-        this.firstElement =
-            this.uniqueElementsWithLabels?.length > 0 ? this.uniqueElementsWithLabels[0] : "";
+        this.startingMagnetization = getStartingMagnetizationOfSpecies(this.material.getBasis());
+        if (this.data) this.data.startingMagnetization = this.startingMagnetization;
 
         this.isTotalMagnetization = this.data?.isTotalMagnetization || false;
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
-            "properties.startingMagnetization": {
-                maxItems: this.uniqueElementsWithLabels.length,
-            },
-            "properties.startingMagnetization.items.properties.atomicSpecies": {
-                enum: this.uniqueElementsWithLabels,
-                default: this.firstElement,
-            },
-            "properties.startingMagnetization.items.properties.value": {
-                default: defaultData.value,
-            },
             "properties.isTotalMagnetization": {
                 default: defaultData.isTotalMagnetization,
             },
@@ -89,28 +85,10 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
 
     getDefaultData(): Data {
         return {
-            startingMagnetization: [
-                {
-                    index: 1,
-                    atomicSpecies: this.firstElement,
-                    value: defaultData.value,
-                },
-            ],
+            startingMagnetization: this.startingMagnetization,
             isTotalMagnetization: defaultData.isTotalMagnetization,
             totalMagnetization: defaultData.totalMagnetization,
         };
-    }
-
-    setData(data: Data) {
-        const startingMagnetization = data.startingMagnetization.map((row) => ({
-            ...row,
-            index: this.uniqueElementsWithLabels.indexOf(row.atomicSpecies) + 1,
-        }));
-
-        super.setData({
-            ...data,
-            startingMagnetization,
-        });
     }
 
     get uiSchemaStyled() {
@@ -124,7 +102,12 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
                         "ui:classNames": "col-xs-6",
                     },
                 },
-                "ui:readonly": this.isTotalMagnetization,
+                "ui:readonly": true,
+                "ui:options": {
+                    addable: false,
+                    orderable: false,
+                    removable: false,
+                },
             },
             isTotalMagnetization: {},
             totalMagnetization: {

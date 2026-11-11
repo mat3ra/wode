@@ -11,6 +11,7 @@ import materialContextMixin, {
 } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
+import { getStartingMagnetizationOfSpecies } from "./CollinearMagnetizationDataManager";
 
 type Data = NonCollinearMagnetizationContextProviderSchema;
 type Schema = NonCollinearMagnetizationContextItemSchema;
@@ -27,7 +28,6 @@ const defaultData = {
     isArbitrarySpinDirection: false,
     isFixedMagnetization: false,
     lforcet: true,
-    value: 0.0,
     angle1: 0.0,
     angle2: 0.0,
     constrainType: "atomic direction" as const,
@@ -52,8 +52,6 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
         return new NonCollinearMagnetizationDataManager(contextItem, externalContext);
     }
 
-    readonly isStartingMagnetization: boolean;
-
     readonly isConstrainedMagnetization: boolean;
 
     readonly isExistingChargeDensity: boolean;
@@ -66,13 +64,12 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
 
     readonly jsonSchema: JSONSchema7;
 
-    private readonly uniqueElementsWithLabels: string[];
+    private readonly startingMagnetization: NonNullable<Data["startingMagnetization"]>;
 
     constructor(contextItem: Partial<Schema>, externalContext: ExternalContext) {
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.isStartingMagnetization = this.data?.isStartingMagnetization ?? true;
         this.isConstrainedMagnetization = this.data?.isConstrainedMagnetization ?? false;
         this.isExistingChargeDensity = this.data?.isExistingChargeDensity ?? false;
         this.isArbitrarySpinDirection = this.data?.isArbitrarySpinDirection ?? false;
@@ -81,9 +78,8 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             lambda: 0.0,
             constrainType: "atomic direction" as const,
         };
-        this.uniqueElementsWithLabels = [
-            ...new Set(this.material?.getBasis()?.elementsWithLabelsArray || []),
-        ];
+        this.startingMagnetization = getStartingMagnetizationOfSpecies(this.material.getBasis());
+        if (this.data) this.data.startingMagnetization = this.startingMagnetization;
 
         const jsonSchema = JSONSchemasInterface.getPatchedSchemaById(jsonSchemaId, {
             isExistingChargeDensity: { default: defaultData.isExistingChargeDensity },
@@ -91,18 +87,9 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             isArbitrarySpinAngle: { default: defaultData.isArbitrarySpinAngle },
             isConstrainedMagnetization: { default: defaultData.isConstrainedMagnetization },
             isFixedMagnetization: { default: defaultData.isFixedMagnetization },
-            startingMagnetization: {
-                minItems: this.uniqueElementsWithLabels.length,
-                maxItems: this.uniqueElementsWithLabels.length,
-            },
-            "startingMagnetization.items.properties.value": {
-                default: defaultData.value,
-                minimum: -1.0,
-                maximum: 1.0,
-            },
             spinAngles: {
-                minItems: this.uniqueElementsWithLabels.length,
-                maxItems: this.uniqueElementsWithLabels.length,
+                minItems: this.startingMagnetization.length,
+                maxItems: this.startingMagnetization.length,
             },
             "spinAngles.items.properties.angle1": { default: defaultData.angle1 },
             "spinAngles.items.properties.angle2": { default: defaultData.angle2 },
@@ -123,18 +110,10 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
     }
 
     getDefaultData(): Data {
-        const startingMagnetization = this.uniqueElementsWithLabels.map((element, index) => {
+        const spinAngles = this.startingMagnetization.map(({ index, atomicSpecies }) => {
             return {
-                index: index + 1,
-                atomicSpecies: element,
-                value: defaultData.value,
-            };
-        });
-
-        const spinAngles = this.uniqueElementsWithLabels.map((element, index) => {
-            return {
-                index: index + 1,
-                atomicSpecies: element,
+                index,
+                atomicSpecies,
                 angle1: defaultData.angle1,
                 angle2: defaultData.angle2,
             };
@@ -149,7 +128,7 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             isFixedMagnetization: defaultData.isFixedMagnetization,
             lforcet: defaultData.lforcet,
             spinAngles,
-            startingMagnetization,
+            startingMagnetization: this.startingMagnetization,
             constrainedMagnetization: {
                 lambda: defaultData.lambda,
                 constrainType: defaultData.constrainType,
@@ -196,7 +175,7 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
                         "ui:classNames": "col-xs-6",
                     },
                 },
-                "ui:readonly": !this.isStartingMagnetization,
+                "ui:readonly": true,
                 "ui:options": {
                     addable: false,
                     orderable: false,

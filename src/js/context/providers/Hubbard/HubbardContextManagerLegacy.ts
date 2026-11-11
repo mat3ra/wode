@@ -63,6 +63,7 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
         }
 
         this.jsonSchema = jsonSchema;
+        if (this.data) this.setData(this.data as Data);
     }
 
     getDefaultData(): Data {
@@ -76,18 +77,19 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
     }
 
     setData(data: Data) {
-        const hubbardUValues = data.map((row) => {
-            const atomicSpeciesIndex =
-                this.uniqueElementsWithLabels?.length > 0
-                    ? this.uniqueElementsWithLabels.indexOf(row.atomicSpecies || "") + 1
-                    : undefined;
+        super.setData(this.withSpeciesIndex(data));
+    }
 
-            return {
-                ...row,
-                atomicSpeciesIndex,
-            };
-        }) as Data;
+    protected patchForRendering(data: Data): Data {
+        return this.withSpeciesIndex(this.expandToSpecies(data) as Data);
+    }
 
-        super.setData(hubbardUValues);
+    private withSpeciesIndex(data: Data): Data {
+        // an element row takes its first species, which made names after the element
+        const names = this.material.getBasis().uniqueAtomicSpecies.map(({ name }) => name);
+        return data.map((row) => ({
+            ...row,
+            atomicSpeciesIndex: names.indexOf(row.atomicSpecies || "") + 1,
+        })) as Data;
     }
 }
