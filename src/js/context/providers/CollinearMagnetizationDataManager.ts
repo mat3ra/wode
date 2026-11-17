@@ -133,6 +133,7 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
                 items: {
                     atomicSpecies: {
                         "ui:classNames": "col-xs-3",
+                        "ui:readonly": true,
                     },
                     value: {
                         "ui:classNames": "col-xs-6",
