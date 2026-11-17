@@ -11,7 +11,7 @@ import materialContextMixin, {
 } from "../mixins/MaterialContextMixin";
 import type { UnitContext } from "./base/ContextProvider";
 import JSONSchemaDataProvider, { type JinjaExternalContext } from "./base/JSONSchemaDataProvider";
-import { getStartingMagnetizationOfSpecies } from "./CollinearMagnetizationDataManager";
+import { getRowsOfSpecies, getStartingMagnetization } from "./CollinearMagnetizationDataManager";
 
 type Data = NonCollinearMagnetizationContextProviderSchema;
 type Schema = NonCollinearMagnetizationContextItemSchema;
@@ -84,22 +84,15 @@ class NonCollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema
             lambda: 0.0,
             constrainType: "atomic direction" as const,
         };
-        this.startingMagnetization = getStartingMagnetizationOfSpecies(
+        this.startingMagnetization = getRowsOfSpecies(
             this.material.getBasis(),
             this.data?.startingMagnetization,
+            getStartingMagnetization,
         );
-        this.spinAngles = this.startingMagnetization.map(({ index, atomicSpecies }) => {
-            return (
-                this.data?.spinAngles?.find(
-                    (row) => row.atomicSpecies === atomicSpecies && row.index === index,
-                ) ?? {
-                    index,
-                    atomicSpecies,
-                    angle1: defaultData.angle1,
-                    angle2: defaultData.angle2,
-                }
-            );
-        });
+        this.spinAngles = getRowsOfSpecies(this.material.getBasis(), this.data?.spinAngles, () => ({
+            angle1: defaultData.angle1,
+            angle2: defaultData.angle2,
+        }));
         if (this.data) {
             this.data.startingMagnetization = this.startingMagnetization;
             this.data.spinAngles = this.spinAngles;

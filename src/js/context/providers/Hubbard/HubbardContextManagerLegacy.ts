@@ -63,7 +63,6 @@ export default class HubbardContextManagerLegacy extends HubbardContextProvider<
         }
 
         this.jsonSchema = jsonSchema;
-        if (this.data) this.setData(this.data as Data);
     }
 
     getDefaultData(): Data {

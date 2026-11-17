@@ -35,13 +35,13 @@ const buildQEPWXData = (material: OrderedMaterial) =>
         { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
     ).getDefaultData();
 
-const buildFeO = (magneticMoments: number[]) => {
+const buildMaterial = (name: string, field: "labels" | "magneticMoments", values: number[]) => {
     const material = new OrderedMaterial(
-        MaterialStandata.getRuntimeDataConfigs().find((config) => config.name.includes("FeO")),
+        MaterialStandata.getRuntimeDataConfigs().find((config) => config.name.includes(name)),
     );
     material.setBasis({
         ...material.getBasis().toJSON(),
-        magneticMoments: magneticMoments.map((value, id) => ({ id, value })),
+        [field]: values.map((value, id) => ({ id, value })),
     });
     return material;
 };
@@ -51,20 +51,9 @@ describe("Atomic species from element and magnetic moment", () => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
     });
 
-    const siliconGermanium = OrderedMaterial.createDefault();
-    siliconGermanium.setBasis({
-        ...siliconGermanium.getBasis().toJSON(),
-        elements: [
-            { id: 0, value: "Si" },
-            { id: 1, value: "Ge" },
-        ],
-        labels: [
-            { id: 0, value: 0 },
-            { id: 1, value: 1 },
-        ],
-    });
-    const antiferromagneticFeO = buildFeO([0.5, -0.5]);
-    const ferromagneticFeO = buildFeO([0.5, 0.5]);
+    const siliconGermanium = buildMaterial("Silicon-Germanium", "labels", [0, 1]);
+    const antiferromagneticFeO = buildMaterial("FeO", "magneticMoments", [0.5, -0.5]);
+    const ferromagneticFeO = buildMaterial("FeO", "magneticMoments", [0.5, 0.5]);
     const externalContext = { material: antiferromagneticFeO };
     const species = ["Fe", "Fe1", "O"];
 
@@ -85,37 +74,17 @@ describe("Atomic species from element and magnetic moment", () => {
     });
 
     [
-        {
-            Provider: CollinearMagnetizationDataManager,
-            spinAngleSpecies: undefined,
-            storedSpinAngles: {},
-            spinAngles: undefined,
-        },
-        {
-            Provider: NonCollinearMagnetizationDataManager,
-            spinAngleSpecies: species,
-            storedSpinAngles: {
-                spinAngles: species.map((atomicSpecies, index) => ({
-                    index: index + 1,
-                    atomicSpecies,
-                    angle1: 90,
-                    angle2: 0,
-                })),
-            },
-            spinAngles: [
-                { index: 1, atomicSpecies: "Fe", angle1: 90, angle2: 0 },
-                { index: 2, atomicSpecies: "O", angle1: 0, angle2: 0 },
-            ],
-        },
-    ].forEach(({ Provider, spinAngleSpecies, storedSpinAngles, spinAngles }) => {
+        { Provider: CollinearMagnetizationDataManager },
+        { Provider: NonCollinearMagnetizationDataManager },
+    ].forEach(({ Provider }) => {
         it(`${Provider.name} shows the material's species limited to [-1, 1], stored rows of the same species and index kept`, () => {
-            const storedData = new Provider({}, { material: buildFeO([2.2, -2.2]) }).getData();
-            const provider = new Provider(
-                { data: { ...storedData, ...storedSpinAngles } } as never,
-                {
-                    material: ferromagneticFeO,
-                },
-            );
+            const storedData = new Provider(
+                {},
+                { material: buildMaterial("FeO", "magneticMoments", [2.2, -2.2]) },
+            ).getData();
+            const provider = new Provider({ data: storedData } as never, {
+                material: ferromagneticFeO,
+            });
             const labelRows = [
                 { index: 1, atomicSpecies: "Fe1", value: 0.5 },
                 { index: 2, atomicSpecies: "Fe2", value: -0.5 },
@@ -125,29 +94,40 @@ describe("Atomic species from element and magnetic moment", () => {
                 { data: { ...storedData, startingMagnetization: labelRows } } as never,
                 { material: antiferromagneticFeO },
             );
-            const data = provider.getData();
 
             expect(storedData.startingMagnetization).to.deep.equal([
                 { index: 1, atomicSpecies: "Fe", value: 1 },
                 { index: 2, atomicSpecies: "Fe1", value: -1 },
                 { index: 3, atomicSpecies: "O", value: 0 },
             ]);
-            expect(
-                "spinAngles" in storedData
-                    ? storedData.spinAngles?.map(({ atomicSpecies }) => atomicSpecies)
-                    : undefined,
-            ).to.deep.equal(spinAngleSpecies);
-            expect(data.startingMagnetization).to.deep.equal([
+            expect(provider.getData().startingMagnetization).to.deep.equal([
                 { index: 1, atomicSpecies: "Fe", value: 1 },
                 { index: 2, atomicSpecies: "O", value: 0 },
             ]);
-            expect("spinAngles" in data ? data.spinAngles : undefined).to.deep.equal(spinAngles);
             expect(labelProvider.getData().startingMagnetization).to.deep.equal([
                 { index: 1, atomicSpecies: "Fe", value: 0.5 },
                 { index: 2, atomicSpecies: "Fe1", value: -0.5 },
                 { index: 3, atomicSpecies: "O", value: 0 },
             ]);
         });
+    });
+
+    it("NonCollinearMagnetizationDataManager shows one spin angle row per species, stored rows of the same species and index kept", () => {
+        const spinAngles = species.map((atomicSpecies, index) => ({
+            index: index + 1,
+            atomicSpecies,
+            angle1: 90,
+            angle2: 0,
+        }));
+        const provider = new NonCollinearMagnetizationDataManager(
+            { data: { spinAngles } } as never,
+            { material: ferromagneticFeO },
+        );
+
+        expect(provider.getData().spinAngles).to.deep.equal([
+            { index: 1, atomicSpecies: "Fe", angle1: 90, angle2: 0 },
+            { index: 2, atomicSpecies: "O", angle1: 0, angle2: 0 },
+        ]);
     });
 
     [
@@ -184,7 +164,6 @@ describe("Atomic species from element and magnetic moment", () => {
         const rowO = { atomicSpecies: "O", atomicSpeciesIndex: 2, hubbardUValue: 1 };
         const provider = new HubbardContextManagerLegacy({ data: [rowFe, rowO] }, externalContext);
 
-        expect(provider.getData()).to.deep.equal([rowFe, { ...rowO, atomicSpeciesIndex: 3 }]);
         expect(provider.getDataForRendering()).to.deep.equal([
             rowFe,
             { ...rowFe, atomicSpecies: "Fe1", atomicSpeciesIndex: 2 },

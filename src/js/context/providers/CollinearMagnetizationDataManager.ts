@@ -29,22 +29,26 @@ const defaultData = {
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
 
 /**
- * One row per QE species of the basis, indexed as QE's starting_magnetization(i); a stored row keeps its value.
+ * One row per QE species of the basis, indexed as QE's starting_magnetization(i); a stored row keeps its values.
  * A stored row matches on index too: a label-named row ("Fe1" = label 1) must not land on the species "Fe1".
  */
-export function getStartingMagnetizationOfSpecies(
+export function getRowsOfSpecies<Values>(
     basis: ConstrainedBasis,
-    storedRows: Partial<Data["startingMagnetization"][number]>[] = [],
-): Data["startingMagnetization"] {
+    storedRows: Partial<{ index: number; atomicSpecies: string } & Values>[] | undefined,
+    getDefaultValues: (magneticMoment: number) => Values,
+) {
     return basis.uniqueAtomicSpecies.map(({ name, magneticMoment }, index) => ({
         index: index + 1,
         atomicSpecies: name,
-        // QE reads starting_magnetization(i) as a fraction in [-1, 1], so a moment in uB is limited to it.
-        value:
-            storedRows.find((row) => row.atomicSpecies === name && row.index === index + 1)
-                ?.value ?? Math.min(1, Math.max(-1, magneticMoment)),
+        ...getDefaultValues(magneticMoment),
+        ...storedRows?.find((row) => row.atomicSpecies === name && row.index === index + 1),
     }));
 }
+
+// QE reads starting_magnetization(i) as a fraction in [-1, 1], so a moment in uB is limited to it.
+export const getStartingMagnetization = (magneticMoment: number) => ({
+    value: Math.min(1, Math.max(-1, magneticMoment)),
+});
 
 class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, ExternalContext> {
     readonly name = "collinearMagnetization" as const;
@@ -71,9 +75,10 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
         super(contextItem, externalContext);
         this.initMaterialContextMixin(externalContext);
 
-        this.startingMagnetization = getStartingMagnetizationOfSpecies(
+        this.startingMagnetization = getRowsOfSpecies(
             this.material.getBasis(),
             this.data?.startingMagnetization,
+            getStartingMagnetization,
         );
         if (this.data) this.data.startingMagnetization = this.startingMagnetization;
 
