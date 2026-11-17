@@ -28,7 +28,10 @@ const defaultData = {
 
 const jsonSchemaId = "context-providers-directory/collinear-magnetization-context-provider";
 
-/** One row per QE species of the basis, indexed as QE's starting_magnetization(i); a stored row keeps its value. */
+/**
+ * One row per QE species of the basis, indexed as QE's starting_magnetization(i); a stored row keeps its value.
+ * A stored row matches on index too: a label-named row ("Fe1" = label 1) must not land on the species "Fe1".
+ */
 export function getStartingMagnetizationOfSpecies(
     basis: ConstrainedBasis,
     storedRows: Partial<Data["startingMagnetization"][number]>[] = [],
@@ -38,8 +41,8 @@ export function getStartingMagnetizationOfSpecies(
         atomicSpecies: name,
         // QE reads starting_magnetization(i) as a fraction in [-1, 1], so a moment in uB is limited to it.
         value:
-            storedRows.find(({ atomicSpecies }) => atomicSpecies === name)?.value ??
-            Math.min(1, Math.max(-1, magneticMoment)),
+            storedRows.find((row) => row.atomicSpecies === name && row.index === index + 1)
+                ?.value ?? Math.min(1, Math.max(-1, magneticMoment)),
     }));
 }
 
@@ -136,6 +139,11 @@ class CollinearMagnetizationDataManager extends JSONSchemaDataProvider<Schema, E
                     },
                 },
                 "ui:readonly": this.isTotalMagnetization,
+                "ui:options": {
+                    addable: false,
+                    orderable: false,
+                    removable: false,
+                },
             },
             isTotalMagnetization: {},
             totalMagnetization: {

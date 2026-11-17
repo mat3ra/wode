@@ -85,14 +85,47 @@ describe("Atomic species from element and magnetic moment", () => {
     });
 
     [
-        { Provider: CollinearMagnetizationDataManager, spinAngleSpecies: undefined },
-        { Provider: NonCollinearMagnetizationDataManager, spinAngleSpecies: species },
-    ].forEach(({ Provider, spinAngleSpecies }) => {
-        it(`${Provider.name} shows the material's species limited to [-1, 1], stored rows kept`, () => {
+        {
+            Provider: CollinearMagnetizationDataManager,
+            spinAngleSpecies: undefined,
+            storedSpinAngles: {},
+            spinAngles: undefined,
+        },
+        {
+            Provider: NonCollinearMagnetizationDataManager,
+            spinAngleSpecies: species,
+            storedSpinAngles: {
+                spinAngles: species.map((atomicSpecies, index) => ({
+                    index: index + 1,
+                    atomicSpecies,
+                    angle1: 90,
+                    angle2: 0,
+                })),
+            },
+            spinAngles: [
+                { index: 1, atomicSpecies: "Fe", angle1: 90, angle2: 0 },
+                { index: 2, atomicSpecies: "O", angle1: 0, angle2: 0 },
+            ],
+        },
+    ].forEach(({ Provider, spinAngleSpecies, storedSpinAngles, spinAngles }) => {
+        it(`${Provider.name} shows the material's species limited to [-1, 1], stored rows of the same species and index kept`, () => {
             const storedData = new Provider({}, { material: buildFeO([2.2, -2.2]) }).getData();
-            const provider = new Provider({ data: storedData } as never, {
-                material: ferromagneticFeO,
-            });
+            const provider = new Provider(
+                { data: { ...storedData, ...storedSpinAngles } } as never,
+                {
+                    material: ferromagneticFeO,
+                },
+            );
+            const labelRows = [
+                { index: 1, atomicSpecies: "Fe1", value: 0.5 },
+                { index: 2, atomicSpecies: "Fe2", value: -0.5 },
+                { index: 3, atomicSpecies: "O", value: 0 },
+            ];
+            const labelProvider = new Provider(
+                { data: { ...storedData, startingMagnetization: labelRows } } as never,
+                { material: antiferromagneticFeO },
+            );
+            const data = provider.getData();
 
             expect(storedData.startingMagnetization).to.deep.equal([
                 { index: 1, atomicSpecies: "Fe", value: 1 },
@@ -104,9 +137,15 @@ describe("Atomic species from element and magnetic moment", () => {
                     ? storedData.spinAngles?.map(({ atomicSpecies }) => atomicSpecies)
                     : undefined,
             ).to.deep.equal(spinAngleSpecies);
-            expect(provider.getData().startingMagnetization).to.deep.equal([
+            expect(data.startingMagnetization).to.deep.equal([
                 { index: 1, atomicSpecies: "Fe", value: 1 },
                 { index: 2, atomicSpecies: "O", value: 0 },
+            ]);
+            expect("spinAngles" in data ? data.spinAngles : undefined).to.deep.equal(spinAngles);
+            expect(labelProvider.getData().startingMagnetization).to.deep.equal([
+                { index: 1, atomicSpecies: "Fe", value: 0.5 },
+                { index: 2, atomicSpecies: "Fe1", value: -0.5 },
+                { index: 3, atomicSpecies: "O", value: 0 },
             ]);
         });
     });
