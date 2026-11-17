@@ -88,7 +88,7 @@ describe("Atomic species from element and magnetic moment", () => {
         { Provider: CollinearMagnetizationDataManager, spinAngleSpecies: undefined },
         { Provider: NonCollinearMagnetizationDataManager, spinAngleSpecies: species },
     ].forEach(({ Provider, spinAngleSpecies }) => {
-        it(`${Provider.name} shows the material's species limited to [-1, 1], not stored rows`, () => {
+        it(`${Provider.name} shows the material's species limited to [-1, 1], stored rows kept`, () => {
             const storedData = new Provider({}, { material: buildFeO([2.2, -2.2]) }).getData();
             const provider = new Provider({ data: storedData } as never, {
                 material: ferromagneticFeO,
@@ -105,7 +105,7 @@ describe("Atomic species from element and magnetic moment", () => {
                     : undefined,
             ).to.deep.equal(spinAngleSpecies);
             expect(provider.getData().startingMagnetization).to.deep.equal([
-                { index: 1, atomicSpecies: "Fe", value: 0.5 },
+                { index: 1, atomicSpecies: "Fe", value: 1 },
                 { index: 2, atomicSpecies: "O", value: 0 },
             ]);
         });
