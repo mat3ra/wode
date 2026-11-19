@@ -105,23 +105,11 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         const lattice = material.getLattice();
         const { jobHasParent, workflowHasRelaxation } = this;
 
-        const ATOMIC_SPECIES = basis.uniqueElements.map((symbol) => {
+        const ATOMIC_SPECIES = basis.uniqueAtomicSpecies.map(({ name, element }) => {
             return {
-                X: symbol,
-                Mass_X: PERIODIC_TABLE[symbol].atomic_mass,
-                PseudoPot_X: this.getPseudopotentialReference(symbol),
-            };
-        });
-
-        const uniqueElementsWithLabels = [...new Set(basis.elementsWithLabelsArray)];
-
-        const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
-            const symbolWithoutLabel = symbol.replace(/\d$/, "") as AtomicElementValue;
-            const label = symbol.match(/\d$/g) ? symbol.match(/\d$/g)?.[0] : "";
-            return {
-                X: `${symbolWithoutLabel}${label}`,
-                Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
-                PseudoPot_X: this.getPseudopotentialReference(symbolWithoutLabel),
+                X: name,
+                Mass_X: PERIODIC_TABLE[element].atomic_mass,
+                PseudoPot_X: this.getPseudopotentialReference(element),
             };
         });
 
@@ -132,9 +120,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
-            ([element, label, coordinate, constraint]) => {
+            ([, species, coordinate, constraint]) => {
                 return {
-                    X: `${element}${label}`,
+                    X: species,
                     x: coordinate[0],
                     y: coordinate[1],
                     z: coordinate[2],
@@ -149,10 +137,10 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             IBRAV: 0,
             RESTART_MODE: jobHasParent || workflowHasRelaxation ? "restart" : "from_scratch",
             ATOMIC_SPECIES,
-            ATOMIC_SPECIES_WITH_LABELS,
+            ATOMIC_SPECIES_WITH_LABELS: ATOMIC_SPECIES,
             NAT: basis.atomicPositions.length,
-            NTYP: basis.uniqueElements.length,
-            NTYP_WITH_LABELS: uniqueElementsWithLabels.length,
+            NTYP: ATOMIC_SPECIES.length,
+            NTYP_WITH_LABELS: ATOMIC_SPECIES.length,
             ATOMIC_POSITIONS,
             ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS: basis.atomicPositions.join("\n"),
             CELL_PARAMETERS,

@@ -75,4 +75,8 @@ export default class HubbardUContextManager extends HubbardContextProvider<Schem
             },
         ];
     }
+
+    protected patchForRendering(data: Data): Data {
+        return this.expandToSpecies(data);
+    }
 }
