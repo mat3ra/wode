@@ -170,4 +170,15 @@ describe("Subworkflow", () => {
 
         expect(subworkflow.toJSON().units[0]).to.have.nested.property("application.build", "Intel");
     });
+
+    it("a change made on a unit instance is in the serialized units", () => {
+        const subworkflow = new Subworkflow({
+            ...Subworkflow.defaultConfig,
+            units: [new AssignmentUnit({ operand: "a", value: 1 }).toJSON()],
+        });
+
+        subworkflow.unitsInstances[0].setProp("name", "changed");
+
+        expect(subworkflow.toJSON().units[0]).to.have.property("name", "changed");
+    });
 });

@@ -90,15 +90,11 @@ type Schema = SubworkflowEntity;
 class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     private ModelFactory: typeof ModelFactory;
 
-    private applicationInstance: Application;
-
-    unitsInstances!: AnySubworkflowUnit[];
-
-    modelInstance: Model;
-
     properties: string[] = [];
 
     repetition = 0;
+
+    static _isDeepCloneRequired = true;
 
     declare static createDefault: () => Subworkflow;
 
@@ -110,13 +106,23 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     constructor(config: NoInfer<S>, _ModelFactory = ModelFactory) {
         super(config);
         this.ModelFactory = _ModelFactory;
-
-        this.applicationInstance = new Application(this.application);
-        this.modelInstance = this.ModelFactory.create({
-            ...this.model,
-            application: this.application,
-        });
         this.setUnits(this.units.map((cfg) => UnitFactory.createInSubworkflow(cfg)));
+    }
+
+    private get applicationInstance() {
+        return InMemoryEntity.getEntityForData(this.application, (data) => new Application(data));
+    }
+
+    get unitsInstances() {
+        return this.units.map((unit) =>
+            InMemoryEntity.getEntityForData(unit, UnitFactory.createInSubworkflow),
+        );
+    }
+
+    get modelInstance() {
+        return InMemoryEntity.getEntityForData(this.model, (data) =>
+            this.ModelFactory.create({ ...data, application: this.application }),
+        );
     }
 
     static get defaultConfig() {
@@ -162,7 +168,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         // reset units if application name changes
         const previousApplicationName = this.application.name;
         this.application = application.toJSON();
-        this.applicationInstance = application;
 
         if (previousApplicationName !== application.name) {
             // TODO: figure out how to set a default unit per new application instead of removing all
@@ -172,9 +177,8 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             this.unitsInstances
                 .filter((unit) => unit.type === UnitType.execution)
                 .forEach((unit) => {
-                    unit.setApplication({ application: this.application });
+                    unit.setApplication({ application });
                 });
-            this.units = this.unitsInstances.map((unit) => unit.toJSON());
         }
 
         // set model to the default one for the application selected
@@ -186,7 +190,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     setModel(model: Model) {
-        this.modelInstance = model;
         this.model = model.toJSON() as SubworkflowSchema["model"];
     }
 
@@ -214,9 +217,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                 u.render(ctx);
             }
         });
-
-        // Keep serialized `units` in sync with instances after execution units update `input`.
-        this.units = this.unitsInstances.map((u) => u.toJSON());
     }
 
     /**
@@ -238,8 +238,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     private setUnits(units: AnySubworkflowUnit[]) {
-        this.unitsInstances = setUnitLinks(units);
-        this.units = units.map((x) => x.toJSON());
+        this.units = setUnitLinks(units);
         this.properties = units.map((x) => x.resultNames).flat();
     }
 
@@ -264,8 +263,9 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     replaceUnit(index: number, unit: AnySubworkflowUnit) {
-        this.unitsInstances[index] = unit;
-        this.setUnits([...this.unitsInstances]);
+        const { unitsInstances } = this;
+        unitsInstances[index] = unit;
+        this.setUnits(unitsInstances);
     }
 
     setIsDraft(bool: boolean) {
@@ -393,7 +393,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                 });
 
                 this.modelInstance.setMethod(method);
-                this.model = this.modelInstance.toJSON() as SubworkflowSchema["model"];
             });
 
         // TODO: Try if/else instead of running both
@@ -404,7 +403,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             });
 
             this.modelInstance.setMethod(method);
-            this.model = this.modelInstance.toJSON() as SubworkflowSchema["model"];
         }
     }
 

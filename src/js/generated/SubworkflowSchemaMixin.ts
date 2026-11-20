@@ -1,4 +1,4 @@
-import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, SubworkflowMixinSchema } from "@mat3ra/esse/dist/js/types";
 
 export type SubworkflowSchemaMixin = SubworkflowMixinSchema;
@@ -16,31 +16,50 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("properties");
         },
         set properties(value: SubworkflowMixinSchema["properties"]) {
-            this.setProp("properties", value);
+            this.setProp(
+                "properties",
+                value?.map((item: unknown) =>
+                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+                ),
+            );
         },
         get compute() {
             return this.prop("compute");
         },
         set compute(value: SubworkflowMixinSchema["compute"]) {
-            this.setProp("compute", value);
+            this.setProp(
+                "compute",
+                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
+            );
         },
         get units() {
             return this.requiredProp("units");
         },
         set units(value: SubworkflowMixinSchema["units"]) {
-            this.setProp("units", value);
+            this.setProp(
+                "units",
+                value?.map((item: unknown) =>
+                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+                ),
+            );
         },
         get model() {
             return this.requiredProp("model");
         },
         set model(value: SubworkflowMixinSchema["model"]) {
-            this.setProp("model", value);
+            this.setProp(
+                "model",
+                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
+            );
         },
         get application() {
             return this.requiredProp("application");
         },
         set application(value: SubworkflowMixinSchema["application"]) {
-            this.setProp("application", value);
+            this.setProp(
+                "application",
+                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
+            );
         },
         get isMultiMaterial() {
             return this.prop("isMultiMaterial");

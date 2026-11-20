@@ -1,4 +1,4 @@
-import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type {
     AssignmentUnitMixinSchema,
     BaseInMemoryEntitySchema,
@@ -25,7 +25,12 @@ export function assignmentUnitSchemaMixin<T extends InMemoryEntity>(
             return this.prop("input");
         },
         set input(value: AssignmentUnitMixinSchema["input"]) {
-            this.setProp("input", value);
+            this.setProp(
+                "input",
+                value?.map((item: unknown) =>
+                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+                ),
+            );
         },
         get operand() {
             return this.requiredProp("operand");

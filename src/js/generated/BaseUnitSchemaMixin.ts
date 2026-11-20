@@ -1,4 +1,4 @@
-import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type {
     BaseInMemoryEntitySchema,
     WorkflowBaseUnitMixinSchema,

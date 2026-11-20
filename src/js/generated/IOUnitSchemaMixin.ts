@@ -1,4 +1,4 @@
-import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, DataIOUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
 
 export type IOUnitSchemaMixin = DataIOUnitMixinSchema;
@@ -32,7 +32,12 @@ export function iOUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("input");
         },
         set input(value: DataIOUnitMixinSchema["input"]) {
-            this.setProp("input", value);
+            this.setProp(
+                "input",
+                value?.map((item: unknown) =>
+                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+                ),
+            );
         },
     };
 
