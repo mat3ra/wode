@@ -1,7 +1,7 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, SubworkflowMixinSchema } from "@mat3ra/esse/dist/js/types";
 
-export type SubworkflowSchemaMixin = SubworkflowMixinSchema;
+export type SubworkflowSchemaMixin = Omit<SubworkflowMixinSchema, "units">;
 
 export type SubworkflowInMemoryEntity = InMemoryEntity<
     BaseInMemoryEntitySchema & SubworkflowSchemaMixin
@@ -23,12 +23,6 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         },
         set compute(value: SubworkflowMixinSchema["compute"]) {
             this.setProp("compute", value);
-        },
-        get units() {
-            return this.requiredProp("units");
-        },
-        set units(value: SubworkflowMixinSchema["units"]) {
-            this.setProp("units", value);
         },
         get model() {
             return this.requiredProp("model");

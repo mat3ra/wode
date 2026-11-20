@@ -30,7 +30,6 @@ const OUTPUT_PATHS = {
     "workflow/unit/mixins/subworkflow": "src/js/generated/SubworkflowUnitSchemaMixin.ts",
     "workflow/unit/mixins/error": "src/js/generated/ErrorUnitSchemaMixin.ts",
     "workflow/unit/input/-inputItem": "src/js/generated/ExecutionUnitInputSchemaMixin.ts",
-    "workflow/subworkflow/mixin": "src/js/generated/SubworkflowSchemaMixin.ts",
     "workflow/base": "src/js/generated/WorkflowSchemaMixin.ts",
 };
 
@@ -38,7 +37,13 @@ function main() {
     // Type assertion to handle schema compatibility - the schemas from esse may have slightly different types
     const result = generateSchemaMixin(allSchemas as JSONSchema7[], OUTPUT_PATHS);
 
-    if (result.errorCount > 0) {
+    const subworkflowResult = generateSchemaMixin(
+        allSchemas as JSONSchema7[],
+        { "workflow/subworkflow/mixin": "src/js/generated/SubworkflowSchemaMixin.ts" },
+        ["units"],
+    );
+
+    if (result.errorCount > 0 || subworkflowResult.errorCount > 0) {
         process.exit(1);
     }
 }

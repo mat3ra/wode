@@ -51,7 +51,7 @@ type ConvergenceConfig = {
     externalContext: SubworkflowExternalContext;
 };
 
-interface SubworkflowCore
+interface Subworkflow
     extends Defaultable,
         NamedEntity,
         SubworkflowSchemaMixin,
@@ -87,7 +87,7 @@ export type SubworkflowEntity = SubworkflowSchema & BaseInMemoryEntitySchema;
 
 type Schema = SubworkflowEntity;
 
-class SubworkflowCore<S extends Schema = Schema> extends InMemoryEntity<S> {
+class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     private ModelFactory: typeof ModelFactory;
 
     private applicationInstance: Application;
@@ -233,7 +233,7 @@ class SubworkflowCore<S extends Schema = Schema> extends InMemoryEntity<S> {
         }
     }
 
-    protected setUnits(units: AnySubworkflowUnit[]) {
+    private setUnits(units: AnySubworkflowUnit[]) {
         this.unitsInstances = setUnitLinks(units);
         this.properties = units.map((x) => x.resultNames).flat();
     }
@@ -541,16 +541,7 @@ class SubworkflowCore<S extends Schema = Schema> extends InMemoryEntity<S> {
         // `addUnit` adjusts the `next` field, hence the below.
         nextStep.next = unitForConvergence.flowchartId;
     }
-}
 
-namedEntityMixin(SubworkflowCore.prototype);
-defaultableEntityMixin(SubworkflowCore);
-computedEntityMixin(SubworkflowCore.prototype);
-subworkflowSchemaMixin(SubworkflowCore.prototype);
-hashedEntityMixin(SubworkflowCore.prototype);
-
-/** `units` is the JSON of the unit instances; a subclass, since the schema mixin above defines it. */
-class Subworkflow<S extends Schema = Schema> extends SubworkflowCore<S> {
     get units(): S["units"] {
         return this.unitsInstances.map((unit) => unit.toJSON());
     }
@@ -568,5 +559,11 @@ class Subworkflow<S extends Schema = Schema> extends SubworkflowCore<S> {
         Subworkflow.validateData({ ...this._json, units: this.units });
     }
 }
+
+namedEntityMixin(Subworkflow.prototype);
+defaultableEntityMixin(Subworkflow);
+computedEntityMixin(Subworkflow.prototype);
+subworkflowSchemaMixin(Subworkflow.prototype);
+hashedEntityMixin(Subworkflow.prototype);
 
 export default Subworkflow;
