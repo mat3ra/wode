@@ -161,6 +161,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         // TODO: adjust the logic above to take into account whether units need re-rendering after version change etc.
         // reset units if application name changes
         const previousApplicationName = this.application.name;
+        this.application = application.toJSON();
         this.applicationInstance = application;
 
         if (previousApplicationName !== application.name) {
@@ -171,12 +172,10 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             this.unitsInstances
                 .filter((unit) => unit.type === UnitType.execution)
                 .forEach((unit) => {
-                    unit.setApplication({ application: application.toJSON() });
+                    unit.setApplication({ application: this.application });
                 });
             this.units = this.unitsInstances.map((unit) => unit.toJSON());
         }
-
-        this.application = application.toJSON();
 
         // set model to the default one for the application selected
         this.setModel(
