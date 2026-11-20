@@ -193,8 +193,10 @@ describe("Subworkflow", () => {
             units: [unit],
         });
 
+        subworkflow.setRepetition(3);
         subworkflow.units = [{ ...unit, application: { ...unit.application, build: "Intel" } }];
 
+        expect(subworkflow.unitsInstances[0].repetition).to.equal(3);
         expect(subworkflow.unitsInstances[0]).to.have.nested.property("application.build", "Intel");
         expect(subworkflow.toJSON().units[0]).to.have.nested.property("application.build", "Intel");
     });

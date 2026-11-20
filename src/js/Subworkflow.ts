@@ -557,6 +557,7 @@ class Subworkflow<S extends Schema = Schema> extends SubworkflowCore<S> {
 
     set units(units: S["units"]) {
         this.setUnits(units.map((config) => UnitFactory.createInSubworkflow(config)));
+        this.setRepetition(this.repetition);
     }
 
     toJSON(): S {
