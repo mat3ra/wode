@@ -170,4 +170,32 @@ describe("Subworkflow", () => {
 
         expect(subworkflow.toJSON().units[0]).to.have.nested.property("application.build", "Intel");
     });
+
+    it("validate reads the live units", () => {
+        const application = new ApplicationRegistry().findApplication({ name: "espresso" });
+        const subworkflow = new Subworkflow({
+            ...Subworkflow.defaultConfig,
+            application,
+            units: [new ExecutionUnit({ application }).toJSON()],
+        });
+
+        subworkflow.unitsInstances[0].unsetProp("flowchartId");
+
+        expect(subworkflow.isValid()).to.equal(false);
+    });
+
+    it("units setter rebuilds the unit instances from JSON", () => {
+        const application = new ApplicationRegistry().findApplication({ name: "espresso" });
+        const unit = new ExecutionUnit({ application }).toJSON();
+        const subworkflow = new Subworkflow({
+            ...Subworkflow.defaultConfig,
+            application,
+            units: [unit],
+        });
+
+        subworkflow.units = [{ ...unit, application: { ...unit.application, build: "Intel" } }];
+
+        expect(subworkflow.unitsInstances[0]).to.have.nested.property("application.build", "Intel");
+        expect(subworkflow.toJSON().units[0]).to.have.nested.property("application.build", "Intel");
+    });
 });
