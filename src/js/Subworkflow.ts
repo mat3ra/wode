@@ -116,7 +116,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             ...this.model,
             application: this.application,
         });
-        this.setUnits(config.units.map((cfg) => UnitFactory.createInSubworkflow(cfg)));
+        this.setUnits(this.units.map((cfg) => UnitFactory.createInSubworkflow(cfg)));
     }
 
     static get defaultConfig() {
@@ -174,6 +174,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                 .forEach((unit) => {
                     unit.setApplication({ application: this.application });
                 });
+            this.units = this.unitsInstances.map((unit) => unit.toJSON());
         }
 
         // set model to the default one for the application selected
@@ -213,6 +214,9 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                 u.render(ctx);
             }
         });
+
+        // Keep serialized `units` in sync with instances after execution units update `input`.
+        this.units = this.unitsInstances.map((u) => u.toJSON());
     }
 
     /**
@@ -235,6 +239,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
 
     private setUnits(units: AnySubworkflowUnit[]) {
         this.unitsInstances = setUnitLinks(units);
+        this.units = units.map((x) => x.toJSON());
         this.properties = units.map((x) => x.resultNames).flat();
     }
 
@@ -540,23 +545,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
 
         // `addUnit` adjusts the `next` field, hence the below.
         nextStep.next = unitForConvergence.flowchartId;
-    }
-
-    get units(): S["units"] {
-        return this.unitsInstances.map((unit) => unit.toJSON());
-    }
-
-    set units(units: S["units"]) {
-        this.setUnits(units.map((config) => UnitFactory.createInSubworkflow(config)));
-        this.setRepetition(this.repetition);
-    }
-
-    toJSON(): S {
-        return this.clean({ ...this._json, units: this.units });
-    }
-
-    validate() {
-        Subworkflow.validateData({ ...this._json, units: this.units });
     }
 }
 
