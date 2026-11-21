@@ -60,4 +60,23 @@ describe("QEPWXInputDataManager with labeled elements", () => {
         expect(data.ATOMIC_SPECIES_WITH_LABELS[0].Mass_X).to.be.a("number").and.be.above(0);
         expect(data.ATOMIC_SPECIES_WITH_LABELS[1].Mass_X).to.be.a("number").and.be.above(0);
     });
+
+    it("names an unlabelled atom by its element in positions and species", () => {
+        const material = OrderedMaterial.createDefault();
+        material.setBasis({
+            ...material.getBasis().toJSON(),
+            atomic_properties: [
+                { name: ProtoPropertyEnum.atomic_labels, values: [{ id: 1, value: 1 }] },
+            ],
+        });
+
+        const provider = new QEPWXInputDataManager(
+            {},
+            { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
+        );
+        const data = provider.getDefaultData();
+
+        expect(data.ATOMIC_POSITIONS.map(({ X }) => X)).to.deep.equal(["Si", "Si1"]);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS.map(({ X }) => X)).to.deep.equal(["Si", "Si1"]);
+    });
 });
