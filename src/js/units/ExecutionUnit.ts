@@ -43,6 +43,8 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
 
     contextProvidersInstances: AnyContextProvider[] = [];
 
+    static _isDeepCloneRequired = true;
+
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/execution");
     }

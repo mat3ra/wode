@@ -79,4 +79,18 @@ describe("ExecutionUnit added input files", () => {
 
         expect(unit.toJSON().input[0]).to.have.property("rendered", "changed");
     });
+
+    it("serializing a unit leaves the registry's executable intact", () => {
+        const application = new ApplicationRegistry().findApplication({ name: "espresso" });
+        new ExecutionUnit({ application }).toJSON();
+
+        const { executable } = new ExecutionUnit({ application });
+
+        expect(executable).to.include.keys(
+            "monitors",
+            "results",
+            "preProcessors",
+            "postProcessors",
+        );
+    });
 });
