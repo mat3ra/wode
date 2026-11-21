@@ -75,15 +75,11 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
 
     static readonly defaultConfig = defaultWorkflowConfig;
 
+    static _isDeepCloneRequired = true;
+
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow");
     }
-
-    subworkflowInstances: Subworkflow[];
-
-    unitInstances!: AnyWorkflowUnit[];
-
-    workflowInstances: Workflow[];
 
     repetition = 0;
 
@@ -122,9 +118,27 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             _id: (rest as Partial<Schema>)._id || Utils.uuid.getUUID(),
         } as S);
 
-        this.subworkflowInstances = this.subworkflows.map((x) => new Subworkflow(x));
-        this.workflowInstances = this.workflows?.map((x) => new Workflow(x)) || [];
+        this.subworkflows = this.subworkflows.map((x) => new Subworkflow(x));
+        this.workflows = this.workflows.map((x) => new Workflow(x));
         this.setUnits(this.units.map((unit) => UnitFactory.createInWorkflow(unit)));
+    }
+
+    get subworkflowInstances() {
+        return this.subworkflows.map((subworkflow) =>
+            InMemoryEntity.getEntityForData(subworkflow, (data) => new Subworkflow(data)),
+        );
+    }
+
+    get unitInstances() {
+        return this.units.map((unit) =>
+            InMemoryEntity.getEntityForData(unit, UnitFactory.createInWorkflow),
+        );
+    }
+
+    get workflowInstances() {
+        return this.workflows.map((workflow) =>
+            InMemoryEntity.getEntityForData(workflow, (data) => new Workflow(data)),
+        );
     }
 
     get workflows() {
@@ -132,17 +146,19 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
     }
 
     set workflows(value: WorkflowSchema[]) {
-        (this._json as Schema).workflows = value;
+        (this._json as Schema).workflows = value.map((item) =>
+            item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+        );
     }
 
     addSubworkflow(subworkflow: Subworkflow, head = false, index = -1) {
         const subworkflowUnit = subworkflow.getAsUnit();
 
         if (head) {
-            this.subworkflowInstances.unshift(subworkflow);
+            this.subworkflows = [subworkflow, ...this.subworkflowInstances];
             this.addUnit(subworkflowUnit, head, index);
         } else {
-            this.subworkflowInstances.push(subworkflow);
+            this.subworkflows = [...this.subworkflowInstances, subworkflow];
             this.addUnit(subworkflowUnit, head, index);
         }
     }
@@ -162,8 +178,7 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
     }
 
     setUnits(arr: AnyWorkflowUnit[]) {
-        this.unitInstances = setUnitLinks(arr);
-        this.units = this.unitInstances.map((u) => u.toJSON());
+        this.units = setUnitLinks(arr);
     }
 
     /**
@@ -221,9 +236,6 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             ...super.toJSON(),
             name: this.name,
             properties: getProperties(this),
-            units: this.unitInstances.map((x) => x.toJSON()),
-            subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
-            workflows: this.workflowInstances.map((x) => x.toJSON()),
         } as S;
     }
 
@@ -275,7 +287,7 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             delete previousUnit.next;
         }
 
-        this.subworkflowInstances = this.subworkflowInstances.filter((x) => x.id !== unit.id);
+        this.subworkflows = this.subworkflowInstances.filter((x) => x.id !== unit.id);
 
         this.setUnits(this.unitInstances.filter((x) => x.flowchartId !== flowchartId));
     }
@@ -297,7 +309,6 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
                 });
 
                 this.workflows = [...(this.workflows || []), mapWorkflowConfig];
-                this.workflowInstances = this.workflows.map((x) => new Workflow(x));
 
                 this.addUnit(mapUnit, head, index);
 
@@ -321,7 +332,6 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
         this.addUnit(mapUnit);
 
         this.workflows = [...(this.workflows || []), mapWorkflowConfig];
-        this.workflowInstances = this.workflows.map((x) => new Workflow(x));
     }
 
     get allSubworkflows() {

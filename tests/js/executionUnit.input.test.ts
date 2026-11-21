@@ -71,4 +71,12 @@ describe("ExecutionUnit added input files", () => {
 
         expect(inputNames(unit)).to.deep.equal(driverNames);
     });
+
+    it("a change made on an input instance is in the serialized input", () => {
+        const unit = new ExecutionUnit({ application: pythonApplication });
+
+        unit.inputInstances[0].setProp("rendered", "changed");
+
+        expect(unit.toJSON().input[0]).to.have.property("rendered", "changed");
+    });
 });

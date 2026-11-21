@@ -100,6 +100,14 @@ describe("Workflow", () => {
             expect(json).to.have.property("subworkflows").that.is.an("array");
             expect(json).to.have.property("workflows").that.is.an("array");
         });
+
+        it("a change made on a subworkflow instance is in the stored subworkflows", () => {
+            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
+
+            workflow.subworkflowInstances[0].setName("changed");
+
+            expect(workflow.subworkflows[0]).to.have.property("name", "changed");
+        });
     });
 
     describe("getters", () => {
