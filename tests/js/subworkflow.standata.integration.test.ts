@@ -1,3 +1,4 @@
+import { Application } from "@mat3ra/ade";
 import {
     type InMemoryEntityInSet,
     inMemoryEntityInSetMixin,
@@ -14,9 +15,9 @@ import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
-import { Workflow } from "../../src/js";
+import { Subworkflow, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
-import { AssignmentUnit, ConditionUnit } from "../../src/js/units";
+import { AssignmentUnit, ConditionUnit, ExecutionUnit } from "../../src/js/units";
 import type { WorkflowRenderContext } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
 
@@ -146,5 +147,27 @@ describe("Subworkflow", () => {
                 "\n",
             )}`,
         ).to.be.above(0);
+    });
+
+    it("setApplication carries a new build into the serialized execution units", () => {
+        const registry = new ApplicationRegistry();
+        const application = registry.findApplication({
+            name: "espresso",
+            version: "7.5",
+            build: "GNU",
+        });
+        const subworkflow = new Subworkflow({
+            ...Subworkflow.defaultConfig,
+            application,
+            units: [new ExecutionUnit({ application }).toJSON()],
+        });
+
+        subworkflow.setApplication(
+            new Application(
+                registry.findApplication({ name: "espresso", version: "7.5", build: "Intel" }),
+            ),
+        );
+
+        expect(subworkflow.toJSON().units[0]).to.have.nested.property("application.build", "Intel");
     });
 });
