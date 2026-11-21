@@ -25,19 +25,19 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("application");
         },
         set application(value: ExecutionUnitMixinSchema["application"]) {
-            this.setProp("application", InMemoryEntity.getDataForEntity(value));
+            this.setProp("application", InMemoryEntity.toStoredData(value));
         },
         get executable() {
             return this.requiredProp("executable");
         },
         set executable(value: ExecutionUnitMixinSchema["executable"]) {
-            this.setProp("executable", InMemoryEntity.getDataForEntity(value));
+            this.setProp("executable", InMemoryEntity.toStoredData(value));
         },
         get flavor() {
             return this.requiredProp("flavor");
         },
         set flavor(value: ExecutionUnitMixinSchema["flavor"]) {
-            this.setProp("flavor", InMemoryEntity.getDataForEntity(value));
+            this.setProp("flavor", InMemoryEntity.toStoredData(value));
         },
         get input() {
             return this.requiredProp("input");
@@ -45,7 +45,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: ExecutionUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get context() {
@@ -54,7 +54,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
         set context(value: ExecutionUnitMixinSchema["context"]) {
             this.setProp(
                 "context",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
     };

@@ -70,13 +70,13 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
 
     get inputInstances() {
         return this.input.map((input) =>
-            InMemoryEntity.getEntityForData(input, (data) => new ExecutionUnitInput(data)),
+            InMemoryEntity.getOrCreateEntity(input, (data) => new ExecutionUnitInput(data)),
         );
     }
 
-    toJSON(exclude?: (keyof Schema)[]) {
+    toJSON() {
         return {
-            ...super.toJSON(exclude),
+            ...super.toJSON(),
             input: this.inputInstances.map((input) => input.toJSON()),
         };
     }

@@ -16,7 +16,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set properties(value: BaseWorkflowSchema["properties"]) {
             this.setProp(
                 "properties",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get isUsingDataset() {
@@ -37,7 +37,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set subworkflows(value: BaseWorkflowSchema["subworkflows"]) {
             this.setProp(
                 "subworkflows",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get units() {
@@ -46,14 +46,14 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set units(value: BaseWorkflowSchema["units"]) {
             this.setProp(
                 "units",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get application() {
             return this.prop("application");
         },
         set application(value: BaseWorkflowSchema["application"]) {
-            this.setProp("application", InMemoryEntity.getDataForEntity(value));
+            this.setProp("application", InMemoryEntity.toStoredData(value));
         },
         get tags() {
             return this.prop("tags");
@@ -61,7 +61,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set tags(value: BaseWorkflowSchema["tags"]) {
             this.setProp(
                 "tags",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
     };

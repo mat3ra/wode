@@ -124,19 +124,19 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
 
     get subworkflowInstances() {
         return this.subworkflows.map((subworkflow) =>
-            InMemoryEntity.getEntityForData(subworkflow, (data) => new Subworkflow(data)),
+            InMemoryEntity.getOrCreateEntity(subworkflow, (data) => new Subworkflow(data)),
         );
     }
 
     get unitInstances() {
         return this.units.map((unit) =>
-            InMemoryEntity.getEntityForData(unit, UnitFactory.createInWorkflow),
+            InMemoryEntity.getOrCreateEntity(unit, UnitFactory.createInWorkflow),
         );
     }
 
     get workflowInstances() {
         return this.workflows.map((workflow) =>
-            InMemoryEntity.getEntityForData(workflow, (data) => new Workflow(data)),
+            InMemoryEntity.getOrCreateEntity(workflow, (data) => new Workflow(data)),
         );
     }
 
@@ -145,9 +145,7 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
     }
 
     set workflows(value: WorkflowSchema[]) {
-        (this._json as Schema).workflows = value.map((item) =>
-            InMemoryEntity.getDataForEntity(item),
-        );
+        (this._json as Schema).workflows = value.map((item) => InMemoryEntity.toStoredData(item));
     }
 
     addSubworkflow(subworkflow: Subworkflow, head = false, index = -1) {

@@ -20,7 +20,7 @@ export function executionUnitInputSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("template");
         },
         set template(value: ExecutionUnitInputItemSchema["template"]) {
-            this.setProp("template", InMemoryEntity.getDataForEntity(value));
+            this.setProp("template", InMemoryEntity.toStoredData(value));
         },
         get rendered() {
             return this.prop("rendered");

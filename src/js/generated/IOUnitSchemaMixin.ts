@@ -34,7 +34,7 @@ export function iOUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: DataIOUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
     };

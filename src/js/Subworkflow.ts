@@ -110,17 +110,17 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     private get applicationInstance() {
-        return InMemoryEntity.getEntityForData(this.application, (data) => new Application(data));
+        return InMemoryEntity.getOrCreateEntity(this.application, (data) => new Application(data));
     }
 
     get unitsInstances() {
         return this.units.map((unit) =>
-            InMemoryEntity.getEntityForData(unit, UnitFactory.createInSubworkflow),
+            InMemoryEntity.getOrCreateEntity(unit, UnitFactory.createInSubworkflow),
         );
     }
 
     get modelInstance() {
-        return InMemoryEntity.getEntityForData(this.model, (data) =>
+        return InMemoryEntity.getOrCreateEntity(this.model, (data) =>
             this.ModelFactory.create({ ...data, application: this.application }),
         );
     }
@@ -200,7 +200,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     setModel(model: Model) {
-        this.model = InMemoryEntity.getDataForEntity(model) as SubworkflowSchema["model"];
+        this.model = InMemoryEntity.toStoredData(model) as SubworkflowSchema["model"];
     }
 
     private buildExternalContext(context: SubworkflowExternalContext): ExternalContext {

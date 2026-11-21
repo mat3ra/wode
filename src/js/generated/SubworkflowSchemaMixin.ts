@@ -18,14 +18,14 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         set properties(value: SubworkflowMixinSchema["properties"]) {
             this.setProp(
                 "properties",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get compute() {
             return this.prop("compute");
         },
         set compute(value: SubworkflowMixinSchema["compute"]) {
-            this.setProp("compute", InMemoryEntity.getDataForEntity(value));
+            this.setProp("compute", InMemoryEntity.toStoredData(value));
         },
         get units() {
             return this.requiredProp("units");
@@ -33,20 +33,20 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         set units(value: SubworkflowMixinSchema["units"]) {
             this.setProp(
                 "units",
-                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
+                value?.map((item) => InMemoryEntity.toStoredData(item)),
             );
         },
         get model() {
             return this.requiredProp("model");
         },
         set model(value: SubworkflowMixinSchema["model"]) {
-            this.setProp("model", InMemoryEntity.getDataForEntity(value));
+            this.setProp("model", InMemoryEntity.toStoredData(value));
         },
         get application() {
             return this.requiredProp("application");
         },
         set application(value: SubworkflowMixinSchema["application"]) {
-            this.setProp("application", InMemoryEntity.getDataForEntity(value));
+            this.setProp("application", InMemoryEntity.toStoredData(value));
         },
         get isMultiMaterial() {
             return this.prop("isMultiMaterial");
