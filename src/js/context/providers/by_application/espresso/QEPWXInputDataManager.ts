@@ -113,7 +113,8 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             };
         });
 
-        const uniqueElementsWithLabels = [...new Set(basis.elementsWithLabelsArray)];
+        const { elementsWithLabelsArray } = basis;
+        const uniqueElementsWithLabels = [...new Set(elementsWithLabelsArray)];
 
         const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
             const symbolWithoutLabel = symbol.replace(/\d$/, "") as AtomicElementValue;
@@ -132,9 +133,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
-            ([element, label, coordinate, constraint]) => {
+            ([, , coordinate, constraint], index) => {
                 return {
-                    X: `${element}${label}`,
+                    X: elementsWithLabelsArray[index],
                     x: coordinate[0],
                     y: coordinate[1],
                     z: coordinate[2],

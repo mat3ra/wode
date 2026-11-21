@@ -8,7 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import { Material } from "@mat3ra/made";
+import { Material, ProtoPropertyEnum } from "@mat3ra/made";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
@@ -37,9 +37,14 @@ describe("QEPWXInputDataManager with labeled elements", () => {
         const material = OrderedMaterial.createDefault();
         material.setBasis({
             ...material.getBasis().toJSON(),
-            labels: [
-                { id: 0, value: 1 },
-                { id: 1, value: 2 },
+            atomic_properties: [
+                {
+                    name: ProtoPropertyEnum.atomic_labels,
+                    values: [
+                        { id: 0, value: 1 },
+                        { id: 1, value: 2 },
+                    ],
+                },
             ],
         });
 
