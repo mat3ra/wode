@@ -22,7 +22,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
-import type { ExecutionUnit } from "../../src/js/units";
+import { ExecutionUnit } from "../../src/js/units";
 import { repairWorkflow } from "../../src/js/utils/repair";
 import type { WorkflowEntity } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
@@ -92,6 +92,7 @@ describe("Workflow", () => {
     describe("toJSON", () => {
         before(() => {
             JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+            ApplicationRegistry.setDriver(new StandataDriver());
         });
 
         it("returns object with name, units, subworkflows, and workflows", () => {
@@ -113,13 +114,20 @@ describe("Workflow", () => {
             expect(workflow.subworkflows[0]).to.have.property("name", "changed");
         });
 
-        it("serializing leaves the stored subworkflows unchanged", () => {
-            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
-            const subworkflows = structuredClone(workflow.subworkflows);
+        it("serializing leaves the registry's executable intact", () => {
+            const application = new ApplicationRegistry().findApplication({ name: "espresso" });
+            const config = structuredClone(Workflow.defaultConfig);
+            config.subworkflows[0].units = [new ExecutionUnit({ application }).toJSON()];
+            new Workflow(config).toJSON();
 
-            workflow.toJSON();
+            const { executable } = new ExecutionUnit({ application });
 
-            expect(workflow.subworkflows).to.deep.equal(subworkflows);
+            expect(executable).to.include.keys(
+                "monitors",
+                "results",
+                "preProcessors",
+                "postProcessors",
+            );
         });
 
         it("serializes each subworkflow as the subworkflow builds it", () => {

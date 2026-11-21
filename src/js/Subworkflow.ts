@@ -125,6 +125,15 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         );
     }
 
+    toJSON(): S {
+        return {
+            ...super.toJSON(),
+            application: this.applicationInstance.toJSON(),
+            model: this.modelInstance.toJSON(),
+            units: this.unitsInstances.map((unit) => unit.toJSON()),
+        } as S;
+    }
+
     static get defaultConfig() {
         const defaultName = "New Subworkflow";
         const application = new ApplicationRegistry().getDefaultApplication();
@@ -167,7 +176,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         // TODO: adjust the logic above to take into account whether units need re-rendering after version change etc.
         // reset units if application name changes
         const previousApplicationName = this.application.name;
-        this.application = application.toJSON();
+        this.application = application;
 
         if (previousApplicationName !== application.name) {
             // TODO: figure out how to set a default unit per new application instead of removing all
@@ -391,8 +400,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                     elements: material.uniqueElements,
                     ...filters,
                 });
-
-                this.modelInstance.setMethod(method);
             });
 
         // TODO: Try if/else instead of running both
@@ -401,8 +408,6 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
                 elements: uniqueElements,
                 ...filters,
             });
-
-            this.modelInstance.setMethod(method);
         }
     }
 

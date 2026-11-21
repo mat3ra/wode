@@ -118,7 +118,6 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             _id: (rest as Partial<Schema>)._id || Utils.uuid.getUUID(),
         } as S);
 
-        this.subworkflows = this.subworkflows.map((x) => new Subworkflow(x));
         this.setUnits(this.units.map((unit) => UnitFactory.createInWorkflow(unit)));
     }
 
@@ -235,6 +234,8 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             ...super.toJSON(),
             name: this.name,
             properties: getProperties(this),
+            units: this.unitInstances.map((x) => x.toJSON()),
+            subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
             workflows: this.workflowInstances.map((x) => x.toJSON()),
         } as S;
     }
