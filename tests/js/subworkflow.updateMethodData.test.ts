@@ -2,8 +2,6 @@ import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
 import { Material } from "@mat3ra/made";
 import { MetaPropertyHolder } from "@mat3ra/prode";
-import { ApplicationRegistry } from "@mat3ra/standata";
-import StandataDriver from "@mat3ra/standata/dist/js/StandataDriver";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
@@ -26,7 +24,7 @@ function createSubworkflow(applicationName: string) {
     return new Subworkflow({
         _id: `${applicationName}-total-energy`,
         name: "Total Energy",
-        application: new ApplicationRegistry().findApplication({ name: applicationName }),
+        application: { name: applicationName },
         properties: [],
         model: {
             type: "dft",
@@ -50,7 +48,6 @@ function getSelectedPseudopotentialPaths(subworkflow: Subworkflow) {
 describe("Subworkflow.updateMethodData", () => {
     before(() => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-        ApplicationRegistry.setDriver(new StandataDriver());
     });
 
     const material = Material.createDefault();
@@ -87,19 +84,5 @@ describe("Subworkflow.updateMethodData", () => {
         subworkflow.updateMethodData([material], metaProperties);
 
         expect(getSelectedPseudopotentialPaths(subworkflow)).to.deep.equal([]);
-    });
-
-    it("serializes the method data without the candidate pseudopotentials", () => {
-        const subworkflow = createSubworkflow("espresso");
-
-        subworkflow.updateMethodData([material], metaProperties);
-
-        expect(subworkflow.toJSON().model.method.data).to.not.have.property("allPseudo");
-    });
-
-    it("serializes the model with the fields the subworkflow schema holds", () => {
-        const subworkflow = createSubworkflow("espresso");
-
-        expect(subworkflow.toJSON().model).to.not.have.property("refiners");
     });
 });

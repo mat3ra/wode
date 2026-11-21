@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type {
     BaseInMemoryEntitySchema,
     ExecutionUnitInputItemSchema,
@@ -20,7 +20,7 @@ export function executionUnitInputSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("template");
         },
         set template(value: ExecutionUnitInputItemSchema["template"]) {
-            this.setProp("template", InMemoryEntity.toStoredData(value));
+            this.setProp("template", value);
         },
         get rendered() {
             return this.prop("rendered");

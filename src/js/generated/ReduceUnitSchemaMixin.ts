@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, ReduceUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
 
 export type ReduceUnitSchemaMixin = ReduceUnitMixinSchema;
@@ -28,10 +28,7 @@ export function reduceUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("input");
         },
         set input(value: ReduceUnitMixinSchema["input"]) {
-            this.setProp(
-                "input",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("input", value);
         },
     };
 

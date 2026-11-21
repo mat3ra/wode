@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, ErrorUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
 
 export type ErrorUnitSchemaMixin = ErrorUnitMixinSchema;

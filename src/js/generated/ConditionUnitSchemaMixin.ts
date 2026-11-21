@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type {
     BaseInMemoryEntitySchema,
     ConditionUnitMixinSchema,
@@ -25,10 +25,7 @@ export function conditionUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("input");
         },
         set input(value: ConditionUnitMixinSchema["input"]) {
-            this.setProp(
-                "input",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("input", value);
         },
         get statement() {
             return this.requiredProp("statement");

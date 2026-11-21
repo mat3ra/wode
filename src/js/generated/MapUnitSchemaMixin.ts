@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, MapUnitMixinSchema } from "@mat3ra/esse/dist/js/types";
 
 export type MapUnitSchemaMixin = MapUnitMixinSchema;
@@ -26,7 +26,7 @@ export function mapUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("input");
         },
         set input(value: MapUnitMixinSchema["input"]) {
-            this.setProp("input", InMemoryEntity.toStoredData(value));
+            this.setProp("input", value);
         },
     };
 

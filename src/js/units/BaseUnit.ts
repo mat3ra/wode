@@ -118,12 +118,10 @@ statusTrackSchemaMixin(BaseUnitCore.prototype);
 namedEntityMixin(BaseUnitCore.prototype);
 defaultableEntityMixin(BaseUnitCore);
 
-interface BaseUnit<S extends Schema = Schema> {
-    toJSON(exclude?: (keyof UnitEntity<S>)[]): UnitEntity<S>;
-}
-
 class BaseUnit<S extends Schema = Schema> extends BaseUnitCore {
     declare _json: UnitEntity<S>;
+
+    declare toJSON: (exclude?: (keyof UnitEntity<S>)[]) => UnitEntity<S>;
 }
 
 export default BaseUnit;

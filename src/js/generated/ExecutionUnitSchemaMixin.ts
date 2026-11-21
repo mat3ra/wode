@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type {
     BaseInMemoryEntitySchema,
     ExecutionUnitMixinSchema,
@@ -25,37 +25,31 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("application");
         },
         set application(value: ExecutionUnitMixinSchema["application"]) {
-            this.setProp("application", InMemoryEntity.toStoredData(value));
+            this.setProp("application", value);
         },
         get executable() {
             return this.requiredProp("executable");
         },
         set executable(value: ExecutionUnitMixinSchema["executable"]) {
-            this.setProp("executable", InMemoryEntity.toStoredData(value));
+            this.setProp("executable", value);
         },
         get flavor() {
             return this.requiredProp("flavor");
         },
         set flavor(value: ExecutionUnitMixinSchema["flavor"]) {
-            this.setProp("flavor", InMemoryEntity.toStoredData(value));
+            this.setProp("flavor", value);
         },
         get input() {
             return this.requiredProp("input");
         },
         set input(value: ExecutionUnitMixinSchema["input"]) {
-            this.setProp(
-                "input",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("input", value);
         },
         get context() {
             return this.requiredProp("context");
         },
         set context(value: ExecutionUnitMixinSchema["context"]) {
-            this.setProp(
-                "context",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("context", value);
         },
     };
 

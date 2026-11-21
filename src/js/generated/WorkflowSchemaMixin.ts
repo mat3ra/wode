@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, BaseWorkflowSchema } from "@mat3ra/esse/dist/js/types";
 
 export type WorkflowSchemaMixin = BaseWorkflowSchema;
@@ -14,10 +14,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("properties");
         },
         set properties(value: BaseWorkflowSchema["properties"]) {
-            this.setProp(
-                "properties",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("properties", value);
         },
         get isUsingDataset() {
             return this.prop("isUsingDataset");
@@ -35,34 +32,25 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("subworkflows");
         },
         set subworkflows(value: BaseWorkflowSchema["subworkflows"]) {
-            this.setProp(
-                "subworkflows",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("subworkflows", value);
         },
         get units() {
             return this.requiredProp("units");
         },
         set units(value: BaseWorkflowSchema["units"]) {
-            this.setProp(
-                "units",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("units", value);
         },
         get application() {
             return this.prop("application");
         },
         set application(value: BaseWorkflowSchema["application"]) {
-            this.setProp("application", InMemoryEntity.toStoredData(value));
+            this.setProp("application", value);
         },
         get tags() {
             return this.prop("tags");
         },
         set tags(value: BaseWorkflowSchema["tags"]) {
-            this.setProp(
-                "tags",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("tags", value);
         },
     };
 

@@ -1,4 +1,4 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { BaseInMemoryEntitySchema, StatusTrackSchema } from "@mat3ra/esse/dist/js/types";
 
 export type StatusTrackSchemaMixin = StatusTrackSchema;
@@ -16,10 +16,7 @@ export function statusTrackSchemaMixin<T extends InMemoryEntity>(
             return this.prop("statusTrack");
         },
         set statusTrack(value: StatusTrackSchema["statusTrack"]) {
-            this.setProp(
-                "statusTrack",
-                value?.map((item) => InMemoryEntity.toStoredData(item)),
-            );
+            this.setProp("statusTrack", value);
         },
     };
 

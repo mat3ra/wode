@@ -1,4 +1,3 @@
-import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Taggable } from "@mat3ra/code/dist/js/entity/mixins/TaggableMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import type {
@@ -39,11 +38,11 @@ type SetExecutableProps = {
 interface ExecutionUnit extends ExecutionUnitSchemaMixin, Taggable {}
 
 class ExecutionUnit extends BaseUnit<Schema> implements Schema {
+    inputInstances: ExecutionUnitInput[] = [];
+
     renderingContext: Partial<ExternalContext> = {};
 
     contextProvidersInstances: AnyContextProvider[] = [];
-
-    static _isDeepCloneRequired = true;
 
     static get jsonSchema() {
         return JSONSchemasInterface.getSchemaById("workflow/unit/execution");
@@ -66,19 +65,6 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
         this.setApplication(config);
 
         this.name = this.name || this.flavor.name || "";
-    }
-
-    get inputInstances() {
-        return this.input.map((input) =>
-            InMemoryEntity.getOrCreateEntity(input, (data) => new ExecutionUnitInput(data)),
-        );
-    }
-
-    toJSON() {
-        return {
-            ...super.toJSON(),
-            input: this.inputInstances.map((input) => input.toJSON()),
-        };
     }
 
     setApplication({
@@ -227,7 +213,7 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
               )
             : [];
 
-        const inputInstances = driverTemplates.map((driverTemplate, index) => {
+        this.inputInstances = driverTemplates.map((driverTemplate, index) => {
             const persistedItem = persistedItems[index];
 
             if (persistedItem && this.isPersistedInputItemCompatible(persistedItem)) {
@@ -236,9 +222,9 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
 
             return ExecutionUnitInput.createFromTemplate(driverTemplate);
         });
-        inputInstances.push(...addedItems.map((item) => new ExecutionUnitInput(item)));
+        this.inputInstances.push(...addedItems.map((item) => new ExecutionUnitInput(item)));
 
-        this.input = inputInstances;
+        this.input = this.inputInstances.map((input) => input.toJSON());
     }
 
     render(externalContext: ExternalContext, convergence?: ConvergenceParameter) {
@@ -306,7 +292,9 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
             ...Object.fromEntries(renderingItems.map((context) => [context.name, context.data])),
             ...renderingExternalContext,
         };
-        this.inputInstances.forEach((input) => input.render(this.renderingContext));
+        this.input = this.inputInstances.map((input) => {
+            return input.render(this.renderingContext).toJSON();
+        });
     }
 
     saveContext({ scopeGlobal, ...externalContext }: ExternalContext) {

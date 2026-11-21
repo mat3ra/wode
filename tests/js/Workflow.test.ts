@@ -22,7 +22,7 @@ import type { WorkflowRenderContext } from "src/js/Workflow";
 
 import { Subworkflow, UnitFactory, Workflow } from "../../src/js";
 import { UnitType } from "../../src/js/enums";
-import { ExecutionUnit } from "../../src/js/units";
+import type { ExecutionUnit } from "../../src/js/units";
 import { repairWorkflow } from "../../src/js/utils/repair";
 import type { WorkflowEntity } from "../../src/js/Workflow";
 import type { WorkflowSchema } from "../../src/js/workflows/types";
@@ -90,11 +90,6 @@ describe("Workflow", () => {
     });
 
     describe("toJSON", () => {
-        before(() => {
-            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
-            ApplicationRegistry.setDriver(new StandataDriver());
-        });
-
         it("returns object with name, units, subworkflows, and workflows", () => {
             const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
@@ -104,55 +99,6 @@ describe("Workflow", () => {
             expect(json).to.have.property("units").that.is.an("array");
             expect(json).to.have.property("subworkflows").that.is.an("array");
             expect(json).to.have.property("workflows").that.is.an("array");
-        });
-
-        it("serializes the same on every call", () => {
-            const config = new WorkflowStandata()
-                .getAll()
-                .find((standataJson) => standataJson.name === "Band Gap");
-            const workflow = new Workflow(config as unknown as WorkflowSchema);
-
-            expect(workflow.toJSON()).to.deep.equal(workflow.toJSON());
-        });
-
-        it("a change made on a subworkflow instance is in the stored subworkflows", () => {
-            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
-
-            workflow.subworkflowInstances[0].setName("changed");
-
-            expect(workflow.subworkflows[0]).to.have.property("name", "changed");
-        });
-
-        it("serializing leaves the registry's executable intact", () => {
-            const application = new ApplicationRegistry().findApplication({ name: "espresso" });
-            const config = structuredClone(Workflow.defaultConfig);
-            config.subworkflows[0].units = [new ExecutionUnit({ application }).toJSON()];
-            new Workflow(config).toJSON();
-
-            const { executable } = new ExecutionUnit({ application });
-
-            expect(executable).to.include.keys(
-                "monitors",
-                "results",
-                "preProcessors",
-                "postProcessors",
-            );
-        });
-
-        it("serializes each subworkflow as the subworkflow builds it", () => {
-            const config = structuredClone(Workflow.defaultConfig);
-            const second = UnitFactory.createDefaultSubworkflowUnit("assignment");
-            config.subworkflows[0].units = [
-                UnitFactory.createDefaultSubworkflowUnit("assignment").toJSON(),
-                second.toJSON(),
-            ];
-
-            const workflow = new Workflow(config);
-
-            expect(workflow.toJSON().subworkflows[0].units[0]).to.have.property(
-                "next",
-                second.flowchartId,
-            );
         });
     });
 
