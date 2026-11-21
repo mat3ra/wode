@@ -126,12 +126,12 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     toJSON(): S {
-        return {
+        return this.clean({
             ...super.toJSON(),
             application: this.applicationInstance.toJSON(),
             model: this.modelInstance.toJSON(),
             units: this.unitsInstances.map((unit) => unit.toJSON()),
-        } as S;
+        }) as S;
     }
 
     static get defaultConfig() {
