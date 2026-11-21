@@ -74,6 +74,13 @@ class ExecutionUnit extends BaseUnit<Schema> implements Schema {
         );
     }
 
+    toJSON(exclude?: (keyof Schema)[]) {
+        return {
+            ...super.toJSON(exclude),
+            input: this.inputInstances.map((input) => input.toJSON()),
+        };
+    }
+
     setApplication({
         application,
         executable,
