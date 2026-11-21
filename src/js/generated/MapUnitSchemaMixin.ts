@@ -26,10 +26,7 @@ export function mapUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("input");
         },
         set input(value: MapUnitMixinSchema["input"]) {
-            this.setProp(
-                "input",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("input", InMemoryEntity.getDataForEntity(value));
         },
     };
 

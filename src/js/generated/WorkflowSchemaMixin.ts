@@ -16,9 +16,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set properties(value: BaseWorkflowSchema["properties"]) {
             this.setProp(
                 "properties",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get isUsingDataset() {
@@ -39,9 +37,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set subworkflows(value: BaseWorkflowSchema["subworkflows"]) {
             this.setProp(
                 "subworkflows",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get units() {
@@ -50,19 +46,14 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set units(value: BaseWorkflowSchema["units"]) {
             this.setProp(
                 "units",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get application() {
             return this.prop("application");
         },
         set application(value: BaseWorkflowSchema["application"]) {
-            this.setProp(
-                "application",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("application", InMemoryEntity.getDataForEntity(value));
         },
         get tags() {
             return this.prop("tags");
@@ -70,9 +61,7 @@ export function workflowSchemaMixin<T extends InMemoryEntity>(
         set tags(value: BaseWorkflowSchema["tags"]) {
             this.setProp(
                 "tags",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
     };

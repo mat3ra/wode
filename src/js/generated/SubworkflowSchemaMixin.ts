@@ -18,19 +18,14 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         set properties(value: SubworkflowMixinSchema["properties"]) {
             this.setProp(
                 "properties",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get compute() {
             return this.prop("compute");
         },
         set compute(value: SubworkflowMixinSchema["compute"]) {
-            this.setProp(
-                "compute",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("compute", InMemoryEntity.getDataForEntity(value));
         },
         get units() {
             return this.requiredProp("units");
@@ -38,28 +33,20 @@ export function subworkflowSchemaMixin<T extends InMemoryEntity>(
         set units(value: SubworkflowMixinSchema["units"]) {
             this.setProp(
                 "units",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get model() {
             return this.requiredProp("model");
         },
         set model(value: SubworkflowMixinSchema["model"]) {
-            this.setProp(
-                "model",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("model", InMemoryEntity.getDataForEntity(value));
         },
         get application() {
             return this.requiredProp("application");
         },
         set application(value: SubworkflowMixinSchema["application"]) {
-            this.setProp(
-                "application",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("application", InMemoryEntity.getDataForEntity(value));
         },
         get isMultiMaterial() {
             return this.prop("isMultiMaterial");

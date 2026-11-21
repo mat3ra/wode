@@ -27,9 +27,7 @@ export function assignmentUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: AssignmentUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get operand() {

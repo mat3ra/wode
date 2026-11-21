@@ -30,9 +30,7 @@ export function reduceUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: ReduceUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
     };

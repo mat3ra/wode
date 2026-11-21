@@ -18,9 +18,7 @@ export function statusTrackSchemaMixin<T extends InMemoryEntity>(
         set statusTrack(value: StatusTrackSchema["statusTrack"]) {
             this.setProp(
                 "statusTrack",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
     };

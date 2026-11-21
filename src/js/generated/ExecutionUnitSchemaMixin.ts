@@ -25,28 +25,19 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
             return this.requiredProp("application");
         },
         set application(value: ExecutionUnitMixinSchema["application"]) {
-            this.setProp(
-                "application",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("application", InMemoryEntity.getDataForEntity(value));
         },
         get executable() {
             return this.requiredProp("executable");
         },
         set executable(value: ExecutionUnitMixinSchema["executable"]) {
-            this.setProp(
-                "executable",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("executable", InMemoryEntity.getDataForEntity(value));
         },
         get flavor() {
             return this.requiredProp("flavor");
         },
         set flavor(value: ExecutionUnitMixinSchema["flavor"]) {
-            this.setProp(
-                "flavor",
-                value instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(value) : value,
-            );
+            this.setProp("flavor", InMemoryEntity.getDataForEntity(value));
         },
         get input() {
             return this.requiredProp("input");
@@ -54,9 +45,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: ExecutionUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get context() {
@@ -65,9 +54,7 @@ export function executionUnitSchemaMixin<T extends InMemoryEntity>(
         set context(value: ExecutionUnitMixinSchema["context"]) {
             this.setProp(
                 "context",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
     };

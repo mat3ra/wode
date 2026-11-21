@@ -27,9 +27,7 @@ export function conditionUnitSchemaMixin<T extends InMemoryEntity>(
         set input(value: ConditionUnitMixinSchema["input"]) {
             this.setProp(
                 "input",
-                value?.map((item: unknown) =>
-                    item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
-                ),
+                value?.map((item) => InMemoryEntity.getDataForEntity(item)),
             );
         },
         get statement() {
