@@ -106,6 +106,15 @@ describe("Workflow", () => {
             expect(json).to.have.property("workflows").that.is.an("array");
         });
 
+        it("serializes the same on every call", () => {
+            const config = new WorkflowStandata()
+                .getAll()
+                .find((standataJson) => standataJson.name === "Band Gap");
+            const workflow = new Workflow(config as unknown as WorkflowSchema);
+
+            expect(workflow.toJSON()).to.deep.equal(workflow.toJSON());
+        });
+
         it("a change made on a subworkflow instance is in the stored subworkflows", () => {
             const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
 

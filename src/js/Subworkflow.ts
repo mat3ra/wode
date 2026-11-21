@@ -125,6 +125,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
         );
     }
 
+    // Each child serializes itself (Model drops allPseudo); the clean keeps what the schema holds
     toJSON(): S {
         return this.clean({
             ...super.toJSON(),
@@ -199,7 +200,7 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
     }
 
     setModel(model: Model) {
-        this.model = model.toJSON() as SubworkflowSchema["model"];
+        this.model = InMemoryEntity.getDataForEntity(model) as SubworkflowSchema["model"];
     }
 
     private buildExternalContext(context: SubworkflowExternalContext): ExternalContext {

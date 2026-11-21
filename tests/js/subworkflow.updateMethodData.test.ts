@@ -96,4 +96,10 @@ describe("Subworkflow.updateMethodData", () => {
 
         expect(subworkflow.toJSON().model.method.data).to.not.have.property("allPseudo");
     });
+
+    it("serializes the model with the fields the subworkflow schema holds", () => {
+        const subworkflow = createSubworkflow("espresso");
+
+        expect(subworkflow.toJSON().model).to.not.have.property("refiners");
+    });
 });

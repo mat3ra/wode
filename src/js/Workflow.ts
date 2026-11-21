@@ -145,7 +145,7 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
 
     set workflows(value: WorkflowSchema[]) {
         (this._json as Schema).workflows = value.map((item) =>
-            item instanceof InMemoryEntity ? InMemoryEntity.getDataForEntity(item) : item,
+            InMemoryEntity.getDataForEntity(item),
         );
     }
 
@@ -230,12 +230,13 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
     }
 
     toJSON(): S {
+        const subworkflows = this.subworkflowInstances.map((x) => x.toJSON());
         return {
             ...super.toJSON(),
             name: this.name,
             properties: getProperties(this),
             units: this.unitInstances.map((x) => x.toJSON()),
-            subworkflows: this.subworkflowInstances.map((x) => x.toJSON()),
+            subworkflows,
             workflows: this.workflowInstances.map((x) => x.toJSON()),
         } as S;
     }
