@@ -119,7 +119,6 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
         } as S);
 
         this.subworkflows = this.subworkflows.map((x) => new Subworkflow(x));
-        this.workflows = this.workflows.map((x) => new Workflow(x));
         this.setUnits(this.units.map((unit) => UnitFactory.createInWorkflow(unit)));
     }
 
@@ -236,6 +235,7 @@ class Workflow<S extends Schema = Schema> extends InMemoryEntity<S> implements W
             ...super.toJSON(),
             name: this.name,
             properties: getProperties(this),
+            workflows: this.workflowInstances.map((x) => x.toJSON()),
         } as S;
     }
 

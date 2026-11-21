@@ -90,6 +90,10 @@ describe("Workflow", () => {
     });
 
     describe("toJSON", () => {
+        before(() => {
+            JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
+        });
+
         it("returns object with name, units, subworkflows, and workflows", () => {
             const config = structuredClone(Workflow.defaultConfig);
             const workflow = new Workflow(config);
@@ -107,6 +111,31 @@ describe("Workflow", () => {
             workflow.subworkflowInstances[0].setName("changed");
 
             expect(workflow.subworkflows[0]).to.have.property("name", "changed");
+        });
+
+        it("serializing leaves the stored subworkflows unchanged", () => {
+            const workflow = new Workflow(structuredClone(Workflow.defaultConfig));
+            const subworkflows = structuredClone(workflow.subworkflows);
+
+            workflow.toJSON();
+
+            expect(workflow.subworkflows).to.deep.equal(subworkflows);
+        });
+
+        it("serializes each subworkflow as the subworkflow builds it", () => {
+            const config = structuredClone(Workflow.defaultConfig);
+            const second = UnitFactory.createDefaultSubworkflowUnit("assignment");
+            config.subworkflows[0].units = [
+                UnitFactory.createDefaultSubworkflowUnit("assignment").toJSON(),
+                second.toJSON(),
+            ];
+
+            const workflow = new Workflow(config);
+
+            expect(workflow.toJSON().subworkflows[0].units[0]).to.have.property(
+                "next",
+                second.flowchartId,
+            );
         });
     });
 

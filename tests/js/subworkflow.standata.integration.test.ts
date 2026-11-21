@@ -181,4 +181,25 @@ describe("Subworkflow", () => {
 
         expect(subworkflow.toJSON().units[0]).to.have.property("name", "changed");
     });
+
+    it("serializing leaves the stored units unchanged", () => {
+        const subworkflow = new Subworkflow(Subworkflow.defaultConfig);
+        subworkflow.addUnit(new AssignmentUnit({ operand: "a", value: 1 }));
+        const units = structuredClone(subworkflow.units);
+
+        subworkflow.toJSON();
+
+        expect(subworkflow.units).to.deep.equal(units);
+    });
+
+    it("replaceUnit puts the new unit into the stored units", () => {
+        const subworkflow = new Subworkflow({
+            ...Subworkflow.defaultConfig,
+            units: [new AssignmentUnit({ operand: "a", value: 1 }).toJSON()],
+        });
+
+        subworkflow.replaceUnit(0, new AssignmentUnit({ operand: "b", value: 2 }));
+
+        expect(subworkflow.units[0]).to.have.property("operand", "b");
+    });
 });
