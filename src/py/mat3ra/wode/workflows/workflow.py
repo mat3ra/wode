@@ -1,12 +1,16 @@
+import re
 from typing import Any, Dict, List, Optional
 
 from mat3ra.code.entity import InMemoryEntitySnakeCase
 from mat3ra.code.mixins import HashedEntityMixin
 from mat3ra.esse.models.workflow import WorkflowSchema
+from mat3ra.made.material import Material
+from mat3ra.prode import PropertyName
 from mat3ra.standata.subworkflows import SubworkflowStandata
 from mat3ra.utils.uuid import get_uuid
 from pydantic import Field
 
+from ..context.providers import PlanewaveCutoffsContextProvider, PointsGridDataProvider
 from ..mixins import FlowchartUnitsManager
 from ..subworkflows import Subworkflow
 from ..units import Unit
@@ -116,3 +120,175 @@ class Workflow(WorkflowSchema, HashedEntityMixin, InMemoryEntitySnakeCase, Flowc
                     if key in unit:
                         unit[key] = []
         return workflow_dict
+
+
+FORTRAN_NUMBER_PATTERN = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[de][+-]?\d+)?$", re.IGNORECASE)
+
+
+def _format_fortran_value(value: object) -> str:
+    if isinstance(value, bool):
+        return f".{str(value).lower()}."
+    if isinstance(value, str) and not FORTRAN_NUMBER_PATTERN.match(value):
+        return repr(value)
+    return str(value)
+
+
+def patch_workflow_qe_input(
+    workflow: Workflow,
+    parameters: Dict[str, Dict[str, object]],
+    unit_names: List[str],
+    input_name: Optional[str] = None,
+) -> Workflow:
+    """
+    Patch QE inputs across workflow subworkflows for named units.
+
+    Args:
+        workflow: Workflow with subworkflows.
+        parameters: Multi-section parameters {section: {key: val}}.
+        unit_names: List of unit names to patch.
+        input_name: Optional input file name filter.
+
+    Example:
+        patch_workflow_qe_input(workflow, {"system": {"vdw_corr": "d3_grimme"}}, ["pw_relax"])
+    """
+    for subworkflow in workflow.subworkflows:
+        for unit_name in unit_names:
+            if not (unit := subworkflow.get_unit_by_name(name=unit_name)):
+                continue
+            for input_item in getattr(unit, "input", []):
+                template = input_item.template
+                template_name = template.name
+                content = template.content
+
+                if input_name not in (None, template_name):
+                    continue
+
+                for section, updates in parameters.items():
+                    name = section.lstrip("&")
+                    match = re.search(rf"(?ims)(^&{re.escape(name)}\s*\n)(.*?)(^/\s*$)", content)
+                    if not match:
+                        raise ValueError(f"Namelist '&{name.upper()}' not found.")
+                    header, body, footer = match.groups()
+                    for key, value in updates.items():
+                        line = f"    {key} = {_format_fortran_value(value)}"
+                        pattern = rf"(?im)^\s*{re.escape(key)}\s*=.*$"
+                        body = re.sub(pattern, line, body) if re.search(pattern, body) else f"{body.rstrip()}\n{line}\n"
+                    content = content[: match.start()] + header + body + footer + content[match.end() :]
+
+                template.set_content(content)
+            subworkflow.set_unit(unit)
+    return workflow
+
+
+def apply_scf_kgrid(
+    workflow: Workflow,
+    scf_kgrid=None,
+    *,
+    material: Optional[Material] = None,
+    unit_name: str = "pw_scf",
+    first_only: bool = False,
+) -> Workflow:
+    """
+    Attaches an edited SCF k-grid context to units named `unit_name`.
+
+    Args:
+        workflow: Workflow with subworkflows.
+        scf_kgrid: K-grid dimensions, e.g. [4, 4, 1]. If None, the workflow is returned unchanged.
+        material: Material the grid applies to. KPPRA is per reciprocal atom and the reciprocal
+            vector ratios come from the lattice, so both are derived from it.
+        unit_name: Name of the unit to attach the k-grid context to.
+        first_only: If True, only patch the first matching subworkflow.
+    """
+    if scf_kgrid is None:
+        return workflow
+    context = PointsGridDataProvider(material=material, dimensions=scf_kgrid, isEdited=True).get_context_item_data()
+    for subworkflow in workflow.subworkflows:
+        if unit_name not in [unit.name for unit in subworkflow.units]:
+            continue
+        unit = subworkflow.get_unit_by_name(name=unit_name)
+        unit.add_context(context)
+        subworkflow.set_unit(unit)
+        if first_only:
+            break
+    return workflow
+
+
+def set_assignment_value(workflow: Workflow, unit_name: str, value: str) -> Workflow:
+    """
+    Sets the value of the assignment units named `unit_name` in every subworkflow that has one.
+
+    Args:
+        workflow: Workflow with subworkflows.
+        unit_name: Name of the assignment unit, e.g. "assign-charge".
+        value: The unit's new value, as the Python expression the workflow evaluates, e.g. "-1".
+
+    Raises:
+        ValueError: If no subworkflow has a unit of that name.
+    """
+    subworkflows = [
+        subworkflow for subworkflow in workflow.subworkflows if subworkflow.get_unit_by_name(name=unit_name)
+    ]
+    if not subworkflows:
+        raise ValueError(f"The workflow has no '{unit_name}' unit.")
+    for subworkflow in subworkflows:
+        unit = subworkflow.get_unit_by_name(name=unit_name)
+        unit.value = value
+        subworkflow.set_unit(unit)
+    return workflow
+
+
+def apply_planewave_cutoffs(workflow: Workflow, wavefunction, density, *, unit_name: str = "pw_relax") -> Workflow:
+    """Attaches an edited planewave cutoffs context to units named `unit_name`."""
+    context = PlanewaveCutoffsContextProvider(
+        wavefunction=wavefunction, density=density, isEdited=True
+    ).get_context_item_data()
+    for subworkflow in workflow.subworkflows:
+        if unit_name not in [unit.name for unit in subworkflow.units]:
+            continue
+        unit = subworkflow.get_unit_by_name(name=unit_name)
+        unit.add_context(context)
+        subworkflow.set_unit(unit)
+    return workflow
+
+
+def get_kgrid_query(kgrid: Optional[List[int]], unit_name: str = "pw_scf") -> Dict[str, Any]:
+    """
+    `jobs.list` condition for jobs whose `unit_name` unit ran on `kgrid` (empty when `kgrid` is None), matched where
+    `apply_scf_kgrid` sets it: `workflow.subworkflows[].units[name].context[name="kgrid"].data.dimensions`.
+    A job created without an explicit k-grid has no such context and never matches.
+    """
+    if kgrid is None:
+        return {}
+    kgrid_context = {"$elemMatch": {"name": "kgrid", "data.dimensions": list(kgrid)}}
+    return {"workflow.subworkflows.units": {"$elemMatch": {"name": unit_name, "context": kgrid_context}}}
+
+
+def get_kgrid_of_job(job: Dict[str, Any], unit_name: str = "pw_scf") -> Optional[List[int]]:
+    """
+    K-grid dimensions the job's `unit_name` unit ran on: its `kgrid` context, or, for a job created without one, the
+    grid the platform rendered into the unit's input, `workflow.subworkflows[].units[name].input[0].rendered`.
+    """
+    units = [unit for subworkflow in job["workflow"]["subworkflows"] for unit in subworkflow["units"]]
+    unit = next(unit for unit in units if unit["name"] == unit_name)
+    kgrid_context = next((item for item in unit["context"] if item["name"] == "kgrid"), None)
+    if kgrid_context:
+        return kgrid_context["data"]["dimensions"]
+    match = re.search(r"K_POINTS automatic\s+(\d+)\s+(\d+)\s+(\d+)", unit["input"][0]["rendered"])
+    return [int(dimension) for dimension in match.groups()] if match else None
+
+
+def get_fermi_energy_flowchart_id(job: dict) -> Optional[str]:
+    """
+    Find the flowchart ID of the last unit that declares fermi_energy in its results.
+    Mirrors calculateFermiEnergy logic in the web app.
+    """
+    for subworkflow in job.get("workflow", {}).get("subworkflows", []):
+        units_with_fermi_energy = [
+            unit
+            for unit in subworkflow.get("units", [])
+            if any(r.get("name") == PropertyName.scalar.fermi_energy.value for r in unit.get("results", []))
+        ]
+        if not units_with_fermi_energy:
+            continue
+        return units_with_fermi_energy[-1].get("flowchartId")
+    return None

@@ -1,12 +1,12 @@
 import pytest
-from pydantic import ValidationError
 from mat3ra.esse.models.context_providers_directory.points_grid_data_provider import (
     GridMetricType,
     PointsGridDataProviderSchema,
 )
 from mat3ra.made.material import Material
 from mat3ra.wode.context.providers import PointsGridDataProvider
-from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPRA
+from mat3ra.wode.context.providers.points_grid_data_provider import DEFAULT_KPPRA, kgrid_from_density
+from pydantic import ValidationError
 
 
 def _material_stub(number_of_atoms, reciprocal_vector_ratios):
@@ -32,6 +32,7 @@ def _material_stub(number_of_atoms, reciprocal_vector_ratios):
         }
     )
 
+
 # Test data constants
 DIMENSIONS_DEFAULT = [1, 1, 1]
 DIMENSIONS_CUSTOM = [1, 2, 3]
@@ -42,9 +43,7 @@ DIVISOR_CUSTOM = 2
 GRID_METRIC_TYPE_DEFAULT = GridMetricType.KPPRA
 NUMBER_OF_ATOMS_DEFAULT = 1
 RATIOS_DEFAULT = [1.0, 1.0, 1.0]
-GRID_METRIC_VALUE_DERIVED = (
-    DIMENSIONS_CUSTOM[0] * DIMENSIONS_CUSTOM[1] * DIMENSIONS_CUSTOM[2] * NUMBER_OF_ATOMS_DEFAULT
-)
+GRID_METRIC_VALUE_DERIVED = DIMENSIONS_CUSTOM[0] * DIMENSIONS_CUSTOM[1] * DIMENSIONS_CUSTOM[2] * NUMBER_OF_ATOMS_DEFAULT
 
 # Expected data structures
 KGRID_DATA = {
@@ -224,3 +223,36 @@ def test_standata_material_drives_derivation():
 
     assert data["gridMetricValue"] == 4 * 4 * 4 * material.basis.number_of_atoms
     assert len(data["reciprocalVectorRatios"]) == 3
+
+
+def _lattice_material(a, b, c):
+    return Material.create(
+        {
+            "name": "test",
+            "lattice": {
+                "a": a,
+                "b": b,
+                "c": c,
+                "alpha": 90,
+                "beta": 90,
+                "gamma": 90,
+                "type": "ORC",
+                "units": {"length": "angstrom", "angle": "degree"},
+            },
+            "basis": {
+                "elements": [{"id": 0, "value": "Si"}],
+                "coordinates": [{"id": 0, "value": [0, 0, 0]}],
+                "units": "crystal",
+            },
+        }
+    )
+
+
+def test_kgrid_from_density_monolayer():
+    material = _lattice_material(a=15.05, b=8.69, c=20.0)
+    assert kgrid_from_density(material, 6, periodic_dims=(0, 1)) == [3, 5, 1]
+
+
+def test_kgrid_from_density_cubic():
+    material = _lattice_material(a=5.0, b=5.0, c=5.0)
+    assert kgrid_from_density(material, 6) == [8, 8, 8]
