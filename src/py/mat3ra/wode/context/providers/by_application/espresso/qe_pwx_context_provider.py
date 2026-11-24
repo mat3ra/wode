@@ -95,5 +95,9 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
 
     @property
     def default_data(self) -> Dict[str, Any]:
-        fields = set(QEPwxContextProviderSchema.model_fields) | set(self.model_extra or {})
+        fields = (
+            set(QEPwxContextProviderSchema.model_fields)
+            | {"CELL_PARAMETERS_STANDARD_REPRESENTATION"}
+            | set(self.model_extra or {})
+        )
         return self.model_dump(mode="json", by_alias=True, include=fields)

@@ -190,6 +190,17 @@ def test_cell_parameters_keep_the_lattice_vectors_and_add_the_standard_represent
     assert standard.v1[1] == pytest.approx(standard.v1[2], abs=1e-10)
 
 
+def test_a_template_can_render_the_standard_representation(workflow, material):
+    item = workflow.subworkflows[0].units[0].input[0]
+    item.template.content = item.template.content.replace(
+        "input.CELL_PARAMETERS.", "input.CELL_PARAMETERS_STANDARD_REPRESENTATION."
+    )
+    workflow.render({"material": material})
+    cell = item.rendered.split("CELL_PARAMETERS angstrom\n")[1].splitlines()[:3]
+    vectors = [[float(value) for value in line.split()] for line in cell]
+    assert flat(vectors) == pytest.approx(flat(material.lattice.vector_arrays_in_standard_orientation), abs=1e-8)
+
+
 def test_rendered_input_keeps_the_lattice_vectors(workflow, material):
     workflow.render({"material": material})
     rendered = workflow.subworkflows[0].units[0].input[0].rendered
