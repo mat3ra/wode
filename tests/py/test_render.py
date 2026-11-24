@@ -162,3 +162,21 @@ def test_grid_metric_is_not_silently_ignored(workflow, material):
     workflow.subworkflows[0].units[0].add_context({"name": "kgrid", "data": {"preferGridMetric": True}})
     with pytest.raises(NotImplementedError, match="explicit k-grid"):
         workflow.render({"material": material})
+
+
+def test_cell_is_rendered_in_the_standard_orientation(workflow, material):
+    """
+    pw.x looks for symmetry only about its Cartesian axes, so the cell is rendered in the
+    lattice type's standard orientation rather than in the generic one.
+    """
+    workflow.render({"material": material})
+    rendered = workflow.subworkflows[0].units[0].input[0].rendered
+    cell = rendered.split("CELL_PARAMETERS angstrom\n")[1].splitlines()[:3]
+    vectors = [[float(value) for value in line.split()] for line in cell]
+    standard = material.lattice.vector_arrays_in_standard_orientation
+    assert [value for vector in vectors for value in vector] == pytest.approx(
+        [value for vector in standard for value in vector], abs=1e-8
+    )
+    # The default material is FCC silicon: (0, 1, 1), (1, 0, 1), (1, 1, 0) times a/2.
+    assert vectors[0][0] == pytest.approx(0, abs=1e-8)
+    assert vectors[0][1] == pytest.approx(vectors[0][2], abs=1e-8)
