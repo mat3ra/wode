@@ -26,6 +26,7 @@ import type {
 import JSONSchemaDataProvider, {
     type JinjaExternalContext,
 } from "../../base/JSONSchemaDataProvider";
+import { standardVectorArrays } from "./standardOrientation";
 
 // TODO: create a task to define correct type for MethodData
 type MethodData = BaseMethod["data"] & {
@@ -125,11 +126,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             };
         });
 
-        const CELL_PARAMETERS = {
-            v1: lattice.vectorArrays[0],
-            v2: lattice.vectorArrays[1],
-            v3: lattice.vectorArrays[2],
-        };
+        // In the orientation pw.x finds the lattice's symmetry in; see standardOrientation.
+        const [v1, v2, v3] = standardVectorArrays(lattice);
+        const CELL_PARAMETERS = { v1, v2, v3 };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
             ([element, label, coordinate, constraint]) => {

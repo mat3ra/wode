@@ -7,6 +7,7 @@ from mat3ra.esse.models.context_providers_directory.by_application.qe_pwx_contex
 from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 
 from ..executable_context_provider import ExecutableContextProvider
+from .standard_orientation import standard_vector_arrays
 
 
 class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider):
@@ -81,7 +82,8 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
             "ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS": "\n".join(
                 f"{position['X']} {position['x']} {position['y']} {position['z']}" for position in positions
             ),
-            "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), material.lattice.vector_arrays)),
+            # In the orientation pw.x finds the lattice's symmetry in; see standard_orientation.
+            "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), standard_vector_arrays(material.lattice))),
             "contextProviderName": "qe-pwx",
         }
 
