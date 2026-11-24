@@ -1,7 +1,8 @@
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from mat3ra.esse.models.context_providers_directory.by_application.qe_pwx_context_provider import (
+    CELLPARAMETERS,
     QEPwxContextProviderSchema,
 )
 from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
@@ -15,6 +16,10 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
     """
 
     name: str = "input"
+    # CELL_PARAMETERS in the standard orientation of the lattice type, where pw.x, which looks for
+    # symmetry only about its Cartesian axes, finds the lattice's full point group. A template opts in
+    # by using it instead of CELL_PARAMETERS; fractional coordinates are the same for both.
+    CELL_PARAMETERS_STANDARD_REPRESENTATION: Optional[CELLPARAMETERS] = None
 
     @classmethod
     def from_context(cls, external_context: Dict[str, Any], data: Dict[str, Any]) -> "QEPWXContextProvider":
@@ -81,9 +86,10 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
             "ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS": "\n".join(
                 f"{position['X']} {position['x']} {position['y']} {position['z']}" for position in positions
             ),
-            # pw.x looks for symmetry only about its Cartesian axes; the standard orientation
-            # puts the lattice's axes there.
-            "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), material.lattice.vector_arrays_in_standard_orientation)),
+            "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), material.lattice.vector_arrays)),
+            "CELL_PARAMETERS_STANDARD_REPRESENTATION": dict(
+                zip(("v1", "v2", "v3"), material.lattice.vector_arrays_in_standard_orientation)
+            ),
             "contextProviderName": "qe-pwx",
         }
 

@@ -36,7 +36,15 @@ export type MethodDataExternalContext = {
     methodData?: MethodData;
 };
 
-type Data = QEPwxContextProviderSchema;
+/**
+ * CELL_PARAMETERS in the standard orientation of the lattice type, where pw.x, which looks
+ * for symmetry only about its Cartesian axes, finds the lattice's full point group. A
+ * template opts in by using it instead of CELL_PARAMETERS; fractional coordinates are the
+ * same for both.
+ */
+type Data = QEPwxContextProviderSchema & {
+    CELL_PARAMETERS_STANDARD_REPRESENTATION: QEPwxContextProviderSchema["CELL_PARAMETERS"];
+};
 type Schema = InputContextItemSchema & { data: Data };
 type ExternalContext = JinjaExternalContext &
     WorkflowExternalContext &
@@ -125,10 +133,13 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             };
         });
 
-        // pw.x looks for symmetry only about its Cartesian axes; the standard orientation
-        // puts the lattice's axes there.
+        const CELL_PARAMETERS = {
+            v1: lattice.vectorArrays[0],
+            v2: lattice.vectorArrays[1],
+            v3: lattice.vectorArrays[2],
+        };
         const [v1, v2, v3] = lattice.vectorArraysInStandardOrientation;
-        const CELL_PARAMETERS = { v1, v2, v3 };
+        const CELL_PARAMETERS_STANDARD_REPRESENTATION = { v1, v2, v3 };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
             ([element, label, coordinate, constraint]) => {
@@ -155,6 +166,7 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             ATOMIC_POSITIONS,
             ATOMIC_POSITIONS_WITHOUT_CONSTRAINTS: basis.atomicPositions.join("\n"),
             CELL_PARAMETERS,
+            CELL_PARAMETERS_STANDARD_REPRESENTATION,
             contextProviderName: "qe-pwx" as const,
         };
     }

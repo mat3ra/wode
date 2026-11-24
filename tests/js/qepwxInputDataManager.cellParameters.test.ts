@@ -24,28 +24,33 @@ inMemoryEntityInSetMixin(OrderedMaterial.prototype);
 orderedEntityInSetMixin(OrderedMaterial.prototype);
 
 /**
- * pw.x looks for symmetry only about its Cartesian axes, so the cell is rendered in the
- * lattice type's standard orientation rather than in the generic one.
+ * CELL_PARAMETERS stays Made's lattice vectors; CELL_PARAMETERS_STANDARD_REPRESENTATION is
+ * the same cell in the lattice type's standard orientation, for templates that opt in so
+ * pw.x, which looks for symmetry only about its Cartesian axes, finds the full point group.
  */
 describe("QEPWXInputDataManager cell parameters", () => {
     before(() => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
     });
 
-    it("renders the lattice vectors in the standard orientation", () => {
+    it("keeps the lattice vectors and adds the standard representation", () => {
         const material = OrderedMaterial.createDefault();
         const provider = new QEPWXInputDataManager(
             {},
             { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
         );
-        const { CELL_PARAMETERS } = provider.getDefaultData();
-        const standard = material.getLattice().vectorArraysInStandardOrientation;
+        const data = provider.getDefaultData();
+        const lattice = material.getLattice();
+        const { CELL_PARAMETERS, CELL_PARAMETERS_STANDARD_REPRESENTATION: standard } = data;
 
         expect([CELL_PARAMETERS.v1, CELL_PARAMETERS.v2, CELL_PARAMETERS.v3]).to.deep.equal(
-            standard,
+            lattice.vectorArrays,
+        );
+        expect([standard.v1, standard.v2, standard.v3]).to.deep.equal(
+            lattice.vectorArraysInStandardOrientation,
         );
         // The default material is FCC silicon: (0, 1, 1), (1, 0, 1), (1, 1, 0) times a/2.
-        const [x, y, z] = standard[0];
+        const [x, y, z] = lattice.vectorArraysInStandardOrientation[0];
         expect(x).to.be.closeTo(0, 1e-9);
         expect(y).to.be.closeTo(z, 1e-9);
     });

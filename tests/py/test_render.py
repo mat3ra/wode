@@ -4,6 +4,9 @@ import pytest
 from jinja2 import TemplateError
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.standata.workflows import WorkflowStandata
+from mat3ra.wode.context.providers.by_application.espresso.qe_pwx_context_provider import (
+    QEPWXContextProvider,
+)
 from mat3ra.wode.units.unit import Unit
 from mat3ra.wode.workflows.workflow import Workflow
 
@@ -164,19 +167,32 @@ def test_grid_metric_is_not_silently_ignored(workflow, material):
         workflow.render({"material": material})
 
 
-def test_cell_is_rendered_in_the_standard_orientation(workflow, material):
+def flat(vectors):
+    return [value for vector in vectors for value in vector]
+
+
+def test_cell_parameters_keep_the_lattice_vectors_and_add_the_standard_representation(material):
     """
-    pw.x looks for symmetry only about its Cartesian axes, so the cell is rendered in the
-    lattice type's standard orientation rather than in the generic one.
+    CELL_PARAMETERS stays Made's lattice vectors; CELL_PARAMETERS_STANDARD_REPRESENTATION is the same
+    cell in the lattice type's standard orientation, for templates that opt in so pw.x, which looks for
+    symmetry only about its Cartesian axes, finds the full point group.
     """
+    external_context = {"material": material, "methodData": {"pseudo": [{"element": "Si", "path": "Si.upf"}]}}
+    provider = QEPWXContextProvider.from_context(external_context, {})
+    cell = provider.CELL_PARAMETERS
+    standard = provider.CELL_PARAMETERS_STANDARD_REPRESENTATION
+    assert flat([cell.v1, cell.v2, cell.v3]) == pytest.approx(flat(material.lattice.vector_arrays), abs=1e-10)
+    assert flat([standard.v1, standard.v2, standard.v3]) == pytest.approx(
+        flat(material.lattice.vector_arrays_in_standard_orientation), abs=1e-10
+    )
+    # The default material is FCC silicon: (0, 1, 1), (1, 0, 1), (1, 1, 0) times a/2.
+    assert standard.v1[0] == pytest.approx(0, abs=1e-10)
+    assert standard.v1[1] == pytest.approx(standard.v1[2], abs=1e-10)
+
+
+def test_rendered_input_keeps_the_lattice_vectors(workflow, material):
     workflow.render({"material": material})
     rendered = workflow.subworkflows[0].units[0].input[0].rendered
     cell = rendered.split("CELL_PARAMETERS angstrom\n")[1].splitlines()[:3]
     vectors = [[float(value) for value in line.split()] for line in cell]
-    standard = material.lattice.vector_arrays_in_standard_orientation
-    assert [value for vector in vectors for value in vector] == pytest.approx(
-        [value for vector in standard for value in vector], abs=1e-8
-    )
-    # The default material is FCC silicon: (0, 1, 1), (1, 0, 1), (1, 1, 0) times a/2.
-    assert vectors[0][0] == pytest.approx(0, abs=1e-8)
-    assert vectors[0][1] == pytest.approx(vectors[0][2], abs=1e-8)
+    assert flat(vectors) == pytest.approx(flat(material.lattice.vector_arrays), abs=1e-8)
