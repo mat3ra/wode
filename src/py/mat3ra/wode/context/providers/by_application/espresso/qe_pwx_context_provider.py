@@ -1,7 +1,8 @@
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from mat3ra.esse.models.context_providers_directory.by_application.qe_pwx_context_provider import (
+    CELLPARAMETERS,
     QEPwxContextProviderSchema,
 )
 from mat3ra.esse.models.properties_directory.enum_options import ProtoPropertyEnum
@@ -16,6 +17,10 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
     """
 
     name: str = "input"
+    # CELL_PARAMETERS in the standard orientation of the lattice type, where pw.x, which looks for
+    # symmetry only about its Cartesian axes, finds the lattice's full point group. A template opts in
+    # by using it instead of CELL_PARAMETERS; fractional coordinates are the same for both.
+    CELL_PARAMETERS_STANDARD_REPRESENTATION: Optional[CELLPARAMETERS] = None
 
     @classmethod
     def from_context(cls, external_context: Dict[str, Any], data: Dict[str, Any]) -> "QEPWXContextProvider":
@@ -85,10 +90,17 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
                 f"{position['X']} {position['x']} {position['y']} {position['z']}" for position in positions
             ),
             "CELL_PARAMETERS": dict(zip(("v1", "v2", "v3"), material.lattice.vector_arrays)),
+            "CELL_PARAMETERS_STANDARD_REPRESENTATION": dict(
+                zip(("v1", "v2", "v3"), material.lattice.vector_arrays_in_standard_orientation)
+            ),
             "contextProviderName": "qe-pwx",
         }
 
     @property
     def default_data(self) -> Dict[str, Any]:
-        fields = set(QEPwxContextProviderSchema.model_fields) | set(self.model_extra or {})
+        fields = (
+            set(QEPwxContextProviderSchema.model_fields)
+            | {"CELL_PARAMETERS_STANDARD_REPRESENTATION"}
+            | set(self.model_extra or {})
+        )
         return self.model_dump(mode="json", by_alias=True, include=fields)

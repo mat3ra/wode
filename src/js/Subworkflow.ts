@@ -171,8 +171,9 @@ class Subworkflow<S extends Schema = Schema> extends InMemoryEntity<S> {
             this.unitsInstances
                 .filter((unit) => unit.type === UnitType.execution)
                 .forEach((unit) => {
-                    unit.setApplication({ application });
+                    unit.setApplication({ application: application.toJSON() });
                 });
+            this.units = this.unitsInstances.map((unit) => unit.toJSON());
         }
 
         this.application = application.toJSON();
