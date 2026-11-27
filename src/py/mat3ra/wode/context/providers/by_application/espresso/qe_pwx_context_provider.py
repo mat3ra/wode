@@ -47,7 +47,7 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
         material.to_crystal()
         basis = material.basis
         constraints = basis.atomic_properties.get_by_name(ProtoPropertyEnum.atomic_constraints)
-        labels = basis.atomic_properties.get_by_name(ProtoPropertyEnum.atomic_labels)
+        labels = basis.labels
         # STANDATA's SCF templates use Nunjucks loop assignment for constraints,
         # which does not have the same scope in Jinja. Do not silently drop them.
         if any(not all(value) for value in constraints.values) or any(labels.values):

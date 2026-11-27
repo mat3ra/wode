@@ -43,7 +43,7 @@ describe("QEPWXInputDataManager with labeled elements", () => {
                     name: ProtoPropertyEnum.atomic_labels,
                     values: [
                         { id: 0, value: 1 },
-                        { id: 1, value: 2 },
+                        { id: 1, value: 10 },
                     ],
                 },
             ],
@@ -57,7 +57,7 @@ describe("QEPWXInputDataManager with labeled elements", () => {
 
         expect(data.ATOMIC_SPECIES_WITH_LABELS).to.have.lengthOf(2);
         expect(data.ATOMIC_SPECIES_WITH_LABELS[0].X).to.equal("Si1");
-        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("Si2");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("Si10");
         expect(data.ATOMIC_SPECIES_WITH_LABELS[0].Mass_X).to.be.a("number").and.be.above(0);
         expect(data.ATOMIC_SPECIES_WITH_LABELS[1].Mass_X).to.be.a("number").and.be.above(0);
     });
