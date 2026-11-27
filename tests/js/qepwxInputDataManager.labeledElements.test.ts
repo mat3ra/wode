@@ -8,7 +8,8 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
-import { Material, ProtoPropertyEnum } from "@mat3ra/made";
+import { ProtoPropertyEnum } from "@mat3ra/esse/dist/js/types";
+import { Material } from "@mat3ra/made";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
 
