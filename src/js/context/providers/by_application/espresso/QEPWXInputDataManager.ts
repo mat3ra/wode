@@ -125,6 +125,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         const uniqueElementsWithLabels = [...new Set(elementsWithLabelsArray)];
 
         const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
+            if (symbol.length > 3) {
+                throw new Error(`Species ${symbol} is longer than the 3 characters pw.x reads`);
+            }
             const symbolWithoutLabel = symbol.replace(/\d+$/, "") as AtomicElementValue;
             return {
                 X: symbol,
