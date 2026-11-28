@@ -121,13 +121,16 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
             };
         });
 
-        const uniqueElementsWithLabels = [...new Set(basis.elementsWithLabelsArray)];
+        const { elementsWithLabelsArray } = basis;
+        const uniqueElementsWithLabels = [...new Set(elementsWithLabelsArray)];
 
         const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
-            const symbolWithoutLabel = symbol.replace(/\d$/, "") as AtomicElementValue;
-            const label = symbol.match(/\d$/g) ? symbol.match(/\d$/g)?.[0] : "";
+            if (symbol.length > 3) {
+                throw new Error(`Species ${symbol} is longer than the 3 characters pw.x reads`);
+            }
+            const symbolWithoutLabel = symbol.replace(/\d+$/, "") as AtomicElementValue;
             return {
-                X: `${symbolWithoutLabel}${label}`,
+                X: symbol,
                 Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
                 PseudoPot_X: this.getPseudopotentialReference(symbolWithoutLabel),
             };
@@ -142,9 +145,9 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
         const CELL_PARAMETERS_STANDARD_REPRESENTATION = { v1, v2, v3 };
 
         const ATOMIC_POSITIONS = basis.elementsCoordinatesConstraintsArray.map(
-            ([element, label, coordinate, constraint]) => {
+            ([, , coordinate, constraint], index) => {
                 return {
-                    X: `${element}${label}`,
+                    X: elementsWithLabelsArray[index],
                     x: coordinate[0],
                     y: coordinate[1],
                     z: coordinate[2],

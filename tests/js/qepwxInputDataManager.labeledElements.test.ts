@@ -8,6 +8,7 @@ import {
 } from "@mat3ra/code/dist/js/entity/set/ordered/OrderedInMemoryEntityInSetMixin";
 import JSONSchemasInterface from "@mat3ra/esse/dist/js/esse/JSONSchemasInterface";
 import esseSchemas from "@mat3ra/esse/dist/js/schemas.json";
+import { ProtoPropertyEnum } from "@mat3ra/esse/dist/js/types";
 import { Material } from "@mat3ra/made";
 import { expect } from "chai";
 import type { JSONSchema7 } from "json-schema";
@@ -37,9 +38,18 @@ describe("QEPWXInputDataManager with labeled elements", () => {
         const material = OrderedMaterial.createDefault();
         material.setBasis({
             ...material.getBasis().toJSON(),
-            labels: [
-                { id: 0, value: 1 },
-                { id: 1, value: 2 },
+            elements: [
+                { id: 0, value: "C" },
+                { id: 1, value: "C" },
+            ],
+            atomic_properties: [
+                {
+                    name: ProtoPropertyEnum.atomic_labels,
+                    values: [
+                        { id: 0, value: 1 },
+                        { id: 1, value: 10 },
+                    ],
+                },
             ],
         });
 
@@ -50,9 +60,53 @@ describe("QEPWXInputDataManager with labeled elements", () => {
         const data = provider.getDefaultData();
 
         expect(data.ATOMIC_SPECIES_WITH_LABELS).to.have.lengthOf(2);
-        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].X).to.equal("Si1");
-        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("Si2");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].X).to.equal("C1");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("C10");
         expect(data.ATOMIC_SPECIES_WITH_LABELS[0].Mass_X).to.be.a("number").and.be.above(0);
         expect(data.ATOMIC_SPECIES_WITH_LABELS[1].Mass_X).to.be.a("number").and.be.above(0);
+    });
+
+    it("throws for a species longer than the 3 characters pw.x reads", () => {
+        const material = OrderedMaterial.createDefault();
+        material.setBasis({
+            ...material.getBasis().toJSON(),
+            atomic_properties: [
+                {
+                    name: ProtoPropertyEnum.atomic_labels,
+                    values: [
+                        { id: 0, value: 1 },
+                        { id: 1, value: 10 },
+                    ],
+                },
+            ],
+        });
+
+        const provider = new QEPWXInputDataManager(
+            {},
+            { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
+        );
+
+        expect(() => provider.getDefaultData()).to.throw(
+            "Species Si10 is longer than the 3 characters pw.x reads",
+        );
+    });
+
+    it("names an unlabelled atom by its element in positions and species", () => {
+        const material = OrderedMaterial.createDefault();
+        material.setBasis({
+            ...material.getBasis().toJSON(),
+            atomic_properties: [
+                { name: ProtoPropertyEnum.atomic_labels, values: [{ id: 1, value: 1 }] },
+            ],
+        });
+
+        const provider = new QEPWXInputDataManager(
+            {},
+            { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
+        );
+        const data = provider.getDefaultData();
+
+        expect(data.ATOMIC_POSITIONS.map(({ X }) => X)).to.deep.equal(["Si", "Si1"]);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS.map(({ X }) => X)).to.deep.equal(["Si", "Si1"]);
     });
 });

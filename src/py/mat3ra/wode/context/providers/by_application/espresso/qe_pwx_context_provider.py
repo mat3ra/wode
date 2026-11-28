@@ -47,7 +47,7 @@ class QEPWXContextProvider(QEPwxContextProviderSchema, ExecutableContextProvider
         basis = material.basis
         # STANDATA's SCF templates use Nunjucks loop assignment for constraints,
         # which does not have the same scope in Jinja. Do not silently drop them.
-        if any(not all(value) for value in basis.constraints.values) or any(basis.labels.values):
+        if any(not all(value) for value in basis.constraints.values) or basis.labels.values:
             raise NotImplementedError("Python QE rendering does not yet support constraints or atom labels")
         pseudopotentials = {
             item["element"]: item for item in (external_context.get("methodData") or {}).get("pseudo", [])

@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import pytest
 from jinja2 import TemplateError
+from mat3ra.esse.models.properties_directory.enum_options import ProtoPropertyEnum
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.standata.workflows import WorkflowStandata
 from mat3ra.wode.context.providers.by_application.espresso.qe_pwx_context_provider import (
@@ -133,10 +134,13 @@ def test_out_of_range_material_selection_fails_in_template(workflow, material, i
         workflow.render({"material": material, "materials": [material, material]})
 
 
-@pytest.mark.parametrize("field,value", [("constraints", [False, True, True]), ("labels", 1)])
-def test_unsupported_geometry_fails(workflow, material, field, value):
+@pytest.mark.parametrize(
+    "property_name,value",
+    [(ProtoPropertyEnum.atomic_constraints, [False, True, True]), (ProtoPropertyEnum.atomic_labels, 0)],
+)
+def test_unsupported_geometry_fails(workflow, material, property_name, value):
     definition = material.to_dict()
-    definition["basis"][field] = [{"id": 0, "value": value}]
+    definition["basis"]["atomic_properties"] = [{"name": property_name, "values": [{"id": 0, "value": value}]}]
     with pytest.raises(NotImplementedError, match="constraints or atom labels"):
         workflow.render({"material": Material.create(definition)})
 
