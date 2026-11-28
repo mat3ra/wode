@@ -27,6 +27,7 @@ dependencies = [
     "mat3ra-ade",
     "mat3ra-made>=2026.11.24.post0",
     "mat3ra-periodic-table",
+    "mat3ra-prode",
     "scipy",
     "mat3ra-standata>=2026.10.22.post1",
 ]

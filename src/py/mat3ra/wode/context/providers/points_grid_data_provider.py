@@ -129,3 +129,23 @@ class PointsGridDataProvider(PointsGridDataProviderSchema, ContextProvider):
 
     def transform_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         raise NotImplementedError
+
+
+def kgrid_from_density(material: Material, density: float, periodic_dims: tuple = (0, 1, 2)) -> List[int]:
+    """
+    Returns a k-point grid sized to a reciprocal-space density (points per Å⁻¹) per periodic
+    dimension, 1 elsewhere.
+
+    Args:
+        material: Material the grid applies to; reciprocal vector norms come from its lattice.
+        density (float): Points per Å⁻¹ of reciprocal length (GPAW's k-point density convention).
+        periodic_dims (tuple[int]): Lattice dimensions (0, 1, 2) that are periodic.
+
+    Returns:
+        list[int]: Grid dimensions, e.g. [4, 4, 1].
+    """
+    norms = material.lattice.reciprocal_vector_norms
+    grid = [1, 1, 1]
+    for dim in periodic_dims:
+        grid[dim] = max(1, math.ceil(density * 2 * math.pi * norms[dim]))
+    return grid

@@ -2,11 +2,7 @@ from typing import Any, Dict, List, Literal, Optional
 
 from mat3ra.ade import Application, Executable, Flavor
 from mat3ra.esse.models.workflow.unit.execution import ExecutionUnitSchema
-from mat3ra.utils import (
-    calculate_hash_from_object,
-    remove_comments_from_source_code,
-    remove_empty_lines_from_string,
-)
+from mat3ra.utils import calculate_hash_from_object, remove_comments_from_source_code, remove_empty_lines_from_string
 from mat3ra.utils.extra.jinja import replace_in_text
 from pydantic import Field, SerializeAsAny, field_validator
 
@@ -35,7 +31,6 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
             elif isinstance(item, dict):
                 instantiated.append(ExecutionUnitInput(**item))
         return instantiated
-
 
     @staticmethod
     def _context_item_name(item: Any) -> Optional[str]:
@@ -132,3 +127,30 @@ class ExecutionUnit(Unit, ExecutionUnitSchema):
             "flavor": flavor,
             "input": input_hash,
         }
+
+
+def set_execution_unit_input(unit: dict, template_name: str, content: str) -> None:
+    """
+    Replaces one input file of an execution unit with fixed content.
+
+    `isManuallyChanged` stops the platform re-rendering the file at job creation, which is what
+    lets the runner keep its `{{ ... }}` placeholders for the compute node to resolve, and keeps a
+    user's requirements verbatim. Inputs are matched by template name rather than position, so
+    adding a file to the flavor cannot silently write content into the wrong one.
+
+    Args:
+        unit (dict): Execution unit config from a workflow.
+        template_name (str): Name of the input file to replace, e.g. "script.py".
+        content (str): Content to write.
+
+    Raises:
+        KeyError: If the unit has no input with that template name.
+    """
+    for unit_input in unit["input"]:
+        if unit_input["template"]["name"] == template_name:
+            unit_input["template"]["content"] = content
+            unit_input["rendered"] = content
+            unit_input["isManuallyChanged"] = True
+            return
+    available = [unit_input["template"]["name"] for unit_input in unit["input"]]
+    raise KeyError(f"No input named '{template_name}' in unit '{unit.get('name')}'. Available: {available}")
