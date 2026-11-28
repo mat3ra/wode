@@ -136,7 +136,7 @@ def test_out_of_range_material_selection_fails_in_template(workflow, material, i
 
 @pytest.mark.parametrize(
     "property_name,value",
-    [(ProtoPropertyEnum.atomic_constraints, [False, True, True]), (ProtoPropertyEnum.atomic_labels, 1)],
+    [(ProtoPropertyEnum.atomic_constraints, [False, True, True]), (ProtoPropertyEnum.atomic_labels, 0)],
 )
 def test_unsupported_geometry_fails(workflow, material, property_name, value):
     definition = material.to_dict()
