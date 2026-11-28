@@ -126,9 +126,8 @@ class QEPWXInputDataManager extends JSONSchemaDataProvider<Schema, ExternalConte
 
         const ATOMIC_SPECIES_WITH_LABELS = uniqueElementsWithLabels.map((symbol) => {
             const symbolWithoutLabel = symbol.replace(/\d+$/, "") as AtomicElementValue;
-            const label = symbol.match(/\d+$/g) ? symbol.match(/\d+$/g)?.[0] : "";
             return {
-                X: `${symbolWithoutLabel}${label}`,
+                X: symbol,
                 Mass_X: PERIODIC_TABLE[symbolWithoutLabel].atomic_mass,
                 PseudoPot_X: this.getPseudopotentialReference(symbolWithoutLabel),
             };
