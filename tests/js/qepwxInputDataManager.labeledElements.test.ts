@@ -34,6 +34,38 @@ describe("QEPWXInputDataManager with labeled elements", () => {
         JSONSchemasInterface.setSchemas(esseSchemas as JSONSchema7[]);
     });
 
+    it("returns correct atomic mass for labeled elements", () => {
+        const material = OrderedMaterial.createDefault();
+        material.setBasis({
+            ...material.getBasis().toJSON(),
+            elements: [
+                { id: 0, value: "C" },
+                { id: 1, value: "C" },
+            ],
+            atomic_properties: [
+                {
+                    name: ProtoPropertyEnum.atomic_labels,
+                    values: [
+                        { id: 0, value: 1 },
+                        { id: 1, value: 10 },
+                    ],
+                },
+            ],
+        });
+
+        const provider = new QEPWXInputDataManager(
+            {},
+            { material, materials: [material], jobHasParent: false, workflowHasRelaxation: false },
+        );
+        const data = provider.getDefaultData();
+
+        expect(data.ATOMIC_SPECIES_WITH_LABELS).to.have.lengthOf(2);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].X).to.equal("C1");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].X).to.equal("C10");
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[0].Mass_X).to.be.a("number").and.be.above(0);
+        expect(data.ATOMIC_SPECIES_WITH_LABELS[1].Mass_X).to.be.a("number").and.be.above(0);
+    });
+
     it("throws for a species longer than the 3 characters pw.x reads", () => {
         const material = OrderedMaterial.createDefault();
         material.setBasis({
